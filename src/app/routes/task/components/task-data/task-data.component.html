@@ -1,0 +1,216 @@
+<form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="holeForm" *ngIf="editGroupIndex !== null">
+  <nz-form-item>
+    <nz-form-label [nzSm]="3" nzRequired>孔名称</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <input type="text" nz-input formControlName="name">
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>张拉模式</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <input type="text" nz-input formControlName="mode" #mode>
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>张拉长度</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <input type="number" nz-input formControlName="length">
+    </nz-form-control>
+    <!--  -->
+    <nz-form-label [nzSm]="3" nzRequired>张拉应力</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <input type="number" nz-input formControlName="tensionKn" (input)="inputKn()">
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>钢绞线数量</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <input type="number" nz-input formControlName="steelStrandNumber">
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>张拉段数</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <nz-select formControlName="tensionStage" #tensionStage (ngModelChange)="onStage($event)">
+        <nz-option [nzValue]="3" nzLabel="三段"></nz-option>
+        <nz-option [nzValue]="4" nzLabel="四段"></nz-option>
+        <nz-option [nzValue]="5" nzLabel="五段"></nz-option>
+      </nz-select>
+    </nz-form-control>
+    <!--  -->
+    <nz-form-label [nzSm]="3" nzRequired>回缩量</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <input type="number" nz-input formControlName="returnMm">
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>二次张拉</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <nz-switch formControlName="twice" (ngModelChange)="onTwice($event)"></nz-switch>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <table class="hole-table">
+      <thead>
+        <tr>
+          <th width="80">任务</th>
+          <th width="80">张拉孔道</th>
+          <th>初张拉</th>
+          <th>阶段一</th>
+          <th *ngIf="tensionStage.value > 3">阶段二</th>
+          <th *ngIf="tensionStage.value > 4">阶段三</th>
+          <th>终张拉</th>
+          <th width="100">工作长度</th>
+          <th width="100">理论伸长量</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="device-name">
+            阶段
+          </td>
+          <td class="device-name">
+          </td>
+          <div formArrayName="stage" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+        </tr>
+        <tr *ngFor="let item of devModeStr; index as i" [formGroupName]="item" [class]="item">
+          <td class="device-name">
+            {{item}}{{theoryIf[item]}}
+          </td>
+          <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
+            <nz-form-item>
+              <nz-form-control>
+                <input nz-input  [ngClass]="{'row2' : theoryIf[item] === 2}" [value]="holeNames[i / 2]">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+          <div formArrayName="kn" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+          <td>
+            <nz-form-item>
+              <nz-form-control>
+                <input type="number" nz-input formControlName="wordMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+          <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
+            <nz-form-item>
+              <nz-form-control>
+                <input [ngClass]="{'row2' : theoryIf[item]===2}" type="number" nz-input
+                  formControlName="theoryMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+        </tr>
+        <!-- <tr *ngIf="mode.value==='0' || mode.value==='1' || mode.value==='4'" formGroupName="zA">
+          <td class="device-name">
+            zA
+          </td>
+          <div formArrayName="kn" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+          <td>
+            <nz-form-item>
+              <nz-form-control>
+                <input type="number" nz-input formControlName="wordMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+          <td [rowSpan]="mode.value==='1' || mode.value==='4' ? 2 : 1">
+            <nz-form-item>
+              <nz-form-control>
+                <input [ngClass]="{'row2' : mode.value==='3' || mode.value==='4'}" type="number" nz-input
+                  formControlName="theoryMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+        </tr>
+        <tr *ngIf="mode.value==='4'" formGroupName="zB">
+          <td class="device-name">
+            zB
+          </td>
+          <div formArrayName="kn" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+          <td>
+            <nz-form-item>
+              <nz-form-control>
+                <input type="number" nz-input formControlName="wordMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+
+        </tr>
+        <tr *ngIf="mode.value==='2' || mode.value==='3' || mode.value==='4'" formGroupName="cA">
+          <td class="device-name">
+            cA
+          </td>
+          <div formArrayName="kn" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+          <td>
+            <nz-form-item>
+              <nz-form-control>
+                <input type="number" nz-input formControlName="wordMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+          <td [rowSpan]="mode.value==='3' || mode.value==='4' ? 2 : 1">
+            <nz-form-item>
+              <nz-form-control>
+                <input [ngClass]="{'row2' : mode.value==='3' || mode.value==='4'}" type="number" nz-input
+                  formControlName="theoryMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+        </tr>
+        <tr *ngIf="mode.value==='4'" formGroupName="cA">
+          <td class="device-name">
+            cB
+          </td>
+          <div formArrayName="kn" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+          <td>
+            <nz-form-item>
+              <nz-form-control>
+                <input type="number" nz-input formControlName="wordMm">
+              </nz-form-control>
+            </nz-form-item>
+          </td>
+
+        </tr> -->
+      </tbody>
+    </table>
+  </nz-form-item>
+</form>

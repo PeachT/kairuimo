@@ -1,0 +1,28 @@
+<nz-layout>
+  <nz-header>
+    <div class="left" (click)="power()" style="cursor: pointer">
+      <div class="logo">
+        <!-- <img src="/assets/img/logo.jpeg"> -->
+        <nz-avatar [nzSize]="56" nzShape="square" nzSrc="/assets/img/logo.jpeg"></nz-avatar>
+        <!-- <span>KVM</span> -->
+      </div>
+      <div class="user" >
+        <p>
+            {{appS.userInfo?.name || '非法登录'}}
+          </p>
+      </div>
+    </div>
+    <div class="main">
+      <div class="icon" *ngFor="let item of appS.menus" [ngClass]="{'active': ifUrl(item.url)}" (click)="goUrl(item.url)">
+        <i nz-icon [type]="item.icon" theme="outline"></i>
+        <div class="text">{{item.name}}</div>
+      </div>
+    </div>
+
+  </nz-header>
+  <div style="flex: 1; display: flex;">
+    <div style="flex: 1;">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</nz-layout>

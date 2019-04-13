@@ -1,0 +1,25 @@
+<div class="plc-state">
+  <div class="item" style="margin-bottom: 5px;" [ngClass]="{'active': PLCS.plcState.z}">
+      Z:{{PLCS.plcState.zLT}}
+  </div>
+  <div class="item" [ngClass]="{'active': PLCS.plcState.c}">C:{{PLCS.plcState.cLT}}</div>
+  <!-- <p>{{tIndex}}</p> -->
+</div>
+<div class="time">
+  {{time}}
+</div>
+<router-outlet></router-outlet>
+<nz-modal [nzVisible]="appService.powerState" nzTitle="" [nzFooter]="null" [nzMaskClosable]="!appService.powerDelayT" nzClosable="false" (nzOnCancel)="appService.powerState = false">
+  <div class="power-btn">
+    <ng-container *ngIf="!appService.powerDelayT">
+      <button class="login-out" (click)="loginOut()"> <i nz-icon nzType="logout" style="color:dodgerblue"></i> 登 出 </button>
+      <button class="restart" (click)="power(false)"> <i nz-icon nzType="reload" style="color:lime"></i> 重 启 </button>
+      <button class="shutdown" (click)="power(true)"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button>
+    </ng-container>
+    <ng-container *ngIf="appService.powerDelayT && appService.powerDelay">
+      <h1 >{{appService.powerDelay}}s后{{appService.powerText}}！</h1>
+      <button class="shutdown" (click)="cancle()"> <i nz-icon nzType="poweroff" style="color:brown"></i> 取 消</button>
+    </ng-container>
+    <h1 *ngIf="!appService.powerDelay">正在{{appService.powerText}}...</h1>
+  </div>
+</nz-modal>

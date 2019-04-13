@@ -1,0 +1,37 @@
+<div style="display: flex;">
+  <app-manual-item style="flex: 1;" #manual class="kvm-slider" [dev]="setData" [name]='name'></app-manual-item>
+  <div style="width: 30%; margin-left: 30px;">
+    <h1 style="text-align: center;">{{reviseName === 'mpa' ? '压力' : '位移'}}校正</h1>
+    <nz-input-group nzSize="large" [nzAddOnBefore]="'设备' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')" [nzAddOnAfter]="suffixButton">
+      <input type="number" nz-input [(ngModel)]="revise.devValue" (input)="countRevise()">
+    </nz-input-group>
+    <ng-template #suffixButton>
+      <button nz-button nzType="primary" (click)="getDevValue()">确 认</button>
+    </ng-template>
+    <br><br>
+    <nz-input-group nzSize="large" [nzAddOnBefore]="'测量' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')">
+      <input type="number" nz-input [(ngModel)]="revise.measureValue" (input)="countRevise()">
+    </nz-input-group>
+    <br> <br>
+    <nz-input-group nzSize="large" nzAddOnBefore="校正值">
+      <input type="number" nz-input [(ngModel)]="revise.value" (input)="countRevise()">
+    </nz-input-group>
+    <br><br>
+    <button style="width: 100%;" nz-button nzType="primary" nzSize="large" (click)="reviseOk()"
+      [disabled]="!(revise.value > 0.97 && revise.value < 1.2) || setIndex === null">确 定</button>
+    <p>校正值应该在1.2 - 0.98 之间</p>
+  </div>
+</div>
+<br><br>
+<form nz-form [formGroup]="setForm">
+  <nz-form-item>
+    <div formArrayName="setValue">
+      <div *ngFor="let item of setStage; index as i">
+        <nz-form-label [nzSm]="2" nzRequired>{{item}}</nz-form-label>
+        <nz-form-control [nzSm]="2">
+          <input type="number" nz-input [formControlName]="i" (click)="setMm(i)">
+        </nz-form-control>
+      </div>
+    </div>
+  </nz-form-item>
+</form>

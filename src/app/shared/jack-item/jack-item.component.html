@@ -1,0 +1,48 @@
+<div [formGroup]="formGroup">
+  <div [formGroupName]="name" [class]="name">
+    <nz-form-item class="revise-btn">
+      <nz-divider style="min-width: auto;" [nzText]="name" nzOrientation="left"></nz-divider>
+      <button nzSize="large" nz-button nzType="default" (click)="onRevise()" *ngIf="reviseBtnShow">校 正</button>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSm]="2" nzRequired>千斤顶编号</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <input type="text" nz-input formControlName="jackNumber">
+      </nz-form-control>
+      <nz-form-label [nzSm]="2" nzRequired>油泵编号</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <input type="text" nz-input formControlName="pumpNumber">
+      </nz-form-control>
+      <nz-form-control [nzSm]="8">
+        &nbsp;
+      </nz-form-control>
+
+      <nz-form-label [nzSm]="2" nzRequired>标定参数a</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <input type="number" nz-input formControlName="a">
+      </nz-form-control>
+      <nz-form-label [nzSm]="2" nzRequired>标定参数b</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <input type="number" nz-input formControlName="b">
+      </nz-form-control>
+      <nz-form-label [nzSm]="2" nzRequired>标定日期</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <nz-date-picker class="revise-date" nzFormat="yyyy-MM-dd" formControlName="date"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <div formArrayName="mm">
+        <div *ngFor="let item of mmStage; index as i">
+          <nz-form-label [nzSm]="2" nzRequired>{{item}}</nz-form-label>
+          <nz-form-control [nzSm]="2">
+            <input type="number" nz-input [formControlName]="i">
+          </nz-form-control>
+        </div>
+      </div>
+    </nz-form-item>
+  </div>
+</div>
+
+<nz-modal nzWidth="90%" *ngIf="revise.state" [(nzVisible)]="revise.state" [nzTitle]="name + '·位移校正'" (nzOnCancel)="cancel()" (nzOnOk)="handleOk()">
+  <app-revise-item [name]="name" reviseName="mm" #reviseDom></app-revise-item>
+</nz-modal>

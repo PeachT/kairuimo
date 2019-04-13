@@ -1,0 +1,343 @@
+@import './device.less';
+@import './manual.less';
+@import './layout.less';
+
+.kvm-slider {
+  nz-slider{
+    .ant-slider-handle{
+      top: -8px;
+      // border-radius: inherit;
+      height: 38px;
+    }
+    .ant-slider-track {
+      top: -13px;
+      height: 38px;
+    }
+    .ant-slider-rail {
+      top: -13px;
+      height: 38px;
+      background-color: #e5e5e5;
+    }
+    .ant-slider-dot {
+      top: 16px;
+    }
+    &.show {
+      .ant-slider-dot {
+        top: -21px;
+      }
+      .ant-slider-track {
+        background-color: #40a9ff !important;
+      }
+      .ant-slider-handle {
+        opacity: 0;
+      }
+    }
+    .ant-slider-mark{
+      top: 24px;
+    }
+  }
+}
+
+.sider-menu {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  .project {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
+    nz-select {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      opacity: 0;
+      .ant-select-selection {
+        height: 100%;
+      }
+    }
+    .text {
+      // height: calc(100% - 3px);
+      height: 100%;
+      width: 100%;
+      border-radius: 0px;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      // background-image: linear-gradient(135deg, #30E3CA 0%, #11999E 100%);
+      background-color: rgba(65, 247, 140, 0.4);
+      color: white;
+    }
+    i {
+      transition: all .6s;
+      transform:rotate(0deg);
+      &.active {
+        transition: all .6s;
+          transform:rotate(180deg);
+      }
+    }
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: rgba(0,0,0,.65);
+    li {
+      position: relative;
+      height: 48px;
+      line-height: 48px;
+      border-bottom: 1px solid #d9d9d9;
+      padding-left: 5px;
+      font-size: 24px;
+      &.active{
+        color: #fff;
+        background: #1890ff;
+        i {
+          transition: all .6s;
+          transform:rotate(180deg);
+        }
+      }
+      i {
+        right: 5px;
+        top: 10px;
+        position: absolute;
+        transition: all .6s;
+        transform:rotate(0deg);
+      }
+    }
+    li:last-of-type{
+      border: 0;
+    }
+    &.menu-2 {
+      font-size: 18px;
+      li {
+        padding-left: 10px;
+        transition: color .3s cubic-bezier(.645,.045,.355,1),border-color .3s cubic-bezier(.645,.045,.355,1),background .3s cubic-bezier(.645,.045,.355,1),padding .15s cubic-bezier(.645,.045,.355,1);
+        &.active {
+          background-color: #e6f7ff;
+          color: #1890ff;
+          border-right: 3px solid #1890ff;
+        }
+      }
+    }
+  }
+}
+
+.revise-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  button {
+    margin-right: 15px;
+  }
+  nz-divider {
+    span{
+      &.ant-divider-inner-text {
+        font-size: 2em;
+      }
+    }
+  }
+}
+// 标定日期
+.revise-date{
+  width: 100%;
+  .ant-calendar-picker {
+    width: 100%;
+  }
+}
+// 任务
+.task-tabset {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  .ant-tabs-content {
+    height: 100%;
+    width: 100%;
+  }
+  .ant-tabs-tabpane {
+    overflow-y: auto;
+  }
+}
+.task-cascader {
+  // background-color: green;
+  .ant-cascader-menu {
+    height: auto;
+    font-size: 20px;
+    width: 172px;
+  }
+  .ant-cascader-menu-item {
+    padding: 12px 12px;
+  }
+}
+
+/* 表单样式 */
+form {
+  &.form-edit {
+    .ant-input, .in-error .ant-input  {
+      border-color: #d9d9d9;
+      color: rgba(0, 0, 0, 0.65);
+    }
+  }
+
+  .ant-input {
+    border-left: 5px solid #40a9ff;
+    border-radius: 4px !important;
+  }
+  .ant-input:focus {
+    border-color: #40a9ff;
+  }
+  /* 表单错误*/
+  .in-error {
+    .ant-input {
+      border: 1px solid #f5222d;
+      border-left: 4px solid #F5222d;
+    }
+    .ant-form-explain {
+      color: #f5222d;
+    }
+  }
+}
+.form-edit {
+  position: relative;
+  .edit {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background-color:rgba(0, 0, 0, 0.1);
+    animation:editoff .3s;
+    &.edit-on  {
+      animation:edit .3s;
+      height: 0;
+    }
+  }
+}
+@keyframes edit {
+  0%{
+    height: 100%;
+  }
+
+  100%{
+    height: 0;
+  }
+}
+@keyframes editoff {
+  0%{
+    height: 0;
+  }
+
+  100%{
+    height: 100%;
+  }
+}
+
+/** 孔号样式 */
+.hole-tag {
+  display: flex;
+  flex-wrap: wrap;
+  span {
+    border-radius: 16px;
+    color: #263238;
+    padding: 5px 25px 5px 15px;
+    margin: 5px 10px;
+    font-size: 20px;
+    min-width: 80px;
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    // background-image: linear-gradient(19deg, #A0FE65 0%, #FFFFFF 25%, #F9F9F9 68%, #FA016D 100%);
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-right: 0;
+    border-left: 0;
+    border: 1px solid #e8e8e8;
+  }
+  span:last-of-type{
+    margin-right: 0;
+  }
+  i {
+    color: white;
+    // background-image: linear-gradient(135deg, #F761A1 0%, #8C1BAB 100%);
+    background-color: #f50;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    border-radius: 10px 10px 10px 0px;
+  }
+  i:active {
+    opacity: .3;
+    color: white;
+  }
+  i:hover {
+    opacity: .6;
+  }
+}
+
+.relative {
+  .ant-input-group-addon.ng-star-inserted{
+    padding: 0 11px;
+  }
+}
+
+
+.power-btn {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  button {
+    height: 96px;
+    width: 96px;
+    border-radius: 96px;
+    color: white;
+    border: 5px solid #e5e5e5;
+    // animation:power-btn 2.1s infinite linear;
+    &:hover {
+      opacity: 0.8;
+      border-color: #aaa;
+    }
+    &.restart {
+      background-image: linear-gradient(135deg, #30E3CA 0%, #11999E 100%);
+    }
+    &.shutdown {
+      background-image: linear-gradient(135deg, #FDD819 0%, #E80505 100%);
+    }
+    &.login-out {
+      background-image: linear-gradient(135deg, #ABDCFF 0%, #0396FF 100%);
+    }
+  }
+}
+
+/*控制整个滚动条*/
+::-webkit-scrollbar {
+  background-color: #f0f2f5;
+  width: 2px;
+  height: 0px;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:window-inactive {
+width: 10px;
+/*当焦点不在当前区域滑块的状态*/
+}
+
+/*滚动条两端方向按钮*/
+::-webkit-scrollbar-button {
+  background-color: pink;
+  height: 0;
+}
+
+/*滚动条中间滑动部分*/
+::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 2px;
+}
+
+/*滚动条右下角区域*/
+::-webkit-scrollbar-corner {
+  background-color: red;
+}
+

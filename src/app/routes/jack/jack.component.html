@@ -1,0 +1,66 @@
+<app-left>
+  <div class="sider sider-menu">
+    <ul class="menu-2">
+      <li *ngFor="let item of menu.datas; index as i" [ngClass]="{'active': menu.select === item.id}"
+        (click)="onMneu(item.id)">{{item.name}}</li>
+    </ul>
+  </div>
+  <div class="main scroll-y">
+    <div class="operation">
+      <div *ngIf="!appS.edit; else elseBlock">
+        <!-- <button nz-button nzType="primary" nzSearch (click)="add()" type="button">添 加</button> -->
+        <button nz-button nzType="primary" nzSearch (click)="modification()" type="button" [hidden]="data">修 改</button>
+        <!-- <button nz-button nzType="danger" nzSearch (click)="copy()" type="button" *ngIf="data">复 制</button> -->
+      </div>
+      <ng-template #elseBlock>
+        <button nz-button nzType="primary" nzSearch (click)="save()" type="button" *ngIf="appS.edit">保 存</button>
+        <button nz-button nzType="danger" nzSearch (click)="cancelEdit()" type="button" *ngIf="appS.edit">取 消</button>
+      </ng-template>
+    </div>
+    <div class="scroll-content" >
+      <form [ngClass]="{'form-edit': !appS.edit}" nz-form [formGroup]="jackForm">
+        <nz-form-item>
+          <nz-form-label [nzSm]="3" nzRequired>千斤顶名称</nz-form-label>
+          <nz-form-control [nzSm]="21">
+            <input type="text" nz-input formControlName="name">
+          </nz-form-control>
+          <nz-form-label [nzSm]="3" nzRequired>泵顶组合</nz-form-label>
+          <nz-form-control [nzSm]="21">
+            <nz-radio-group formControlName="jackMode" #jackModeV>
+              <label nz-radio [nzValue]="4">一泵四顶</label>
+              <label nz-radio [nzValue]="2">一泵两顶</label>
+              <label nz-radio [nzValue]="1">一泵一顶</label>
+            </nz-radio-group>
+          </nz-form-control>
+          <nz-form-label [nzSm]="3" nzRequired>回归方程</nz-form-label>
+          <nz-form-control [nzSm]="21">
+            <nz-radio-group formControlName="equation">
+              <label nz-radio [nzValue]="1">P=aF+b F张拉控制应力KN</label>
+              <label nz-radio [nzValue]="0">F=aP+b P张拉控制应力MPa</label>
+            </nz-radio-group>
+          </nz-form-control>
+          <nz-form-label [nzSm]="3" nzRequired>千斤顶型号</nz-form-label>
+          <nz-form-control [nzSm]="5">
+            <input type="text" nz-input formControlName="jackModel">
+          </nz-form-control>
+          <nz-form-label [nzSm]="3" nzRequired>油泵型号</nz-form-label>
+          <nz-form-control [nzSm]="5">
+            <input type="text" nz-input formControlName="pumpModel">
+          </nz-form-control>
+        </nz-form-item>
+        <app-jack-item [formGroup]="jackForm" name="zA"></app-jack-item>
+        <app-jack-item [formGroup]="jackForm" name="zB" *ngIf="jackForm.value.jackMode > 1"></app-jack-item>
+        <app-jack-item [formGroup]="jackForm" name="zC" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
+        <app-jack-item [formGroup]="jackForm" name="zD" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
+
+        <app-jack-item [formGroup]="jackForm" name="cA"></app-jack-item>
+        <app-jack-item [formGroup]="jackForm" name="cB" *ngIf="jackForm.value.jackMode > 1"></app-jack-item>
+        <app-jack-item [formGroup]="jackForm" name="cC" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
+        <app-jack-item [formGroup]="jackForm" name="cD" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
+        <div class="edit" [ngClass]="{'edit-on': appS.edit}"></div>
+      </form>
+    </div>
+    <!-- <button nz-button nzType="primary" nzSearch (click)="save()" type="button" >保 存</button> -->
+  </div>
+
+</app-left>

@@ -1,0 +1,86 @@
+<app-left>
+  <div class="sider sider-menu">
+    <ul class="menu-2">
+      <li *ngFor="let item of menu.datas; index as i" [ngClass]="{'active': menu.select === item.id}"
+        (click)="onMneu(item.id)">{{item.name}}</li>
+    </ul>
+  </div>
+  <div class="main scroll-y">
+    <div class="operation">
+      <div *ngIf="!appS.edit; else elseBlock">
+        <button nz-button nzType="primary" nzSearch (click)="add()" type="button">添 加</button>
+        <button nz-button nzType="primary" nzSearch (click)="modification()" type="button" *ngIf="data">修 改</button>
+        <!-- <button nz-button nzType="danger" nzSearch (click)="copy()" type="button" *ngIf="data">复 制</button> -->
+      </div>
+      <ng-template #elseBlock>
+        <button nz-button nzType="primary" nzSearch (click)="save()" type="button" *ngIf="appS.edit">保 存</button>
+        <button nz-button nzType="danger" nzSearch (click)="cancelEdit()" type="button" *ngIf="appS.edit">取 消</button>
+      </ng-template>
+    </div>
+    <div class="scroll-content">
+      <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formGroup">
+        <nz-form-item>
+          <nz-form-label [nzSm]="3" nzRequired nzFor="name">项目名称</nz-form-label>
+          <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formGroup.get('name').errors}">
+            <input type="text" nz-input placeholder="梁号" formControlName="name">
+            <nz-form-explain *ngIf="appS.edit">{{formGroup.get('name').errors | ValidatorError}}</nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+
+        <div class="hole">
+          <div>
+            <span>梁型：</span>
+            <button nz-button nzType="primary" nzSearch (click)="addHole()" type="button">添 加</button>
+          </div>
+          <div nz-row nzGutter="25" formArrayName="hole">
+            <div nz-col nzSm="24" nzLg="12" *ngFor="let item of formArr.controls; index as i" [formGroupName]="i">
+              <div class="card">
+                <div class="btn">
+                  <button nz-button *ngIf="formArr.controls.length > 1" nzType="default" nzShape="circle"
+                    (click)="subHole()"><i nz-icon type="close"></i></button>
+                  <!-- <button nz-button nzType="default" nzShape="circle" (click)="subHole()"><i nz-icon
+                      nzType="edit"></i></button> -->
+                </div>
+                <div class="content">
+                  <nz-form-item>
+                    <nz-form-label [nzSm]="4">图片</nz-form-label>
+                    <nz-form-control [nzSm]="20">
+                      <input type="text" nz-input placeholder="图片" formControlName="ImgBase64">
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <nz-form-item>
+                    <nz-form-label [nzSm]="4" nzRequired>梁名称</nz-form-label>
+                    <nz-form-control [nzSm]="20" [ngClass]="{'in-error': item.get('name').errors}">
+                      <input type="text" nz-input placeholder="孔名称" formControlName="name">
+                      <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain>
+                    </nz-form-control>
+                  </nz-form-item>
+
+                  <div>
+                    <span>孔号：</span>
+                    <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text" style="width: 78px;"
+                    (blur)="handleInputConfirm($event, item.get('holes'))"
+                    (keydown.enter)="handleInputConfirm($event, item.get('holes'))" />
+                    <br>
+                    <br>
+                    <div class="hole-tag">
+                      <span *ngFor="let tag of item.get('holes').value; index as hi">
+                        {{tag}}
+                        <i nz-icon type="close" theme="outline" (click)="handleClose(item.get('holes'), tag)"></i>
+                      </span>
+                    </div>
+                  </div>
+                  <nz-form-control [ngClass]="{'in-error': item.get('holes').errors}">
+                    <nz-form-explain *ngIf="appS.edit && item.get('holes').errors">至少需要要个孔号！</nz-form-explain>
+                  </nz-form-control>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="edit" [ngClass]="{'edit-on': appS.edit}"></div>
+      </form>
+    </div>
+  </div>
+</app-left>

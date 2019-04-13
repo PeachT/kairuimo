@@ -1,0 +1,25 @@
+<div *ngFor="let item of gmStr">
+  <nz-input-group [nzAddOnBefore]="item + '组'">
+    <!-- <input type="text" nzSize="large" nz-input [(ngModel)]="groupDevValue[item]" (input)="ifHoleName()"> -->
+    <nz-select style="width: 200px;" nzShowSearch nzPlaceHolder="选择或输入构建" [(ngModel)]="groupDevValue[item]"
+      nzSize="large" (ngModelChange)="holesChange($event)" (nzOpenChange)="open()">
+      <nz-option [nzLabel]="item" [nzValue]="item" *ngFor="let item of sholes">
+      </nz-option>
+    </nz-select>
+  </nz-input-group>
+  <br>
+  <br>
+</div>
+<button nz-button nzType="primary" nzSearch (click)="onGroupSave()" type="button" [disabled]="!err.state">确定</button>
+<p *ngIf="err.msg">{{err.msg}}</p>
+<div>
+  <br>
+  <h3>已分组</h3>
+  <hr>
+  <div class="hole-tag">
+    <span *ngFor="let item of group.g; index as i">
+      {{item}}
+      <i nz-icon type="close" theme="outline" (click)="delTag(i)"></i>
+    </span>
+  </div>
+</div>

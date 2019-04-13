@@ -1,0 +1,55 @@
+<nz-layout>
+  <nz-header>
+    <span class="company-name">
+      柳州凯瑞姆
+    </span>
+  </nz-header>
+  <nz-content>
+    <p class="random-word">{{msg}}</p>
+    <div>
+      <h1 style="color: white; text-align: center;">登录</h1>
+      <form nz-form [formGroup]="validateForm" >
+        <nz-form-item>
+          <nz-form-control>
+            <nz-input-group [nzPrefix]="prefixUser" nzSize="large">
+              <input
+                placeholder="输入用户名"
+                nz-input
+                formControlName="userName"
+                [nzAutocomplete]="auto"
+              />
+              <nz-autocomplete [nzDataSource]="users" #auto> </nz-autocomplete>
+            </nz-input-group>
+            <nz-form-explain *ngIf="validateForm.get('userName').dirty && validateForm.get('userName').errors">请输入用户名！</nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-input-group [nzPrefix]="prefixLock" nzSize="large">
+              <input type="password" nz-input placeholder="密码" formControlName="password">
+            </nz-input-group>
+            <nz-form-explain *ngIf="validateForm.get('userName').dirty && validateForm.get('userName').errors">请入输入密码！</nz-form-explain>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control (dblclick)="adminLogin()">
+            <button nz-button class="login-form-button" nzType="default" nzGhost type="button"
+              (click)="submitForm()"
+              nzSize="large"
+              [nzLoading]="dyLogin"
+              >登 录</button>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <div class="power-btn">
+            <button class="restart" (click)="appS.powerState = true"> <i nz-icon nzType="reload" style="color:lime"></i> 重 启 </button>
+            <button class="shutdown" (click)="appS.powerState = true"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button>
+          </div>
+        </nz-form-item>
+      </form>
+      <ng-template #prefixUser><i nz-icon type="user"></i></ng-template>
+      <ng-template #prefixLock><i nz-icon type="lock"></i></ng-template>
+    </div>
+  </nz-content>
+  <nz-footer>©柳州凯瑞姆</nz-footer>
+</nz-layout>
