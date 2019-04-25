@@ -9,9 +9,13 @@ import { PLCLiveData } from '../models/live';
 @Injectable({ providedIn: 'root' })
 export class PLCService {
   public plcState = {
+    /** 设备状态 */
     z: false,
+    /** 通信延时定时器 */
     zT: null,
+    /** 记录通信本次联通时间 */
     zOT: 0,
+    /** 通信延时 */
     zLT: 0,
     c: false,
     cT: null,
@@ -184,6 +188,11 @@ export class PLCService {
   // tslint:disable-next-line:ban-types
   public ipcSend(sendChannel: string, address: number, value: any) {
     return new Promise((resolve, reject) => {
+      if ((!this.plcState.z && sendChannel.indexOf('z') > -1) || (!this.plcState.c && sendChannel.indexOf('c') > -1)) {
+        this.message.warning('设备未连接');
+        reject('设备未连接');
+        return;
+      }
       console.log(sendChannel, address, value);
       const channel = `${sendChannel}${this.constareChannel()}`;
       this.e.ipcRenderer.send(sendChannel, { address, value, channel });
@@ -194,11 +203,13 @@ export class PLCService {
           this.message.error(`${sendChannel}-M${address}设置失败`);
         }
         resolve(data);
+        return;
       });
       const t = setTimeout(() => {
         this.message.error(`${sendChannel}-M${address}设置超时`);
         this.e.ipcRenderer.removeAllListeners(channel);
         reject();
+        return;
       }, 3000);
     });
   }

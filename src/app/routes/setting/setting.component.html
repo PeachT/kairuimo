@@ -1,5 +1,5 @@
   <main class="setting">
-    <div>
+    <div [ngClass]="{'form-edit': !PLCS.plcState.z}">
       <nz-divider style="min-width: auto;" nzText="系统参数" nzOrientation="left"></nz-divider>
       <nz-row>
         <nz-col nz-col nzSpan="6">
@@ -54,9 +54,10 @@
           </nz-input-group>
         </nz-col>
       </nz-row>
-    </div>
+
+    <!-- </div>
     <br>
-    <div>
+    <div> -->
       <nz-divider style="min-width: auto;" nzText="自动参数" nzOrientation="left"></nz-divider>
       <nz-row>
         <nz-col nz-col nzSpan="6">
@@ -93,6 +94,7 @@
           </nz-input-group>
         </nz-col>
       </nz-row>
+      <div [ngClass]="{'edit': !PLCS.plcState.z}">设备未连接无法设置参数！！</div>
     </div>
     <!-- <div *ngFor="let name of revise.dev; index as i" style="    display: flex;
     flex-direction: column;">
@@ -122,7 +124,7 @@
           <td *ngFor="let item of revise.mpaStage; index as i">
             <input nzSize="large" type="number" nz-input [value]="revise[name][i]">
           </td>
-          <td><button nzSize="large" nz-button nzType="default" (click)="onRevise(name)">{{name}}校 正</button></td>
+          <td><button nzSize="large" nz-button nzType="default" (click)="onRevise(name)" [disabled]="!PLCS.plcState.z">{{name}}校 正</button></td>
         </tr>
       </table>
     </div>
