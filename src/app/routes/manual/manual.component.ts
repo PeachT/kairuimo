@@ -5,6 +5,7 @@ import { DbService, DB } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D, PLC_M } from 'src/app/models/IPCChannel';
+import { plcToMpa } from 'src/app/Function/device.date.processing';
 
 @Component({
   selector: 'app-manual',
@@ -16,6 +17,7 @@ export class ManualComponent implements OnInit, OnDestroy {
   selectedJack: any;
   selectedI: any = null;
   jacks = [];
+  selectJackId = 1;
   deviceMode = true;
   devModeStr: any = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']};
   /** 点动  强制  补压 */
@@ -137,20 +139,20 @@ export class ManualComponent implements OnInit, OnDestroy {
     this.db = this.odb.db;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.it = setInterval(() => {
       // this.da = this.da++;
       console.log('manual');
     }, 500);
-    this.db.jack.toArray().then((d) => {
+    // 获取顶
+    await this.db.jack.toArray().then((d) => {
       this.jacks = d.map(item => {
-        return { name: item.name, address: (item.id - 1) * 100, mode: item.jackMode };
+        return { name: item.name, id: item.id };
       });
-      if (!this.selectedJack && this.selectedI !== null) {
-        this.selectedJack = this.jacks[this.selectedI];
-      }
-      console.log(this.jacks);
     });
+    await this.onSelectedDevice(this.PLCS.getJackId());
+    /** 获取设备压力校正 */
+    await this.PLCS.getMpaRevise();
     this.selectManual('z');
     this.selectManual('c');
     this.getManualData('z');
@@ -163,23 +165,20 @@ export class ManualComponent implements OnInit, OnDestroy {
     this.selectManual('c', [false, false, false, false]);
   }
   /** 切换设备 */
-  onSelectedDevice(value) {
-    console.log(value);
-    this.PLCS.ipcSend('zF06', PLC_D(408), value.address);
+  async onSelectedDevice(id) {
+    console.log(id);
+    this.PLCS.ipcSend('zF06', PLC_D(408), id);
+    this.selectJackId = id;
+    const jack = await this.PLCS.selectJack(id);
     const devModeStr = [
-      {z: ['zA'], c: ['cA']},
       {},
-      {z: ['zA', 'zB'], c: ['cA', 'cB']},
+      { z: ['zA'], c: ['cA'] },
+      { z: ['zA', 'zB'], c: ['cA', 'cB'] },
       {},
-      {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}
+      { z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD'] }
     ];
-    this.devModeStr = devModeStr[value.mode];
-    // console.log(id === '1');
-    // if (id === '1') {
-    //   this.deviceMode = false;
-    // } else {
-    //   this.deviceMode = true;
-    // }
+    this.devModeStr = devModeStr[jack.jackMode];
+    console.log(jack, this.devModeStr);
   }
 
   /** 切换手动 */
@@ -188,29 +187,38 @@ export class ManualComponent implements OnInit, OnDestroy {
   }
   /** 获取手动数据 */
   getManualData(dev: string = 'z', ) {
-    this.PLCS.ipcSend(`${dev}F03`, PLC_D(98), 14).then((data: any) => {
-      console.log(`${dev}返回的结果`, data);
-      this.setDev[`${dev}A`].setMpa = data.float[1];
-      this.setDev[`${dev}A`].setMm = data.float[2];
-      this.setDev[`${dev}A`].setUn = data.float[3];
+    console.log(this.PLCS.jack, this.PLCS.mpaRevise);
+    this.PLCS.ipcSend(`${dev}F03`, PLC_D(100), 20).then((data: any) => {
+      console.log('手动数据', data);
+      let i = 0;
+      this.devModeStr[dev].map(name => {
+        this.setDev[name].setMpa = plcToMpa(data.int16[i], this.PLCS.mpaRevise[name]);
+        this.setDev[name].setMm = plcToMpa(data.int16[i + 1], this.PLCS.jack[name]);
+        this.setDev[name].setUn = plcToMpa(data.int16[i + 2], this.PLCS.mpaRevise[name]);
+        i += 3;
+      });
+      // console.log(`${dev}返回的结果`, data);
+      // this.setDev[`${dev}A`].setMpa = plcToMpa(data.int16[0], this.PLCS.mpaRevise[`${dev}A`]);
+      // this.setDev[`${dev}A`].setMm = plcToMpa(data.int16[1], this.PLCS.jack[`${dev}A`]);
+      // this.setDev[`${dev}A`].setUn = plcToMpa(data.int16[3], this.PLCS.mpaRevise[`${dev}A`]);
 
-      this.setDev[`${dev}B`].setMpa = data.float[4];
-      this.setDev[`${dev}B`].setMm = data.float[5];
-      this.setDev[`${dev}B`].setUn = data.float[6];
+      // this.setDev[`${dev}B`].setMpa = data.int16[4];
+      // this.setDev[`${dev}B`].setMm = data.int16[5];
+      // this.setDev[`${dev}B`].setUn = data.int16[6];
 
-      this.setDev[`${dev}C`].setMpa = data.float[7];
-      this.setDev[`${dev}C`].setMm = data.float[8];
-      this.setDev[`${dev}C`].setUn = data.float[9];
+      // this.setDev[`${dev}C`].setMpa = data.int16[7];
+      // this.setDev[`${dev}C`].setMm = data.int16[8];
+      // this.setDev[`${dev}C`].setUn = data.int16[9];
 
-      this.setDev[`${dev}D`].setMpa = data.float[10];
-      this.setDev[`${dev}D`].setMm = data.float[11];
-      this.setDev[`${dev}D`].setUn = data.float[12];
-      // 获取选择顶
-      this.selectedI = data.int16[1] === 0 ? data.int16[1] : Math.round(data.int16[1] / 100);
-      if (this.jacks.length > 0) {
-        this.selectedJack = this.jacks[this.selectedI];
-      }
-      console.log(this.jacks, this.selectedJack, this.selectedI);
+      // this.setDev[`${dev}D`].setMpa = data.int16[10];
+      // this.setDev[`${dev}D`].setMm = data.int16[11];
+      // this.setDev[`${dev}D`].setUn = data.int16[12];
+      // // 获取选择顶
+      // this.selectedI = data.int16[1] === 0 ? data.int16[1] : Math.round(data.int16[1] / 100);
+      // if (this.jacks.length > 0) {
+      //   this.selectedJack = this.jacks[this.selectedI];
+      // }
+      // console.log(this.jacks, this.selectedJack, this.selectedI);
     });
   }
 

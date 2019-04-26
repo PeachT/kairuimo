@@ -6,6 +6,8 @@ import { AppService } from 'src/app/services/app.service';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D, PLC_M } from 'src/app/models/IPCChannel';
 import { ReviseItemComponent } from 'src/app/shared/revise-item/revise-item.component';
+import { plcToMpa, mpaToPlc } from 'src/app/Function/device.date.processing';
+import { MpaRevise, AutoDate } from 'src/app/models/device';
 
 @Component({
   selector: 'app-setting',
@@ -24,15 +26,10 @@ export class SettingComponent implements OnInit, OnDestroy {
     name: 'zA',
     dev: ['zA', 'zB', 'zC', 'zD', 'cA', 'cB', 'cC', 'cD'],
     mpaStage: ['5Mpa', '15Mpa', '25Mpa', '35Mpa', '45Mpa', '55Mpa'],
-    zA : [],
-    zB : [],
-    zC : [],
-    zD : [],
-    cA : [],
-    cB : [],
-    cC : [],
-    cD : [],
   };
+  mpaRevise: MpaRevise;
+  mpaToPlc = mpaToPlc;
+  autoData: AutoDate;
 
   constructor(
     private e: ElectronService,
@@ -42,8 +39,8 @@ export class SettingComponent implements OnInit, OnDestroy {
     private message: NzMessageService,
   ) {
     this.getData();
-    this.getRevise('z');
-    this.getRevise('c');
+    this.mpaRevise = this.PLCS.getMpaRevise();
+    this.autoData = this.PLCS.getAutoDate();
   }
 
   ngOnInit() {
@@ -58,26 +55,16 @@ export class SettingComponent implements OnInit, OnDestroy {
   }
   /** 获取设置数据 */
   getData() {
-    this.PLCS.ipcSend('zF03', PLC_D(410), 40).then((data: any) => {
+    console.log('123123123123123123132132');
+    // this.PLCS.ipcSend(`zF03`, PLC_D(410), 6);
+    this.PLCS.ipcSend('zF03', PLC_D(410), 6).then((data: any) => {
       if (data) {
-        this.systenDate = data.float;
-        this.systenDate[7] = data.int16[14] / 10;
-        this.systenDate[14] = data.int16[28] / 10;
+        this.systenDate[0] = plcToMpa(data.int16[0], null);
+        this.systenDate[1] = plcToMpa(data.int16[1], null);
+        this.systenDate[2] = plcToMpa(data.int16[2], null);
+        this.systenDate[3] = data.int16[3] / 10;
       }
-      console.log(this.systenDate);
-    }).finally(() => {
-      this.refState = false;
-    });
-  }
-  getRevise(dev: string = 'z') {
-    this.PLCS.ipcSend(`${dev}F03`, PLC_D(500), 48).then((data: any) => {
-      if (data) {
-        this.revise[`${dev}A`] = data.float.slice(0, 6);
-        this.revise[`${dev}B`] = data.float.slice(6, 12);
-        this.revise[`${dev}C`] = data.float.slice(12, 18);
-        this.revise[`${dev}D`] = data.float.slice(18, 24);
-      }
-      console.log(data);
+      console.log('获取PLC设备数据', data, this.systenDate);
     }).finally(() => {
       this.refState = false;
     });
@@ -105,31 +92,15 @@ export class SettingComponent implements OnInit, OnDestroy {
   cancel() {
     this.revise.state = false;
   }
+  /** 修改压力校正 */
   ok() {
     const value = this.reviseDom.setForm.value.setValue;
-    // const address = this.revise.name.indexOf('A') > -1 ? 500 : 520;
-    let address = 500;
-    switch (this.revise.name) {
-      // case 'zA':
-      //   address = 500;
-      //   break;
-      case 'zB':
-        address = 512;
-        break;
-      case 'zC':
-        address = 524;
-        break;
-      case 'zD':
-        address = 536;
-        break;
-      default:
-        break;
-    }
-    const dev = this.revise.name.indexOf('z') > -1 ? 'z' : 'c';
-    console.log(value, address, dev);
-    this.PLCS.ipcSend(`${dev}F016_float`, PLC_D(address), value).then(() => {
-      this.revise.state = false;
-      this.getRevise(dev);
-    });
+    const name = this.revise.name;
+    this.mpaRevise[name] = value;
+    this.PLCS.setMpaRevise(this.mpaRevise);
+  }
+  /** 修改自动参数 */
+  setAuto() {
+    this.PLCS.setAutoData(this.autoData);
   }
 }

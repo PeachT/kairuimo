@@ -5,6 +5,7 @@ import { DbService } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D, PLC_M } from 'src/app/models/IPCChannel';
+import { mpaToPlc, mmToPlc } from 'src/app/Function/device.date.processing';
 
 @Component({
   selector: 'app-manual-item',
@@ -104,19 +105,19 @@ export class ManualItemComponent implements OnInit {
     // this.setAeeress = this.name.indexOf('A') > -1 ? [100, 102] : [106, 108];
     switch (true) {
       case this.name.indexOf('A') > -1:
-        this.setAeeress = [100, 102];
+        this.setAeeress = [100, 101];
         this.setM = [20, 21, 22, 23];
         break;
         case this.name.indexOf('B') > -1:
-        this.setAeeress = [106, 108];
+        this.setAeeress = [105, 106];
         this.setM = [24, 25, 26, 27];
         break;
         case this.name.indexOf('C') > -1:
-        this.setAeeress = [112, 114];
+        this.setAeeress = [110, 111];
         this.setM = [30, 31, 32, 33];
         break;
         case this.name.indexOf('D') > -1:
-        this.setAeeress = [118, 120];
+        this.setAeeress = [115, 116];
         this.setM = [34, 35, 36, 37];
         break;
       default:
@@ -125,9 +126,14 @@ export class ManualItemComponent implements OnInit {
   }
 
   /** 设置数据 */
-  set(address: number, value: number) {
+  set(address: number, value: number, state: string = 'mm') {
     console.log(value);
-    this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]);
+    // this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]);
+    if (state === 'mpa') {
+      this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mpaToPlc(value, this.PLCS.mpaRevise[this.name]));
+    } else {
+      this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mmToPlc(value, this.PLCS.jack[this.name].mm));
+    }
   }
 
   showAlarm() {

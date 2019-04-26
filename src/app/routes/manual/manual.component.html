@@ -1,15 +1,15 @@
 <main >
   <header>
     <span style="margin-left: 60px;">选择千斤顶：</span>
-    <nz-select nzSize="large" style="width: 200px;" [(ngModel)]="selectedJack" nzPlaceHolder="Choose"
+    <nz-select nzSize="large" style="width: 200px;" [(ngModel)]="selectJackId" nzPlaceHolder="Choose"
       (ngModelChange)="onSelectedDevice($event)">
-      <nz-option [nzValue]="item" [nzLabel]="item.name" *ngFor="let item of jacks"></nz-option>
+      <nz-option [nzValue]="item.id" [nzLabel]="item.name" *ngFor="let item of jacks"></nz-option>
         <!-- <nz-option nzValue="jack" nzLabel="Jack"></nz-option>
         <nz-option nzValue="lucy" nzLabel="Lucy"></nz-option> -->
     </nz-select>
   </header>
   <main class="manual kvm-slider">
-    <div class="content z" >
+    <div class="content z" [ngClass]="{'form-edit': !PLCS.plcState.z}">
       <div class="btn" [ngClass]="{'coerce': zMarginMode[1]}">
         <nz-divider style="min-width: auto;" nzText="主 站" nzOrientation="left"></nz-divider>
           <button nzSize="large" nz-button nzShape="round"
@@ -30,13 +30,14 @@
           [dev]="setDev[item]" [name]='item' *ngIf="showDev[item]"></app-manual-item>
         </ng-container>
         <!-- <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zA" name='zA' *ngIf="showDev.zA"></app-manual-item>
-        <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zB" name='zB' *ngIf="showDev.zB"></app-manual-item>
-        <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zC" name='zC' *ngIf="showDev.zC"></app-manual-item>
-        <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zD" name='zD' *ngIf="showDev.zD"></app-manual-item> -->
+          <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zB" name='zB' *ngIf="showDev.zB"></app-manual-item>
+          <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zC" name='zC' *ngIf="showDev.zC"></app-manual-item>
+          <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="zD" name='zD' *ngIf="showDev.zD"></app-manual-item> -->
       </div>
+      <div class="edit" *ngIf="!PLCS.plcState.z">设备未连接！！</div>
     </div>
     <br><br>
-    <div class="content c" >
+    <div class="content c" [ngClass]="{'form-edit': !PLCS.plcState.c}">
       <div class="btn" [ngClass]="{'coerce': cMarginMode[1]}">
           <nz-divider style="min-width: auto;" nzText="从 站" nzOrientation="left"></nz-divider>
           <button nzSize="large" nz-button nzShape="round"
@@ -59,7 +60,8 @@
         <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="setDev.cB" name='cB' *ngIf="showDev.cB"></app-manual-item>
         <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="setDev.cC" name='cC' *ngIf="showDev.cC"></app-manual-item>
         <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="setDev.cD" name='cD' *ngIf="showDev.cD"></app-manual-item> -->
-        </div>
+      </div>
+      <div class="edit" *ngIf="!PLCS.plcState.c">设备未连接！！</div>
     </div>
   </main>
 </main>

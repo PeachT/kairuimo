@@ -16,6 +16,8 @@ export class ReviseItemComponent implements OnInit {
     name: string;
   @Input()
     reviseName: string;
+  @Input()
+    reviseData = [0, 1, 2, 3, 4, 5];
 
   revise = {
     state: false,
@@ -40,7 +42,11 @@ export class ReviseItemComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public PLCS: PLCService,
-  ) {}
+  ) {
+    this.setForm = this.fb.group({
+      setValue: this.fb.array(this.reviseData),
+    });
+  }
 
   ngOnInit() {
     console.log(this.name);

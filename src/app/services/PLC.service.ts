@@ -5,9 +5,35 @@ import { NzMessageService } from 'ng-zorro-antd';
 import { Subject, Observable, interval } from 'rxjs';
 import { PLC_D } from '../models/IPCChannel';
 import { PLCLiveData } from '../models/live';
+import { plcToMpa, plcToMm, mmToPlc } from '../Function/device.date.processing';
+import { MpaRevise, AutoDate } from '../models/device';
+import { Jack } from '../models/jack';
+import { DbService } from './db.service';
+
+
+const mpaRevise: MpaRevise = {
+  zA : [1, 1, 1, 1, 1, 1],
+  zB : [1, 1, 1, 1, 1, 1],
+  zC : [1, 1, 1, 1, 1, 1],
+  zD : [1, 1, 1, 1, 1, 1],
+  cA : [1, 1, 1, 1, 1, 1],
+  cB : [1, 1, 1, 1, 1, 1],
+  cC : [1, 1, 1, 1, 1, 1],
+  cD : [1, 1, 1, 1, 1, 1],
+};
+const autoDate: AutoDate = {
+  pressureDifference: 2,
+  superElongation: 10,
+  tensionBalance: 10,
+  backMm: 55,
+  unloadingDelay: 30,
+};
 
 @Injectable({ providedIn: 'root' })
 export class PLCService {
+  jack: Jack;
+  mpaRevise: MpaRevise;
+
   public plcState = {
     /** 设备状态 */
     z: false,
@@ -22,17 +48,7 @@ export class PLCService {
     cOT: 0,
     cLT: 0,
   };
-  /** 压力校正数据 */
-  revise = {
-    zA: [],
-    zB: [],
-    zC: [],
-    zD: [],
-    cA: [],
-    cB: [],
-    cC: [],
-    cD: [],
-  };
+
   public PD: PLCLiveData = {
     zA: {
       showMpa: NaN,
@@ -89,12 +105,19 @@ export class PLCService {
 
   constructor(
     private e: ElectronService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private odb: DbService,
   ) {
+    const revise = JSON.parse(localStorage.getItem('mpaRevise'));
+    if (!revise) {
+      this.setMpaRevise(mpaRevise);
+    }
+    const auto = JSON.parse(localStorage.getItem('autoDate'));
+    if (!auto) {
+      this.setAutoData(autoDate);
+    }
     this.ipcOn('z');
     this.ipcOn('c');
-    // this.getRevise('z');
-    // this.getRevise('c');
   }
 
   // 获得一个Observable;
@@ -104,40 +127,43 @@ export class PLCService {
   public onSharch() {
 
   }
+  /** 获取实时数据 */
   private ipcOn(dev: string = 'z') {
     this.e.ipcRenderer.on(`${dev}connection`, (event, data) => {
       console.log(dev, data);
     });
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
+      console.log(data);
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`] - 1000;
       this.plcState[`${dev}OT`] = new Date().getTime();
       clearTimeout(this.plcState[`${dev}T`]);
       this.plcState[dev] = true;
-      // console.log(data);
-      this.PD[`${dev}A`].showMpa = data.float[0];
-      this.PD[`${dev}A`].showMm = data.float[1];
-      const astate = this.getState(data.int16[4]);
-      this.PD[`${dev}A`].state = astate.state.join('·');
-      this.PD[`${dev}A`].alarm = astate.alarm;
+      if (this.mpaRevise && this.jack) {
+        // console.log(data);
+        this.PD[`${dev}A`].showMpa = plcToMpa(data.int16[0], this.mpaRevise[`${dev}A`]);
+        this.PD[`${dev}A`].showMm = plcToMm(data.int16[1], this.jack[`${dev}A`]);
+        const astate = this.getState(data.int16[2]);
+        this.PD[`${dev}A`].state = astate.state.join('·');
+        this.PD[`${dev}A`].alarm = astate.alarm;
 
-      this.PD[`${dev}B`].showMpa = data.float[3];
-      this.PD[`${dev}B`].showMm = data.float[4];
-      const bstate = this.getState(data.int16[10]);
-      this.PD[`${dev}B`].state = bstate.state.join('·');
-      this.PD[`${dev}B`].alarm = bstate.alarm;
+        this.PD[`${dev}B`].showMpa = plcToMpa(data.int16[5], this.mpaRevise[`${dev}A`]);
+        this.PD[`${dev}B`].showMm = plcToMm(data.int16[6], this.jack[`${dev}A`]);
+        const bstate = this.getState(data.int16[7]);
+        this.PD[`${dev}B`].state = bstate.state.join('·');
+        this.PD[`${dev}B`].alarm = bstate.alarm;
 
-      this.PD[`${dev}C`].showMpa = data.float[6];
-      this.PD[`${dev}C`].showMm = data.float[7];
-      const cstate = this.getState(data.int16[16]);
-      this.PD[`${dev}C`].state = cstate.state.join('·');
-      this.PD[`${dev}C`].alarm = cstate.alarm;
+        this.PD[`${dev}C`].showMpa = plcToMpa(data.int16[10], this.mpaRevise[`${dev}A`]);
+        this.PD[`${dev}C`].showMm = plcToMm(data.int16[11], this.jack[`${dev}A`]);
+        const cstate = this.getState(data.int16[12]);
+        this.PD[`${dev}C`].state = cstate.state.join('·');
+        this.PD[`${dev}C`].alarm = cstate.alarm;
 
-      this.PD[`${dev}D`].showMpa = data.float[9];
-      this.PD[`${dev}D`].showMm = data.float[10];
-      const dstate = this.getState(data.int16[22]);
-      this.PD[`${dev}D`].state = dstate.state.join('·');
-      this.PD[`${dev}D`].alarm = dstate.alarm;
-
+        this.PD[`${dev}D`].showMpa = plcToMpa(data.int16[15], this.mpaRevise[`${dev}A`]);
+        this.PD[`${dev}D`].showMm = plcToMm(data.int16[16], this.jack[`${dev}A`]);
+        const dstate = this.getState(data.int16[17]);
+        this.PD[`${dev}D`].state = dstate.state.join('·');
+        this.PD[`${dev}D`].alarm = dstate.alarm;
+      }
       this.plcSub.next();
 
       this.plcState[`${dev}T`] = setTimeout(() => {
@@ -190,7 +216,7 @@ export class PLCService {
     return new Promise((resolve, reject) => {
       if ((!this.plcState.z && sendChannel.indexOf('z') > -1) || (!this.plcState.c && sendChannel.indexOf('c') > -1)) {
         this.message.warning('设备未连接');
-        reject('设备未连接');
+        reject(`${sendChannel}设备未连接`);
         return;
       }
       console.log(sendChannel, address, value);
@@ -200,29 +226,66 @@ export class PLCService {
         console.log(`${sendChannel}-${address}设置返回的结果`, data);
         clearTimeout(t);
         if (!data) {
-          this.message.error(`${sendChannel}-M${address}设置失败`);
+          this.message.error(`${sendChannel}-${address}设置失败`);
         }
         resolve(data);
         return;
       });
       const t = setTimeout(() => {
-        this.message.error(`${sendChannel}-M${address}设置超时`);
+        this.message.error(`${sendChannel}-${address}设置超时`);
         this.e.ipcRenderer.removeAllListeners(channel);
-        reject();
+        reject(`${sendChannel}-M${address}设置超时`);
         return;
       }, 3000);
     });
   }
-  /** 获取压力校正系数 */
-  getRevise(dev: string = 'z') {
-    this.ipcSend(`${dev}F03`, PLC_D(500), 48).then((data: any) => {
-      if (data) {
-        this.revise[`${dev}A`] = data.float.slice(0, 6);
-        this.revise[`${dev}B`] = data.float.slice(6, 12);
-        this.revise[`${dev}C`] = data.float.slice(12, 18);
-        this.revise[`${dev}D`] = data.float.slice(18, 24);
+
+
+    /** 获取压力校正系数 */
+    getMpaRevise(): MpaRevise {
+      this.mpaRevise =  JSON.parse(localStorage.getItem('mpaRevise'));
+      return this.mpaRevise;
+    }
+
+    /** 设置压力校正系数 */
+    setMpaRevise(revise: MpaRevise) {
+      localStorage.setItem('mpaRevise', JSON.stringify(revise));
+    }
+    /** 获取自动参数 */
+    getAutoDate(): AutoDate {
+      return JSON.parse(localStorage.getItem('autoDate'));
+    }
+
+    /** 设置自动参数 */
+    setAutoData(data: AutoDate) {
+      localStorage.setItem('autoDate', JSON.stringify(data));
+    }
+
+    /** 切换设备 */
+    async selectJack(id: number): Promise<Jack> {
+      localStorage.setItem('jackId', JSON.stringify(id));
+      await this.odb.db.jack.filter(f => f.id === id).first(d => {
+        this.jack = d;
+      });
+      this.ipcSend('zF016', PLC_D(420), [
+        mmToPlc(this.jack.zA.upper, this.jack.zA.mm), mmToPlc(this.jack.zA.floot, this.jack.zA.mm),
+        mmToPlc(this.jack.zB.upper, this.jack.zB.mm), mmToPlc(this.jack.zB.floot, this.jack.zB.mm),
+        mmToPlc(this.jack.zC.upper, this.jack.zC.mm), mmToPlc(this.jack.zC.floot, this.jack.zC.mm),
+        mmToPlc(this.jack.zD.upper, this.jack.zD.mm), mmToPlc(this.jack.zD.floot, this.jack.zD.mm),
+      ]);
+      this.ipcSend('cF016', PLC_D(420), [
+        mmToPlc(this.jack.cA.upper, this.jack.zA.mm), mmToPlc(this.jack.cA.floot, this.jack.zA.mm),
+        mmToPlc(this.jack.cB.upper, this.jack.zB.mm), mmToPlc(this.jack.cB.floot, this.jack.zB.mm),
+        mmToPlc(this.jack.cC.upper, this.jack.zC.mm), mmToPlc(this.jack.cC.floot, this.jack.zC.mm),
+        mmToPlc(this.jack.cD.upper, this.jack.zD.mm), mmToPlc(this.jack.cD.floot, this.jack.zD.mm),
+      ]);
+      return this.jack;
+    }
+    getJackId() {
+      const jackId = JSON.parse(localStorage.getItem('jackId'));
+      if (!jackId) {
+        this.selectJack(1);
       }
-      console.log(data);
-    });
-  }
+      return JSON.parse(localStorage.getItem('jackId'));
+    }
 }

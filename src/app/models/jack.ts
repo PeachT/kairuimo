@@ -1,7 +1,11 @@
 export interface Jack {
   id?: any;
   name: string;
-  /** 设备模式 */
+  /** 设备模式
+   * 4一泵四顶
+   * 2一泵两顶
+   * 1一泵一顶
+   */
   jackMode: number;
   /** 方程类型 */
   equation: number;
@@ -17,15 +21,24 @@ export interface Jack {
   cB: Dev;
   cC: Dev;
   cD: Dev;
-  eAddress: number;
 }
 
 export interface Dev {
+  /** 千斤顶编号 */
   jackNumber: string;
+  /** 油泵编号 */
   pumpNumber: string;
+  /** 位移上限 */
+  upper: number;
+  /** 位移下限 */
+  floot: number;
+  /** 标定系数a */
   a: number;
+  /** 标定系数b */
   b: number;
+  /** 标定日期 */
   date: any;
+  /** 位移校正系数 */
   mm: Array<number>;
 }
 

@@ -1,5 +1,5 @@
 /**
- * 浮点数数组转有符号16位整数
+ * 浮点数数组转有符号32位整数
  *
  * @export
  * @param {number[]} floats 浮点数数组
@@ -24,7 +24,7 @@ function floatToBuffer(floats) {
   return ints;
 }
 /**
- * 无符号16位整数转浮点数
+ * 有符号32位整数转浮点数
  *
  * @export
  * @param {Buffer} buffers buffer数据
@@ -38,7 +38,24 @@ function bufferToFloat(buffers) {
   }
   return fs;
 }
+/**
+ * 有符号16位整数
+ *
+ * @export
+ * @param {Buffer} buffers buffer数据
+ */
+function bufferTo16int(buffers) {
+  const ints = [];
+  for (let index = 0; index < buffers.length; index += 2) {
+    const b2 = buffers.slice(index, index + 2);
+    ints.push(b2.readInt16BE(0));
+    // console.log(b4.readInt16LE(0));
+    // console.log(b4.readInt16BE(0));
+  }
+  return ints;
+}
 export const bf = {
   floatToBuffer,
-  bufferToFloat
+  bufferToFloat,
+  bufferTo16int
 };

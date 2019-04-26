@@ -48,20 +48,18 @@
             <input type="text" nz-input formControlName="pumpModel">
           </nz-form-control>
         </nz-form-item>
-        <div [ngClass]="{'form-edit': !PLCS.plcState.z}">
+        <div>
           <app-jack-item [formGroup]="jackForm" name="zA"></app-jack-item>
           <app-jack-item [formGroup]="jackForm" name="zB" *ngIf="jackForm.value.jackMode > 1"></app-jack-item>
           <app-jack-item [formGroup]="jackForm" name="zC" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
           <app-jack-item [formGroup]="jackForm" name="zD" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
-          <div [ngClass]="{'edit': !PLCS.plcState.z && appS.edit}">设备未连接无法设置参数！！</div>
         </div>
 
-        <div [ngClass]="{'form-edit': !PLCS.plcState.c}">
+        <div>
           <app-jack-item [formGroup]="jackForm" name="cA"></app-jack-item>
           <app-jack-item [formGroup]="jackForm" name="cB" *ngIf="jackForm.value.jackMode > 1"></app-jack-item>
           <app-jack-item [formGroup]="jackForm" name="cC" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
           <app-jack-item [formGroup]="jackForm" name="cD" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
-          <div [ngClass]="{'edit': !PLCS.plcState.c && appS.edit}">设备未连接无法设置参数！！</div>
         </div>
         <div class="edit" [ngClass]="{'edit-on': appS.edit}"></div>
       </form>

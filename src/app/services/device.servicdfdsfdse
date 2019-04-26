@@ -1,0 +1,97 @@
+import { Injectable } from '@angular/core';
+import { ElectronService } from 'ngx-electron';
+import { NzMessageService } from 'ng-zorro-antd';
+import { MpaRevise, AutoDate } from '../models/device';
+import { Jack } from '../models/jack';
+import { PLC_D } from '../models/IPCChannel';
+import { DbService } from './db.service';
+import { PLCService } from './PLC.service';
+
+
+const mpaRevise: MpaRevise = {
+  zA : [1, 1, 1, 1, 1, 1],
+  zB : [1, 1, 1, 1, 1, 1],
+  zC : [1, 1, 1, 1, 1, 1],
+  zD : [1, 1, 1, 1, 1, 1],
+  cA : [1, 1, 1, 1, 1, 1],
+  cB : [1, 1, 1, 1, 1, 1],
+  cC : [1, 1, 1, 1, 1, 1],
+  cD : [1, 1, 1, 1, 1, 1],
+};
+const autoDate: AutoDate = {
+  pressureDifference: 2,
+  superElongation: 10,
+  tensionBalance: 10,
+  backMm: 55,
+  unloadingDelay: 30,
+};
+
+@Injectable({ providedIn: 'root' })
+export class DeviceService {
+  jack: Jack;
+  mpaRevise: MpaRevise;
+
+  constructor(
+    private e: ElectronService,
+    private message: NzMessageService,
+    private odb: DbService,
+    private PLCS: PLCService,
+  ) {
+    const revise = JSON.parse(localStorage.getItem('mpaRevise'));
+    if (!revise) {
+      this.setMpaRevise(mpaRevise);
+    }
+    const auto = JSON.parse(localStorage.getItem('autoDate'));
+    if (!auto) {
+      this.setAutoData(autoDate);
+    }
+  }
+
+  /** 获取压力校正系数 */
+  getMpaRevise(): MpaRevise {
+    this.mpaRevise =  JSON.parse(localStorage.getItem('mpaRevise'));
+    return this.mpaRevise;
+  }
+
+  /** 设置压力校正系数 */
+  setMpaRevise(revise: MpaRevise) {
+    localStorage.setItem('mpaRevise', JSON.stringify(revise));
+  }
+  /** 获取自动参数 */
+  getAutoDate(): AutoDate {
+    return JSON.parse(localStorage.getItem('autoDate'));
+  }
+
+  /** 设置自动参数 */
+  setAutoData(data: AutoDate) {
+    localStorage.setItem('autoDate', JSON.stringify(data));
+  }
+
+  /** 切换设备 */
+  async selectJack(id: number): Promise<Jack> {
+    localStorage.setItem('jackId', JSON.stringify(id));
+    await this.odb.db.jack.filter(f => f.id === id).first(d => {
+      this.jack = d;
+    });
+    this.PLCS.ipcSend('zF16', PLC_D(420), [
+      this.jack.zA.upper, this.jack.zA.floot,
+      this.jack.zB.upper, this.jack.zB.floot,
+      this.jack.zC.upper, this.jack.zC.floot,
+      this.jack.zD.upper, this.jack.zD.floot,
+    ]);
+    this.PLCS.ipcSend('cF16', PLC_D(420), [
+      this.jack.cA.upper, this.jack.cA.floot,
+      this.jack.cB.upper, this.jack.cB.floot,
+      this.jack.cC.upper, this.jack.cC.floot,
+      this.jack.cD.upper, this.jack.cD.floot,
+    ]);
+    return this.jack;
+  }
+  getJackId() {
+    const jackId = JSON.parse(localStorage.getItem('jackId'));
+    if (!jackId) {
+      this.selectJack(1);
+    }
+    return JSON.parse(localStorage.getItem('jackId'));
+  }
+}

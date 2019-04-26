@@ -51,92 +51,6 @@ export class JackComponent implements OnInit {
 
   ngOnInit() {
     this.getMneu();
-    this.db.jack.count().then((data) => {
-      console.log('获取用户数量', data);
-      if (data === 0) {
-        for (let index = 0; index < 5; index++) {
-          const jack: Jack = {
-            name: `未命名${index}`,
-            jackMode: null,
-            equation: null,
-            jackModel: null,
-            pumpModel: null,
-            zA: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            zB: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            zC: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            zD: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            cA: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            cB: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            cC: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            cD: {
-              jackNumber: null,
-              pumpNumber: null,
-              a: null,
-              b: null,
-              date: null,
-              mm: [],
-            },
-            eAddress: index * 100,
-          };
-          this.db.jack.add(jack).then(() => {
-            this.message.success('添加成功🙂');
-          }).catch(() => {
-            this.message.error('添加失败😔');
-          });
-        }
-      }
-    }).catch((error) => {
-      console.log('数据库错误！！', error);
-    });
     // this.getMenuOne();
     this.createJackForm();
     // this.startBaseSub();
@@ -144,7 +58,7 @@ export class JackComponent implements OnInit {
   createJackForm() {
     this.jackForm = this.fb.group({
       name: ['1'],
-      jackMode: [2],
+      jackMode: [8],
       equation: [1],
       jackModel: [],
       pumpModel: [],
@@ -163,6 +77,8 @@ export class JackComponent implements OnInit {
     return this.fb.group({
       jackNumber: [],
       pumpNumber: [],
+      upper: 0,
+      floot: 0,
       a: [],
       b: [],
       date: [],
@@ -175,7 +91,7 @@ export class JackComponent implements OnInit {
     this.db.jack.toArray().then((d) => {
       console.log(d);
       this.menu.datas = d.map(item => {
-        return { name: item.name, eAddress: item.eAddress, id: item.id };
+        return { name: item.name, id: item.id };
       });
     });
   }
@@ -187,8 +103,9 @@ export class JackComponent implements OnInit {
         console.log(jack);
         if (jack) {
           this.data = jack;
-          this.getPLCData('z', (id - 1) * 100);
-          this.getPLCData('c', (id - 1) * 100);
+          this.jackForm.reset(this.data);
+          // this.getPLCData('z', (id - 1) * 100);
+          // this.getPLCData('c', (id - 1) * 100);
         } else {
           this.message.error('获取数据失败😔');
         }
@@ -271,31 +188,7 @@ export class JackComponent implements OnInit {
 
     data.id = this.menu.select;
     console.log(data);
-    const z = [
-      data.jackMode, data.equation, 2, 3, 4,
-      ...data.zA.mm, data.zA.a, data.zA.b, this.dn(data.zA.date), 0,
-      ...data.zB.mm, data.zB.a, data.zB.b, this.dn(data.zB.date), 0,
-      ...data.zC.mm, data.zC.a, data.zC.b, this.dn(data.zC.date), 0,
-      ...data.zD.mm, data.zD.a, data.zD.b, this.dn(data.zD.date)
-    ];
-    // .map(item => {
-    //   // tslint:disable-next-line:no-bitwise
-    //   return Number(item);
-    // });
-    const c = [
-      data.jackMode, data.equation, 2, 3, 4,
-      ...data.cA.mm, data.cA.a, data.cA.b, this.dn(data.cA.date), 0,
-      ...data.cB.mm, data.cB.a, data.cB.b, this.dn(data.cB.date), 0,
-      ...data.cC.mm, data.cC.a, data.cC.b, this.dn(data.cC.date), 0,
-      ...data.cD.mm, data.cD.a, data.cD.b, this.dn(data.cD.date)
-    ];
-    // .map(item => {
-    //   return Number(item);
-    // });
-    const address = PLC_D(2000 + ((data.id - 1) * 100));
-    console.log(z, c, address);
-    this.savePLC('z', address, z);
-    this.savePLC('c', address, c);
+
     this.db.jack.update(data.id, data).then((updata) => {
       this.message.success('修改成功🙂');
       this.getMneu();

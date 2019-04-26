@@ -20,12 +20,12 @@
         <nz-col nz-col nzSpan="8">
           <nz-input-group nzAddOnBefore="设置压力 Mpa">
             <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="dev.setMpa"
-              (ngModelChange)="set(setAeeress[0], $event)"></nz-input-number>
+              (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-input-number>
           </nz-input-group>
         </nz-col>
         <nz-col nzSpan="16">
           <nz-slider [nzMarks]="mpaMarks" [nzMin]="0" [nzMax]="60" [nzStep]="0.5" [(ngModel)]="dev.setMpa"
-            (ngModelChange)="set(setAeeress[0], $event)"></nz-slider>
+            (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-slider>
         </nz-col>
       </nz-row>
       <nz-row>

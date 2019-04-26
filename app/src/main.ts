@@ -88,7 +88,7 @@ function IPCOn(d: string = 'z', tcp: ModbusTCP) {
     tcp.F06(arg.address, arg.value, arg.channel);
   });
   ipcMain.on(`${d}F016`, (e, arg) => {
-    tcp.F016(arg.address, arg.valuey, arg.channel);
+    tcp.F016(arg.address, arg.value, arg.channel);
   });
   ipcMain.on(`${d}F016_float`, (e, arg) => {
     tcp.F016_float(arg.address, arg.value, arg.channel);

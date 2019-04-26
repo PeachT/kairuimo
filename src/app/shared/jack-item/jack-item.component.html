@@ -17,6 +17,18 @@
         &nbsp;
       </nz-form-control>
 
+      <nz-form-label [nzSm]="2" nzRequired>位移上限</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <input type="text" nz-input formControlName="upper">
+      </nz-form-control>
+      <nz-form-label [nzSm]="2" nzRequired>位移下限</nz-form-label>
+      <nz-form-control [nzSm]="6">
+        <input type="text" nz-input formControlName="floot">
+      </nz-form-control>
+      <nz-form-control [nzSm]="8">
+        &nbsp;
+      </nz-form-control>
+
       <nz-form-label [nzSm]="2" nzRequired>标定参数a</nz-form-label>
       <nz-form-control [nzSm]="6">
         <input type="number" nz-input formControlName="a">
