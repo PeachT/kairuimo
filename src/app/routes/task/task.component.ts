@@ -14,6 +14,7 @@ import { TaskDataComponent } from './components/task-data/task-data.component';
 import { Jack } from 'src/app/models/jack';
 import { Comp } from 'src/app/models/component';
 import { AutoService } from 'src/app/services/auto.service';
+import { PLCService } from 'src/app/services/PLC.service';
 
 @Component({
   selector: 'app-task',
@@ -22,9 +23,9 @@ import { AutoService } from 'src/app/services/auto.service';
 })
 export class TaskComponent implements OnInit {
   @ViewChild('groupDom')
-  groupDom: GroupComponent;
+    groupDom: GroupComponent;
   @ViewChild('taskDataDom')
-  taskDataDom: TaskDataComponent;
+    taskDataDom: TaskDataComponent;
 
   validateForm: FormGroup;
 
@@ -78,7 +79,7 @@ export class TaskComponent implements OnInit {
   /** 自动完成component */
   componentOptions = {
     menu: [],
-    holes: []
+    holes: null
   };
   /** 当前显示面板 */
   tabsetShow = 0;
@@ -95,6 +96,19 @@ export class TaskComponent implements OnInit {
     selectBridge: null,
     editGroupName: null
   };
+  /** 张拉设备状态 */
+  tensionDevice = {
+    state: false,
+    names: [],
+    zA: null,
+    zB: null,
+    zC: null,
+    zD: null,
+    cA: null,
+    cB: null,
+    cC: null,
+    cD: null,
+  };
 
 
   constructor(
@@ -106,6 +120,7 @@ export class TaskComponent implements OnInit {
     private modalService: NzModalService,
     private autoS: AutoService,
     private activatedRoute: ActivatedRoute,
+    public PLCS: PLCService,
   ) {
     this.db = this.odb.db;
     activatedRoute.queryParams.subscribe(queryParams => {
@@ -337,10 +352,7 @@ export class TaskComponent implements OnInit {
     const value = this.validateForm.value;
     console.log(value);
   }
-  /** 选择设备 */
-  deviceOnChanges(value) {
-    console.log(value);
-  }
+
   componentOnChanges(value) {
     console.log(value);
   }
@@ -348,24 +360,24 @@ export class TaskComponent implements OnInit {
     console.log(value);
   }
   /** 切换张拉组 */
-  onHoleRadio(value) {
+  onHoleRadio(name) {
     if (this.edit || !this.data.id) { return; }
     if (this.holeSub$) {
       this.holeSub$.unsubscribe();
       this.holeSub$ = null;
     }
     const data = this.groupData.filter((g, i) => {
-      if (g.name === value) {
+      if (g.name === name) {
         this.editGroupIndex = i;
-        this.editGroupName = value;
+        this.editGroupName = name;
       }
-      return g.name === value;
+      return g.name === name;
     })[0];
-
-    console.log('切换张拉组', value, this.editGroupIndex);
-    this.taskDataDom.holeForm.reset(data);
+    // this.taskDataDom.holeForm.reset(data);
+    this.taskDataDom.createHoleform(data);
     this.holeData = data;
-    this.taskDataDom.tensionStageArrF();
+    console.log('切换张拉组', name, this.groupData, this.editGroupIndex, data);
+    // this.taskDataDom.tensionStageArrF();
     if (this.holeSub$ === null) {
       this.holeSub$ = this.taskDataDom.holeForm.valueChanges.subscribe((s) => {
         console.log('编辑2监控', s);
@@ -389,13 +401,13 @@ export class TaskComponent implements OnInit {
 
   /** 分组 */
   onGroup() {
-    const device = this.validateForm.controls.device.value;
+    // const device = this.validateForm.controls.device.value;
     this.group.g = this.groupData.map(item => {
       return item.name;
     });
-    console.log(this.groupIsVisible, device);
-    if (device && device.length > 0) {
-      this.group.mode = device[1];
+    console.log(this.groupIsVisible, this.group.mode);
+    if (this.group.mode) {
+      // this.group.mode = device[1];
       this.groupIsVisible = true;
     } else {
       this.message.error('请选择设备😔');
@@ -412,7 +424,7 @@ export class TaskComponent implements OnInit {
   }
   /** 分组完成 */
   groupOk() {
-    console.log('完成', this.group.g, this.groupDom.group);
+    console.log('完成', this.group, this.groupDom.group);
     this.group.g = this.groupDom.group.g;
     if (this.group.g.length === 0) {
       this.message.error('至少需要一个分组');
@@ -427,11 +439,11 @@ export class TaskComponent implements OnInit {
         tensionKn: 0,
         steelStrandNumber: 0,
         tensionStage: 4,
-        stage: [10, 20, 50, 100, 0],
+        stage: [10, 20, 50, 100, 101],
         returnMm: 6,
         twice: false,
       };
-      taskModeStr(this.group.mode).map(d => {
+      taskModeStr[this.group.mode].map(d => {
         taskBase[d] = {
           kn: [0, 0, 0, 0, 0],
           wordMm: 4,
@@ -469,8 +481,10 @@ export class TaskComponent implements OnInit {
     console.log(this.data);
     // const data = Object.assign(this.data, this.validateForm.value);
     const data = this.validateForm.value;
-    const value = this.taskDataDom.holeForm.value;
-    this.groupData[this.editGroupIndex] = value;
+    if (this.data.id) {
+      const value = this.taskDataDom.holeForm.value;
+      this.groupData[this.editGroupIndex] = value;
+    }
 
     data.groups = this.groupData;
     this.data = Object.assign(this.data, data);
@@ -478,7 +492,7 @@ export class TaskComponent implements OnInit {
       this.holeSub$.unsubscribe();
     }
 
-    console.log(this.data);
+    console.log('保存数据', this.data, this.groupData);
     // 添加
     if (!this.data.id) {
       delete this.data.id;
@@ -531,6 +545,8 @@ export class TaskComponent implements OnInit {
   }
   /** 添加 */
   add() {
+    this.group.mode = null;
+    this.componentOptions.holes = null;
     this.onMenubridge(null);
   }
   /** 修改 */
@@ -545,20 +561,44 @@ export class TaskComponent implements OnInit {
   }
   /** 张拉 */
   tension() {
-    // this.autoS.task = {
+    console.log('张拉', this.holeData);
+    if (this.tensionDeviceState()) {
+      this.tensionDevice.state = true;
+      this.tensionDevice.names = taskModeStr[this.holeData.mode];
+      console.log('设备状态错误！！！');
+    }
+    // localStorage.setItem('autoTask', JSON.stringify({
+    //   project: this.project.id,
+    //   component: this.menu.selectComponent,
     //   id: this.data.id,
     //   groupData: this.holeData
-    // };
-    localStorage.setItem('autoTask', JSON.stringify({
-      project: this.project.id,
-      component: this.menu.selectComponent,
-      id: this.data.id,
-      groupData: this.holeData
-    }));
-    console.log('张拉', this.autoS.task);
-    this.router.navigate(['/auto']);
+    // }));
+    // this.router.navigate(['/auto']);
   }
-
+  /** 设备状态 */
+  tensionDeviceState(): boolean {
+    let s = false;
+    for (const name of taskModeStr[this.holeData.mode]) {
+      console.log(this.PLCS.PD[name].alarm, this.PLCS.PD[name].state);
+      this.tensionDevice[name] = null;
+      for (let index = 1; index < this.holeData.tensionStage; index++) {
+        const i0 = Number(this.holeData[name].kn[index - 1]);
+        const i1 = Number(this.holeData[name].kn[index]);
+        console.log(i0, '>=', i1, '=', i0 >= i1);
+        if ((i0 >= i1) || i0 > 56 || i1 > 56) {
+          this.tensionDevice[name] = '阶段压力设置错误';
+          s = true;
+        }
+      }
+      if (this.PLCS.PD[name].alarm.length !== 0 || this.PLCS.PD[name].state !== '待机') {
+        s = true;
+      }
+    }
+    return s;
+  }
+  cleanTension() {
+    this.tensionDevice.state = false;
+  }
   /** 切换显示项 */
   changeTabst(value) {
     console.log(value.index);
@@ -574,5 +614,34 @@ export class TaskComponent implements OnInit {
   componentChange() {
     const e = this.validateForm.value.component;
     this.componentOptions.holes = this.componentOptions.menu.filter(f => f.name === e)[0];
+    this.autoGroup();
+  }
+  /** 选择设备 */
+  deviceOnChanges(value) {
+    console.log(value);
+    if (value) {
+      this.group.mode = value[1];
+      this.autoGroup();
+    }
+  }
+  /** 自动分组 */
+  autoGroup() {
+    if (this.group.mode && this.componentOptions.holes && this.componentOptions.holes.holes.length > 0) {
+      console.log(this.group.mode, this.componentOptions.holes.holes);
+      this.groupDom.gmStr = groupModeStr(this.group.mode);
+      if (this.componentOptions.holes.holes.length % this.groupDom.gmStr.length) {
+        console.log('不能自动分组');
+      } else {
+        const g = [];
+        for (let index = 0; index < this.componentOptions.holes.holes.length; index += this.groupDom.gmStr.length) {
+          console.log(this.componentOptions.holes.holes.slice(index, index + this.groupDom.gmStr.length));
+          g.push(this.componentOptions.holes.holes.slice(index, index + this.groupDom.gmStr.length).join('/'));
+        }
+        console.log(g);
+        this.groupDom.group.g = g;
+        this.groupDom.holes = this.componentOptions.holes;
+        this.groupOk();
+      }
+    }
   }
 }

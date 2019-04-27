@@ -38,9 +38,6 @@ export class ManualItemComponent implements OnInit {
   };
   zero = 0;
 
-  @Output()
-    showAlarmOut = new EventEmitter();
-
 
   mpaMarks: any = {
     0: '0Mpa',
@@ -131,8 +128,10 @@ export class ManualItemComponent implements OnInit {
     // this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]);
     if (state === 'mpa') {
       this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mpaToPlc(value, this.PLCS.mpaRevise[this.name]));
+      this.dev.setMpa = value;
     } else {
       this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mmToPlc(value, this.PLCS.jack[this.name].mm));
+      this.dev.setMm = value;
     }
   }
 
@@ -148,10 +147,14 @@ export class ManualItemComponent implements OnInit {
   }
 
   /** 松开 */
-  onDown(i) {
-    console.log(this.setM[i]);
-    this.PLCS.ipcSend(`${this.devName}F05`, PLC_M(this.setM[i]), true);
-    this.setMState[i] = true;
+  onDown(i: number) {
+    if (this.dev.setMpa > 0 || i > 0) {
+      console.log(this.setM[i]);
+      this.PLCS.ipcSend(`${this.devName}F05`, PLC_M(this.setM[i]), true);
+      this.setMState[i] = true;
+    } else {
+      this.message.warning('设置压力不能等于0MPa');
+    }
   }
   /** 按下 */
   onUp(i) {

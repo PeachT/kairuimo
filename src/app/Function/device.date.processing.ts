@@ -21,8 +21,9 @@ export function plcToMpa(plcData: number, mpaArr: Array<number>): number {
   if (mpaArr === null) {
     return Number(mpa.toFixed(fixedNumber()));
   } else {
-    const index = Math.ceil(mpa / 10);
-    return Number((mpa * mpaArr[index]).toFixed(fixedNumber()));
+    const index = Math.ceil(mpa / 10) - 1;
+    const reviseValue = index >= 0 ? mpaArr[index] : 1;
+    return Number((mpa * reviseValue).toFixed(fixedNumber()));
   }
 }
 
@@ -36,11 +37,13 @@ export function plcToMpa(plcData: number, mpaArr: Array<number>): number {
  */
 export function plcToMm(plcData: number, mmArr: Array<number>): number {
   const mm = plcData / mmCoefficient;
-  if (mmArr) {
+  if (mmArr === null) {
     return Number(mm.toFixed(fixedNumber()));
   } else {
-    const index = Math.ceil(mm / 40);
-    return Number((mm * mmArr[index]).toFixed(fixedNumber()));
+    const index = Math.ceil(mm / 40) - 1;
+    const reviseValue = index >= 0 ? mmArr[index] : 1;
+    // console.log(reviseValue, mm, index);
+    return Number((mm * reviseValue).toFixed(fixedNumber()));
   }
 }
 

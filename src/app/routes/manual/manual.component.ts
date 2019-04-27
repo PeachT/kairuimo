@@ -197,28 +197,6 @@ export class ManualComponent implements OnInit, OnDestroy {
         this.setDev[name].setUn = plcToMpa(data.int16[i + 2], this.PLCS.mpaRevise[name]);
         i += 3;
       });
-      // console.log(`${dev}返回的结果`, data);
-      // this.setDev[`${dev}A`].setMpa = plcToMpa(data.int16[0], this.PLCS.mpaRevise[`${dev}A`]);
-      // this.setDev[`${dev}A`].setMm = plcToMpa(data.int16[1], this.PLCS.jack[`${dev}A`]);
-      // this.setDev[`${dev}A`].setUn = plcToMpa(data.int16[3], this.PLCS.mpaRevise[`${dev}A`]);
-
-      // this.setDev[`${dev}B`].setMpa = data.int16[4];
-      // this.setDev[`${dev}B`].setMm = data.int16[5];
-      // this.setDev[`${dev}B`].setUn = data.int16[6];
-
-      // this.setDev[`${dev}C`].setMpa = data.int16[7];
-      // this.setDev[`${dev}C`].setMm = data.int16[8];
-      // this.setDev[`${dev}C`].setUn = data.int16[9];
-
-      // this.setDev[`${dev}D`].setMpa = data.int16[10];
-      // this.setDev[`${dev}D`].setMm = data.int16[11];
-      // this.setDev[`${dev}D`].setUn = data.int16[12];
-      // // 获取选择顶
-      // this.selectedI = data.int16[1] === 0 ? data.int16[1] : Math.round(data.int16[1] / 100);
-      // if (this.jacks.length > 0) {
-      //   this.selectedJack = this.jacks[this.selectedI];
-      // }
-      // console.log(this.jacks, this.selectedJack, this.selectedI);
     });
   }
 
@@ -237,5 +215,4 @@ export class ManualComponent implements OnInit, OnDestroy {
     this.alarm.datas = this.PLCS.PD[name].alarm;
     this.alarm.name = `${name}报警状态`;
   }
-
 }

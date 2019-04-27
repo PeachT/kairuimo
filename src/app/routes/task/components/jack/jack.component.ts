@@ -34,7 +34,7 @@ export class JackComponent implements OnInit {
       cC: this.createDevGroup(),
       cD: this.createDevGroup(),
     });
-    this.taskModeStr = taskModeStr('AB8');
+    this.taskModeStr = taskModeStr.AB8;
     this.jackForm.reset(this.data);
     this.jackForm.disable();
   }

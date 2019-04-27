@@ -51,51 +51,51 @@ export class PLCService {
 
   public PD: PLCLiveData = {
     zA: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     zB: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     zC: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     zD: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     cA: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     cB: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     cC: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
     cD: {
-      showMpa: NaN,
-      showMm: NaN,
-      state: '未知状态',
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
       alarm: [],
     },
   };
@@ -111,6 +111,8 @@ export class PLCService {
     const revise = JSON.parse(localStorage.getItem('mpaRevise'));
     if (!revise) {
       this.setMpaRevise(mpaRevise);
+    } else {
+      this.mpaRevise = revise;
     }
     const auto = JSON.parse(localStorage.getItem('autoDate'));
     if (!auto) {
@@ -118,6 +120,7 @@ export class PLCService {
     }
     this.ipcOn('z');
     this.ipcOn('c');
+    this.selectJack(this.getJackId());
   }
 
   // 获得一个Observable;
@@ -133,7 +136,7 @@ export class PLCService {
       console.log(dev, data);
     });
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
-      console.log(data);
+      // console.log(data);
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`] - 1000;
       this.plcState[`${dev}OT`] = new Date().getTime();
       clearTimeout(this.plcState[`${dev}T`]);
@@ -141,25 +144,25 @@ export class PLCService {
       if (this.mpaRevise && this.jack) {
         // console.log(data);
         this.PD[`${dev}A`].showMpa = plcToMpa(data.int16[0], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}A`].showMm = plcToMm(data.int16[1], this.jack[`${dev}A`]);
+        this.PD[`${dev}A`].showMm = plcToMm(data.int16[1], this.jack[`${dev}A`].mm);
         const astate = this.getState(data.int16[2]);
         this.PD[`${dev}A`].state = astate.state.join('·');
         this.PD[`${dev}A`].alarm = astate.alarm;
 
         this.PD[`${dev}B`].showMpa = plcToMpa(data.int16[5], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}B`].showMm = plcToMm(data.int16[6], this.jack[`${dev}A`]);
+        this.PD[`${dev}B`].showMm = plcToMm(data.int16[6], this.jack[`${dev}A`].mm);
         const bstate = this.getState(data.int16[7]);
         this.PD[`${dev}B`].state = bstate.state.join('·');
         this.PD[`${dev}B`].alarm = bstate.alarm;
 
         this.PD[`${dev}C`].showMpa = plcToMpa(data.int16[10], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}C`].showMm = plcToMm(data.int16[11], this.jack[`${dev}A`]);
+        this.PD[`${dev}C`].showMm = plcToMm(data.int16[11], this.jack[`${dev}A`].mm);
         const cstate = this.getState(data.int16[12]);
         this.PD[`${dev}C`].state = cstate.state.join('·');
         this.PD[`${dev}C`].alarm = cstate.alarm;
 
         this.PD[`${dev}D`].showMpa = plcToMpa(data.int16[15], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}D`].showMm = plcToMm(data.int16[16], this.jack[`${dev}A`]);
+        this.PD[`${dev}D`].showMm = plcToMm(data.int16[16], this.jack[`${dev}A`].mm);
         const dstate = this.getState(data.int16[17]);
         this.PD[`${dev}D`].state = dstate.state.join('·');
         this.PD[`${dev}D`].alarm = dstate.alarm;
@@ -174,6 +177,10 @@ export class PLCService {
     this.e.ipcRenderer.on(`${dev}error`, (event, data) => {
       console.error(dev, data);
       this.plcState[`${dev}LT`] = '重新链接...';
+      this.PD[`${dev}A`].state = '重新链接中...';
+      this.PD[`${dev}B`].state = '重新链接中...';
+      this.PD[`${dev}C`].state = '重新链接中...';
+      this.PD[`${dev}D`].state = '重新链接中...';
     });
   }
   /** 转换设备状态 */
@@ -250,6 +257,7 @@ export class PLCService {
     /** 设置压力校正系数 */
     setMpaRevise(revise: MpaRevise) {
       localStorage.setItem('mpaRevise', JSON.stringify(revise));
+      this.mpaRevise = revise;
     }
     /** 获取自动参数 */
     getAutoDate(): AutoDate {
@@ -279,6 +287,7 @@ export class PLCService {
         mmToPlc(this.jack.cC.upper, this.jack.zC.mm), mmToPlc(this.jack.cC.floot, this.jack.zC.mm),
         mmToPlc(this.jack.cD.upper, this.jack.zD.mm), mmToPlc(this.jack.cD.floot, this.jack.zD.mm),
       ]);
+      console.log('切换顶', this.jack);
       return this.jack;
     }
     getJackId() {

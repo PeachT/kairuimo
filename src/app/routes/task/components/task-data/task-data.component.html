@@ -6,7 +6,8 @@
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>张拉模式</nz-form-label>
     <nz-form-control [nzSm]="5">
-      <input type="text" nz-input formControlName="mode" #mode>
+      <!-- <input type="text" nz-input hidden formControlName="mode" #mode> -->
+      <input type="text" nz-input [value]="modeName[holeForm.value.mode]">
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>张拉长度</nz-form-label>
     <nz-form-control [nzSm]="5">
@@ -108,109 +109,7 @@
             </nz-form-item>
           </td>
         </tr>
-        <!-- <tr *ngIf="mode.value==='0' || mode.value==='1' || mode.value==='4'" formGroupName="zA">
-          <td class="device-name">
-            zA
-          </td>
-          <div formArrayName="kn" style="display: contents;">
-            <td *ngFor="let item of tensionStageArr; index as i;">
-              <nz-form-item>
-                <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i">
-                </nz-form-control>
-              </nz-form-item>
-            </td>
-          </div>
-          <td>
-            <nz-form-item>
-              <nz-form-control>
-                <input type="number" nz-input formControlName="wordMm">
-              </nz-form-control>
-            </nz-form-item>
-          </td>
-          <td [rowSpan]="mode.value==='1' || mode.value==='4' ? 2 : 1">
-            <nz-form-item>
-              <nz-form-control>
-                <input [ngClass]="{'row2' : mode.value==='3' || mode.value==='4'}" type="number" nz-input
-                  formControlName="theoryMm">
-              </nz-form-control>
-            </nz-form-item>
-          </td>
-        </tr>
-        <tr *ngIf="mode.value==='4'" formGroupName="zB">
-          <td class="device-name">
-            zB
-          </td>
-          <div formArrayName="kn" style="display: contents;">
-            <td *ngFor="let item of tensionStageArr; index as i;">
-              <nz-form-item>
-                <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i">
-                </nz-form-control>
-              </nz-form-item>
-            </td>
-          </div>
-          <td>
-            <nz-form-item>
-              <nz-form-control>
-                <input type="number" nz-input formControlName="wordMm">
-              </nz-form-control>
-            </nz-form-item>
-          </td>
-
-        </tr>
-        <tr *ngIf="mode.value==='2' || mode.value==='3' || mode.value==='4'" formGroupName="cA">
-          <td class="device-name">
-            cA
-          </td>
-          <div formArrayName="kn" style="display: contents;">
-            <td *ngFor="let item of tensionStageArr; index as i;">
-              <nz-form-item>
-                <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i">
-                </nz-form-control>
-              </nz-form-item>
-            </td>
-          </div>
-          <td>
-            <nz-form-item>
-              <nz-form-control>
-                <input type="number" nz-input formControlName="wordMm">
-              </nz-form-control>
-            </nz-form-item>
-          </td>
-          <td [rowSpan]="mode.value==='3' || mode.value==='4' ? 2 : 1">
-            <nz-form-item>
-              <nz-form-control>
-                <input [ngClass]="{'row2' : mode.value==='3' || mode.value==='4'}" type="number" nz-input
-                  formControlName="theoryMm">
-              </nz-form-control>
-            </nz-form-item>
-          </td>
-        </tr>
-        <tr *ngIf="mode.value==='4'" formGroupName="cA">
-          <td class="device-name">
-            cB
-          </td>
-          <div formArrayName="kn" style="display: contents;">
-            <td *ngFor="let item of tensionStageArr; index as i;">
-              <nz-form-item>
-                <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i">
-                </nz-form-control>
-              </nz-form-item>
-            </td>
-          </div>
-          <td>
-            <nz-form-item>
-              <nz-form-control>
-                <input type="number" nz-input formControlName="wordMm">
-              </nz-form-control>
-            </nz-form-item>
-          </td>
-
-        </tr> -->
-      </tbody>
+       </tbody>
     </table>
   </nz-form-item>
 </form>

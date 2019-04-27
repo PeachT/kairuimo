@@ -46,24 +46,23 @@ export interface Dev {
 export const JackIndex = '++id,&name';
 
 /** 张拉模式字符串 */
-export function taskModeStr(mode: string) {
-  switch (mode) {
-    case 'A1':
-      return ['zA'];
-    case 'A2':
-      return ['zA', 'cA'];
-    case 'B1':
-      return ['zB'];
-    case 'B2':
-      return ['zB', 'cB'];
-    case 'AB4':
-      return ['zA', 'cA', 'zB', 'cB'];
-    case 'AB8':
-      return ['zA', 'cA', 'zB', 'cB', 'zC', 'cC', 'zD', 'cD']
-    default:
-      break;
-  }
-}
+export const taskModeStr = {
+    A1: ['zA'],
+    A2: ['zA', 'cA'],
+    B1: ['zB'],
+    B2: ['zB', 'cB'],
+    AB4: ['zA', 'cA', 'zB', 'cB'],
+    AB8: ['zA', 'cA', 'zB', 'cB', 'zC', 'cC', 'zD', 'cD']
+};
+export const modeName = {
+  A1: 'A单顶',
+  A2: 'A两顶',
+  B1: 'B单顶',
+  B2: 'B两顶',
+  AB4: '四顶',
+  AB8: '八顶',
+};
+
 
 /** 分组模式字符串 */
 export function groupModeStr(mode: string) {

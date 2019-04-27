@@ -122,3 +122,17 @@
   (nzOnOk)="groupOk()">
   <app-group #groupDom></app-group>
 </nz-modal>
+
+<nz-modal [nzVisible]="tensionDevice.state" nzTitle="设备状态错误！" nzOkText="张拉" nzWidth="80%"
+  (nzOnCancel)="cleanTension()"
+  (nzOnOk)="tension()">
+  <div nz-row nzGutter="25">
+    <div nz-col nzSm="24" nzLg="12" class="title" *ngFor="let name of tensionDevice.names; index as i">
+      <nz-divider style="min-width: auto;" [nzText]="name + '：设备状态'" nzOrientation="left"></nz-divider>
+      <h1>{{name}}·{{PLCS.PD.zA.state}}</h1>
+      <h1 *ngIf="tensionDevice[name]"> {{tensionDevice[name]}} </h1>
+      <nz-alert nzType="error" *ngFor="let item of PLCS.PD[name].alarm" [nzMessage]="item" nzShowIcon>
+      </nz-alert>
+    </div>
+  </div>
+</nz-modal>

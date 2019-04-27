@@ -56,31 +56,9 @@ export class JackItemComponent implements OnInit {
     this.revise.state = false;
   }
   handleOk() {
-    console.log(this.reviseDom.setForm.value);
-    // const value = this.reviseDom.setForm.value.setValue;
-    // // const address = this.revise.name.indexOf('A') > -1 ? 500 : 520;
-    // let address = 500;
-    // switch (this.revise.name) {
-    //   // case 'zA':
-    //   //   address = 500;
-    //   //   break;
-    //   case 'zB':
-    //     address = 512;
-    //     break;
-    //   case 'zC':
-    //     address = 524;
-    //     break;
-    //   case 'zD':
-    //     address = 536;
-    //     break;
-    //   default:
-    //     break;
-    // }
-    // const dev = this.revise.name.indexOf('z') > -1 ? 'z' : 'c';
-    // console.log(value, address, dev);
-    // this.PLCS.ipcSend(`${dev}F016_float`, PLC_D(address), value).then(() => {
-    //   this.revise.state = false;
-    //   // this.getRevise(dev);
-    // });
+    const value = this.formGroup.value[this.name];
+    value.mm = this.reviseDom.setForm.value.setValue;
+    this.formGroup.controls[this.name].setValue(value);
+    this.revise.state = false;
   }
 }

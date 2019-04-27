@@ -105,7 +105,7 @@ export class AutoComponent implements OnInit, OnDestroy {
     const name = this.task.name;
     const tensionStage = this.task.tensionStage;
     this.theoryIf = tableDev(mode);
-    this.devNames = taskModeStr(mode);
+    this.devNames = taskModeStr[mode];
     this.tensionStageArr =  [...Array(tensionStage)];
     this.holeNames = name.split('/');
     console.log('011445445456456456456', this.devNames, mode);

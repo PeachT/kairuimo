@@ -98,6 +98,8 @@ export class SettingComponent implements OnInit, OnDestroy {
     const name = this.revise.name;
     this.mpaRevise[name] = value;
     this.PLCS.setMpaRevise(this.mpaRevise);
+    this.revise.state = false;
+    console.log(this.PLCS.mpaRevise);
   }
   /** 修改自动参数 */
   setAuto() {

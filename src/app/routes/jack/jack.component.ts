@@ -191,7 +191,9 @@ export class JackComponent implements OnInit {
 
     this.db.jack.update(data.id, data).then((updata) => {
       this.message.success('修改成功🙂');
+      this.PLCS.selectJack(data.id);
       this.getMneu();
+      this.appS.edit = false;
     }).catch((err) => {
       this.message.error(`修改失败😔${err}`);
     });

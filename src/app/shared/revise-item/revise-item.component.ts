@@ -43,9 +43,6 @@ export class ReviseItemComponent implements OnInit {
     private fb: FormBuilder,
     public PLCS: PLCService,
   ) {
-    this.setForm = this.fb.group({
-      setValue: this.fb.array(this.reviseData),
-    });
   }
 
   ngOnInit() {
@@ -54,6 +51,10 @@ export class ReviseItemComponent implements OnInit {
     this.setStage = this.reviseName === 'mpa' ?
     ['5Mpa', '15Mpa', '25Mpa', '35Mpa', '45Mpa', '55Mpa'] :
     ['20mm', '60mm', '100mm', '140mm', '180mm', '220mm'];
+    console.log(this.reviseData);
+    this.setForm = this.fb.group({
+      setValue: this.fb.array(this.reviseData),
+    });
   }
 
   cancel() {
@@ -65,9 +66,11 @@ export class ReviseItemComponent implements OnInit {
   setMm(i) {
     this.setIndex = i;
     if (this.reviseName === 'mpa') {
-      this.manualDom.dev.setMpa = i * 10 + 5;
+      const setMpa = i * 10 + 5;
+      this.manualDom.set(this.manualDom.setAeeress[0], setMpa, 'mpa');
     } else {
-      this.manualDom.dev.setMm = i * 40 + 20;
+      const setMm = i * 40 + 20;
+      this.manualDom.set(this.manualDom.setAeeress[1], setMm);
     }
   }
 

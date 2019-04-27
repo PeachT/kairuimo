@@ -1,8 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { taskModeStr, Jack, tableDev } from 'src/app/models/jack';
+import { taskModeStr, Jack, tableDev, modeName } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { AppService } from 'src/app/services/app.service';
+import { GroupItem } from 'src/app/models/task.models';
 
 @Component({
   selector: 'app-task-data',
@@ -29,6 +30,7 @@ export class TaskDataComponent implements OnInit {
     cD: false,
   };
   holeForm: FormGroup;
+  modeName = modeName;
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +38,12 @@ export class TaskDataComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.holeForm = this.fb.group({
+    this.createHoleform();
+  }
+  /** 创建form */
+  createHoleform(data: GroupItem = null) {
+    console.log(data);
+    const group =  {
       name: ['1'],
       mode: [4],
       length: [20],
@@ -48,17 +55,17 @@ export class TaskDataComponent implements OnInit {
       ]),
       returnMm: [6],
       twice: [false],
-      zA: this.createDevFrom(),
-      zB: this.createDevFrom(),
-      zC: this.createDevFrom(),
-      zD: this.createDevFrom(),
-      cA: this.createDevFrom(),
-      cB: this.createDevFrom(),
-      cC: this.createDevFrom(),
-      cD: this.createDevFrom(),
+    };
+    const names = !data ? taskModeStr.AB8 : taskModeStr[data.mode];
+    names.map(name =>  {
+      group[name] = this.createDevFrom();
     });
+    this.holeForm = this.fb.group(group);
+    if (data) {
+      this.holeForm.reset(data);
+    }
+    this.tensionStageArrF();
   }
-
   /** 创建设备from */
   createDevFrom() {
     return this.fb.group({
@@ -73,7 +80,7 @@ export class TaskDataComponent implements OnInit {
     const stage = this.holeForm.controls.stage.value;
     console.log(kn, stage);
 
-    taskModeStr(this.holeForm.controls.mode.value).map(d => {
+    taskModeStr[this.holeForm.controls.mode.value].map(d => {
       const a = this.jackData[d].a;
       const b = this.jackData[d].b;
       const value = this.holeForm.controls[d].value;
@@ -95,11 +102,13 @@ export class TaskDataComponent implements OnInit {
   /** 阶段修改 */
   inputStage(i) {
     const stage = this.holeForm.controls.stage.value;
+    console.log(stage);
     if (i === 0) {
       stage[1] = stage[0] * 2;
       this.holeForm.controls.stage.setValue(stage);
     }
     this.inputKn();
+    console.log(this.holeForm.value);
   }
   // 切换张拉段数
   onStage(value) {
@@ -113,13 +122,14 @@ export class TaskDataComponent implements OnInit {
         stages = [10, 10, 50, 100, 0];
         break;
       case 5:
-        stages = [10, 10, 50, 80, 100];
+        stages = [10, 10, 50, 100, 103];
         break;
       default:
         break;
     }
     this.holeForm.controls.stage.setValue(stages);
     this.inputKn();
+    console.log(this.holeForm.value);
   }
   // 切换二次张拉
   onTwice(value) {
@@ -155,8 +165,9 @@ export class TaskDataComponent implements OnInit {
       cD: 0,
     };
     this.theoryIf = tableDev(mode);
-    this.devModeStr = taskModeStr(mode);
+    this.devModeStr = taskModeStr[mode];
     this.holeNames = this.holeForm.value.name.split('/');
     console.log('011445445456456456456', this.devModeStr, mode);
+    this.inputKn();
   }
 }
