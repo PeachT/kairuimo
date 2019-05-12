@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { bf } from './bufferToNumber';
 import ModbusRTU from 'modbus-serial';
 import { ModbusTCP } from './modbus';
@@ -8,6 +8,14 @@ import { ModbusTCP } from './modbus';
 // 注意这个autoUpdater不是electron中的autoUpdater
 // const { autoUpdater } = require('electron-updater');
 import { autoUpdater } from 'electron-updater';
+
+const ejsexcel = require('ejsExcel');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+
 
 // 运行环境判断
 const args = process.argv.slice(1);
@@ -69,7 +77,7 @@ function createModbus() {
   console.log('start... Modbus');
   ztcp = new ModbusTCP({ ip: '192.168.1.15', port: 502, address: 1 }, win);
   // ztcp.connection();
-  ctcp = new ModbusTCP({ ip: '192.168.1.6', port: 502, address: 1 }, win);
+  ctcp = new ModbusTCP({ ip: '192.168.1.25', port: 502, address: 1 }, win);
   // ctcp.connection();
 }
 
@@ -178,98 +186,53 @@ function sendUpdateMessage(text) {
 function IPCSend(channel: string, message: any) {
   win.webContents.send(channel, message);
 }
-//////////////////////////// Modbus /////////////////////
-// let b = true;
-// let t = null;
 
-// create an empty modbus client
+///////////////////////////////////////////////////////////// 导出表格
+// 开始导出
+ipcMain.on('derivedExcel', async (event, data) => {
+  // console.log('123456789', path);
+  // 获得Excel模板的buffer对象
+  // derived = {
+  //   templatePath: null,
+  //   outPath: null,
+  // };
+  const filePath = data.templatePath;
+  const savePath = `${data.outPath}/out.xlsx`;
+  try {
+    console.log(filePath, savePath, data.data);
+    const exlBuf = await readFileAsync(filePath);
+    // 数据源
+    // const data = [
+    //   {name: 'N1', kh: 'A1'},
+    //   {name: 'N1', kh: 'A2'},
+    //   {name: 'N2', kh: 'B1'},
+    //   {name: 'N2', kh: 'B2'},
+    // ]
 
-// let client = new ModbusRTU();
+    // 用数据源(对象)data渲染Excel模板
+    const exlBuf2 = await ejsexcel.renderExcel(exlBuf, data.data);
+    await writeFileAsync(savePath, exlBuf2);
+    event.sender.send(data.channel, {success: true, filePath, savePath});
+  } catch (error) {
+    event.sender.send(data.channel, {success: false, filePath, savePath, error});
+  }
+});
 
-// // open connection to a tcp line
-// client.connectTCP('192.168.1.5', { port: 502 });
-// client.setID(1);
-
-
-// // 主进程监听渲染进程传来的信息
-// ipcMain.on('coil', (e, arg) => {
-//   console.log('start');
-//   if (t === null) {
-//     y0();
-//   }
-// });
-// // 主进程监听渲染进程传来的信息
-// ipcMain.on('offCoil', (e, arg) => {
-//   console.log('stop');
-//   clearInterval(t);
-//   t = null;
-// });
-
-// function y0() {
-//   t = setInterval(() => {
-//     console.log('00000000000000000000', b);
-//     // client.writeCoil(1280, b, (err, data) => {
-//     //   if (err) {
-//     //     client = new ModbusRTU();
-//     //     // open connection to a tcp line
-//     //     client.connectTCP('192.168.1.5', { port: 502 });
-//     //     client.setID(1);
-//     //   } else {
-//     //     console.log(err, data);
-//     //     b = !b;
-//     //   }
-//     // });
-//     client.writeCoil(1280, b).then((data) => {
-//         console.log(data);
-//         b = !b;
-//     }).catch((err) => {
-//       console.log(err);
-//       client = new ModbusRTU();
-//       // open connection to a tcp line
-//       client.connectTCP('192.168.1.5', { port: 502 });
-//       client.setID(1);
-//     });
-//   }, 1000);
-// }
-
-// let getPLCTime = null;
-// const getPLCDelay = 1000;
-
-// // 主进程监听渲染进程传来的信息
-// ipcMain.on('onGet', (e, arg) => {
-//   console.log('start');
-//   if (getPLCTime === null) {
-//     getPLCData();
-//   }
-// });
-// // 主进程监听渲染进程传来的信息
-// ipcMain.on('offGet', (e, arg) => {
-//   console.log('stop');
-//   clearInterval(getPLCTime);
-//   getPLCTime = null;
-// });
-// function getPLCData() {
-//   getPLCTime = setInterval(() => {
-//     console.log('00000000000000000000', b);
-//     client.writeFC3(1, 4096, 10, (err, data) => {
-//       if (err) {
-//         client = new ModbusRTU();
-//         // open connection to a tcp line
-//         client.connectTCP('192.168.1.5', { port: 502 });
-//         client.setID(1);
-//       } else {
-//         const float = bf.bufferToFloat(data.buffer);
-//         win.webContents.send('getPLC', float);
-//         console.log(err, data, float);
-//       }
-//     });
-//   }, getPLCDelay);
-// }
-// // 主进程监听渲染进程传来的信息
-// ipcMain.on('setFload', (e, arg) => {
-//   const ints = bf.floatToBuffer([arg]);
-//   console.log('--------arg=====', arg, ints);
-//   client.writeFC16(1, 4196, ints, (err, data) => {
-//   });
-// });
-
+// 选择模板与导出路径
+ipcMain.on('selectTemplate', (event, data) => {
+  let outPath = '';
+  let templatePath = '';
+  if (data) {
+    try {
+      outPath = dialog.showOpenDialog(win, {properties: ['openDirectory']})[0];
+      templatePath = dialog.showOpenDialog(win, {properties: ['openFile']})[0];
+      console.log(outPath, templatePath);
+    } catch (error) {
+    }
+  } else {
+    try {
+    } catch (error) {
+    }
+  }
+  event.sender.send(data.channel, {msg: `获取成功`, outPath, templatePath, data});
+});

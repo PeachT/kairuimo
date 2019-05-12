@@ -98,7 +98,7 @@ export class LoginComponent implements OnInit {
             name: user.name,
             jurisdiction: user.jurisdiction
           };
-          this.message.success('添加成功🙂');
+          this.message.success('登录成功🙂');
           this.router.navigate(['/task']);
           this.appS.menus = menus.filter(menu => menu.jurisdiction <= user.jurisdiction);
         } else {

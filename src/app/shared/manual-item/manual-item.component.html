@@ -12,7 +12,7 @@
     <button nz-button nzType="primary" class="z" nzShape="circle" (mousedown)="onDown(0)" (mouseup)="onUp(0)" (mouseleave)="onUp(0)" >张拉</button>
     <button nz-button nzType="primary" class="r" nzShape="circle" (mousedown)="onDown(1)" (mouseup)="onUp(1)" (mouseleave)="onUp(1)" >回程</button>
     <button nz-button nzType="primary" class="u"  nzShape="circle" (mousedown)="onDown(2)" (mouseup)="onUp(2)" (mouseleave)="onUp(2)" >卸荷</button>
-    <button nz-button nzType="danger" class="s"  nzShape="circle" (mousedown)="onDown(3)" (mouseup)="onUp(3)" (mouseleave)="onUp(3)" >停止</button>
+    <button nz-button nzType="danger" class="s"  nzShape="circle" (mousedown)="onDown(3)" (mouseup)="onUp(3)" (mouseleave)="onUp(3)"  (touchstart)="onUp(3)" (touchmove)="onUp(3)" (touchend)="onUp(3)">停止</button>
   </div>
   <div style="margin: 0 25px;">
     <div>

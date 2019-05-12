@@ -16,6 +16,7 @@ export interface GroupItem {
   steelStrandNumber: number;
   tensionStage: number;
   stage: Array<number>;
+  time: Array<number>;
   returnMm: number;
   twice: boolean;
   zA?: AB;
@@ -26,8 +27,34 @@ export interface GroupItem {
   cB?: AB;
   cC?: AB;
   cD?: AB;
+  record?: Record;
+}
+/** 记录 */
+export interface Record {
+  tensionStage: number;
+  twice: boolean;
+  time: Array<string | number>;
+  zA?: Curve;
+  zB?: Curve;
+  zC?: Curve;
+  zD?: Curve;
+  cA?: Curve;
+  cB?: Curve;
+  cC?: Curve;
+  cD?: Curve;
+}
+export interface Curve {
+  mapData: Array<number>;
+  mmData: Array<number>;
+  make: Array<Make>;
+  mpa: Array<number>;
+  mm: Array<number>;
 }
 
+export interface Make {
+  msg?: string;
+    index?: number;
+}
 export interface AB {
   kn: Array<number>;
   wordMm: number;

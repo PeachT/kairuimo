@@ -1,3 +1,7 @@
+import { GroupItem } from '../models/task.models';
+import { taskModeStr } from '../models/jack';
+import { ElongationItem, Elongation } from '../models/live';
+
 /** 设备数据换算处理 */
 /** 压力系数 */
 const mpaCoefficient = (4000 / 60);
@@ -21,7 +25,8 @@ export function plcToMpa(plcData: number, mpaArr: Array<number>): number {
   if (mpaArr === null) {
     return Number(mpa.toFixed(fixedNumber()));
   } else {
-    const index = Math.ceil(mpa / 10) - 1;
+    let index = Math.ceil(mpa / 10) - 1;
+    index = index > 5 ? 5 : index;
     const reviseValue = index >= 0 ? mpaArr[index] : 1;
     return Number((mpa * reviseValue).toFixed(fixedNumber()));
   }
@@ -40,7 +45,8 @@ export function plcToMm(plcData: number, mmArr: Array<number>): number {
   if (mmArr === null) {
     return Number(mm.toFixed(fixedNumber()));
   } else {
-    const index = Math.ceil(mm / 40) - 1;
+    let index = Math.ceil(mm / 40) - 1;
+    index = index > 5 ? 5 : index;
     const reviseValue = index >= 0 ? mmArr[index] : 1;
     // console.log(reviseValue, mm, index);
     return Number((mm * reviseValue).toFixed(fixedNumber()));
@@ -62,7 +68,8 @@ export function mpaToPlc(mpa: number, mpaArr: Array<number>): number {
   if (mpaArr === null) {
     return Math.ceil(mpa * mpaCoefficient);
   } else {
-    const index = Math.ceil(mpa / 10);
+    let index = Math.ceil(mpa / 10);
+    index = index > 5 ? 5 : index;
     return Math.ceil(mpa / mpaArr[index] * mpaCoefficient);
   }
 }
@@ -83,7 +90,42 @@ export function mmToPlc(mm: number, mmArr: Array<number>): number {
   if (mmArr === null) {
     return Math.ceil(mm * mmCoefficient);
   } else {
-    const index = Math.ceil(mm / 40);
+    let index = Math.ceil(mm / 40);
+    index = index > 5 ? 5 : index;
     return Math.ceil(mm / mmArr[index] * mmCoefficient);
   }
+}
+
+export function TensionMm(data: GroupItem): Elongation {
+  const elongation: Elongation = {
+    zA: { mm: 0, sumMm: 0, percent: 0 },
+    zB: { mm: 0, sumMm: 0, percent: 0 },
+    zC: { mm: 0, sumMm: 0, percent: 0 },
+    zD: { mm: 0, sumMm: 0, percent: 0 },
+    cA: { mm: 0, sumMm: 0, percent: 0 },
+    cB: { mm: 0, sumMm: 0, percent: 0 },
+    cC: { mm: 0, sumMm: 0, percent: 0 },
+    cD: { mm: 0, sumMm: 0, percent: 0 },
+  };
+  taskModeStr.AB8.map(key => {
+    if (taskModeStr[data.mode].indexOf(key) >= 0) {
+      const mm = data.record[key].mm;
+      elongation[key].mm =
+        Number(mm[mm.length - 1])
+        - (2 * mm[0])
+        + Number(mm[1])
+        - Number(data.returnMm)
+        - Number(data[key].wordMm);
+    }
+  });
+  taskModeStr[data.mode].map(key => {
+    if (key.indexOf('z') > -1) {
+      const k = key[1];
+      const mm = elongation[`z${k}`].mm + elongation[`c${k}`].mm;
+      const tmm = data[key].theoryMm;
+      elongation[`z${k}`].sumMm = mm.toFixed(2);
+      elongation[`z${k}`].percent = ((mm - tmm) / tmm * 100).toFixed(2);
+    }
+  });
+  return elongation;
 }

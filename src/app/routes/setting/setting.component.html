@@ -27,6 +27,17 @@
           </nz-input-group>
         </nz-col>
       </nz-row>
+      <nz-row>
+        <nz-col nz-col nzSpan="6">
+          <nz-input-group nzAddOnBefore="设备模式" >
+            <nz-radio-group [(ngModel)]="systenDate[4]" (ngModelChange)="setF06(408, $event)">
+              <label nz-radio [nzValue]="4">一泵四顶</label>
+              <label nz-radio [nzValue]="2">一泵两顶</label>
+              <label nz-radio [nzValue]="1">一泵一顶</label>
+            </nz-radio-group>
+          </nz-input-group>
+        </nz-col>
+      </nz-row>
     <!-- </div>
     <br>
     <div> -->

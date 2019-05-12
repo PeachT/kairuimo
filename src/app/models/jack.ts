@@ -168,25 +168,32 @@ export function carterJaskMenu(mode: number) {
   return c;
 }
 
-/** 获取表格合拼数据 */
-export function tableDev(mode: string) {
+/**
+ * 获取表格合拼数据
+ *
+ * @export
+ * @param {string} mode 设备模式
+ * @param {number} [rowSpan=2] 合并行数
+ * @returns
+ */
+export function tableDev(mode: string, rowSpan = 2) {
   let zA = 0;
   let zB = 0;
   if (mode === 'AB4' || mode === 'AB8') {
-    zA = 2;
-    zB = 2;
+    zA = rowSpan;
+    zB = rowSpan;
   }
   if (mode === 'A2') {
-    zA = 2;
+    zA = rowSpan;
   }
   if (mode === 'B2') {
-    zA = 2;
+    zA = rowSpan;
   }
   return {
     zA: mode === 'A1' ? 1 : zA,
     zB: mode === 'B1' ? 1 : zB,
-    zC: mode === 'AB8' ? 2 : 0,
-    zD: mode === 'AB8' ? 2 : 0,
+    zC: mode === 'AB8' ? rowSpan : 0,
+    zD: mode === 'AB8' ? rowSpan : 0,
     cA: 0,
     cB: 0,
     cC: 0,

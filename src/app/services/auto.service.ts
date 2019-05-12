@@ -10,6 +10,7 @@ export class AutoService {
     id: any,
     groupData: GroupItem
     project: any;
+    jackId: number;
     component: any;
   };
   public autoData = [];

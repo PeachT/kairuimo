@@ -1,1 +1,17 @@
-<div #svg></div>
+<div style="position: relative;">
+
+  <div #svg >
+  </div>
+  <div
+  style="position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,.1);
+  font-size: 32px;"
+  (click)="update(true)" *ngIf="show">点 击 查 看</div>
+</div>
+

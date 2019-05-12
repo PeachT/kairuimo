@@ -12,7 +12,7 @@ import { GroupItem } from 'src/app/models/task.models';
 })
 export class TaskDataComponent implements OnInit {
   @Input()
-  editGroupIndex = null;
+    editGroupIndex = null;
   @Input()
     jackData: Jack;
 
@@ -41,17 +41,21 @@ export class TaskDataComponent implements OnInit {
     this.createHoleform();
   }
   /** 创建form */
-  createHoleform(data: GroupItem = null) {
+  createHoleform(data: GroupItem = null, jack: Jack = null) {
+    this.jackData = jack;
     console.log(data);
     const group =  {
       name: ['1'],
-      mode: [4],
+      mode: null,
       length: [20],
       tensionKn: [2000],
       steelStrandNumber: [6],
       tensionStage: [3],
       stage: this.fb.array([
         10, 10, 100, 0, 0
+      ]),
+      time: this.fb.array([
+        30, 30, 30, 300, 300
       ]),
       returnMm: [6],
       twice: [false],
@@ -64,6 +68,7 @@ export class TaskDataComponent implements OnInit {
     if (data) {
       this.holeForm.reset(data);
     }
+    console.log(this.holeForm.value);
     this.tensionStageArrF();
   }
   /** 创建设备from */
@@ -76,14 +81,18 @@ export class TaskDataComponent implements OnInit {
   }
   /** 压力换算计算 */
   inputKn() {
-    const kn = this.holeForm.controls.tensionKn.value;
-    const stage = this.holeForm.controls.stage.value;
-    console.log(kn, stage);
+    const mode = this.holeForm.value.mode;
+    if (!mode) {
+      return;
+    }
+    const kn = this.holeForm.value.tensionKn;
+    const stage = this.holeForm.value.stage;
+    console.log('4564564654', this.jackData);
 
-    taskModeStr[this.holeForm.controls.mode.value].map(d => {
+    taskModeStr[this.holeForm.value.mode].map(d => {
       const a = this.jackData[d].a;
       const b = this.jackData[d].b;
-      const value = this.holeForm.controls[d].value;
+      const value = this.holeForm.value[d];
       console.log(d, value);
       stage.map((s, i) => {
         const sp = s / 100;
@@ -117,17 +126,21 @@ export class TaskDataComponent implements OnInit {
     this.tensionStageArrF(value);
     const stage = value;
     let stages = [10, 20, 100, 0, 0];
+    let time = [30, 30, 300, 0, 0];
     switch (stage) {
       case 4:
         stages = [10, 10, 50, 100, 0];
+        time = [30, 30, 30, 300, 0];
         break;
       case 5:
         stages = [10, 10, 50, 100, 103];
+        time = [30, 30, 30, 30, 300];
         break;
       default:
         break;
     }
     this.holeForm.controls.stage.setValue(stages);
+    this.holeForm.controls.time.setValue(time);
     this.inputKn();
     console.log(this.holeForm.value);
   }
@@ -136,6 +149,7 @@ export class TaskDataComponent implements OnInit {
     if (value) {
       this.holeForm.controls.tensionStage.setValue(4);
       this.holeForm.controls.stage.setValue([10, 10, 50, 100, 0]);
+      this.holeForm.controls.time.setValue([30, 30, 30, 300, 0]);
     }
   }
   // 获取阶段数据

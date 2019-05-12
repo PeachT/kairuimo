@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd';
 import { DbService, DB } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { PLCService } from 'src/app/services/PLC.service';
-import { PLC_D, PLC_M } from 'src/app/models/IPCChannel';
+import { PLC_D, PLC_M, PLC_S } from 'src/app/models/IPCChannel';
 import { plcToMpa } from 'src/app/Function/device.date.processing';
 
 @Component({
@@ -83,51 +83,6 @@ export class ManualComponent implements OnInit, OnDestroy {
     cD: true,
   };
 
-  // mpaMarks: any = {
-  //   0: '0Mpa',
-  //   20: '20Mpa',
-  //   10: '10Mpa',
-  //   30: '30Mpa',
-  //   40: '40Mpa',
-  //   50: '50Mpa',
-  //   60: {
-  //     style: {
-  //       color: '#f50',
-  //     },
-  //     label: '<strong>60Mpa</strong>',
-  //   }
-  // };
-  // mpaMarksNull: any = {
-  //   0: null,
-  //   10: null,
-  //   20: null,
-  //   30: null,
-  //   40: null,
-  //   50: null,
-  //   60: null
-  // };
-  // mmMarks: any = {
-  //   0: '0mm',
-  //   40: '40mm',
-  //   80: '80mm',
-  //   120: '120mm',
-  //   160: '160mm',
-  //   200: {
-  //     style: {
-  //       color: '#f50',
-  //     },
-  //     label: '<strong>200mm</strong>',
-  //   }
-  // };
-  // mmMarksNull: any = {
-  //   0: null,
-  //   40: null,
-  //   80: null,
-  //   120: null,
-  //   160: null,
-  //   200: null,
-  // };
-
   it = null;
   constructor(
     private e: ElectronService,
@@ -142,7 +97,7 @@ export class ManualComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.it = setInterval(() => {
       // this.da = this.da++;
-      console.log('manual');
+      // console.log('manual');
     }, 500);
     // 获取顶
     await this.db.jack.toArray().then((d) => {
@@ -167,7 +122,7 @@ export class ManualComponent implements OnInit, OnDestroy {
   /** 切换设备 */
   async onSelectedDevice(id) {
     console.log(id);
-    this.PLCS.ipcSend('zF06', PLC_D(408), id);
+    this.PLCS.ipcSend('zF06', PLC_S(0), id);
     this.selectJackId = id;
     const jack = await this.PLCS.selectJack(id);
     const devModeStr = [

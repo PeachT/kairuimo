@@ -57,12 +57,14 @@ export class SettingComponent implements OnInit, OnDestroy {
   getData() {
     console.log('123123123123123123132132');
     // this.PLCS.ipcSend(`zF03`, PLC_D(410), 6);
-    this.PLCS.ipcSend('zF03', PLC_D(410), 6).then((data: any) => {
+    this.PLCS.ipcSend('zF03', PLC_D(408), 8).then((data: any) => {
       if (data) {
-        this.systenDate[0] = plcToMpa(data.int16[0], null);
-        this.systenDate[1] = plcToMpa(data.int16[1], null);
-        this.systenDate[2] = plcToMpa(data.int16[2], null);
+        this.systenDate[0] = plcToMpa(data.int16[2], null);
+        this.systenDate[1] = plcToMpa(data.int16[3], null);
+        this.systenDate[2] = plcToMpa(data.int16[4], null);
         this.systenDate[3] = data.int16[3] / 10;
+        /** 设备模式 */
+        this.systenDate[4] = data.int16[0];
       }
       console.log('获取PLC设备数据', data, this.systenDate);
     }).finally(() => {

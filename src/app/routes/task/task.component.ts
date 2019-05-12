@@ -15,6 +15,9 @@ import { Jack } from 'src/app/models/jack';
 import { Comp } from 'src/app/models/component';
 import { AutoService } from 'src/app/services/auto.service';
 import { PLCService } from 'src/app/services/PLC.service';
+import { mpaToPlc, TensionMm } from 'src/app/Function/device.date.processing';
+import { ElectronService } from 'ngx-electron';
+import { Elongation } from 'src/app/models/live';
 
 @Component({
   selector: 'app-task',
@@ -23,9 +26,9 @@ import { PLCService } from 'src/app/services/PLC.service';
 })
 export class TaskComponent implements OnInit {
   @ViewChild('groupDom')
-    groupDom: GroupComponent;
+  groupDom: GroupComponent;
   @ViewChild('taskDataDom')
-    taskDataDom: TaskDataComponent;
+  taskDataDom: TaskDataComponent;
 
   validateForm: FormGroup;
 
@@ -109,7 +112,11 @@ export class TaskComponent implements OnInit {
     cC: null,
     cD: null,
   };
-
+  /** 导出 */
+  derived = {
+    templatePath: null,
+    outPath: null,
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -121,6 +128,7 @@ export class TaskComponent implements OnInit {
     private autoS: AutoService,
     private activatedRoute: ActivatedRoute,
     public PLCS: PLCService,
+    private e: ElectronService,
   ) {
     this.db = this.odb.db;
     activatedRoute.queryParams.subscribe(queryParams => {
@@ -139,9 +147,6 @@ export class TaskComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getProjectMenu();
-    // this.getMenuOne();
-    this.getJacks();
     this.validateForm = this.fb.group({
       id: [],
       name: [null, [Validators.required], [this.nameRepetition()]],
@@ -151,13 +156,16 @@ export class TaskComponent implements OnInit {
       holeRadio: [null, [Validators.required]],
       project: []
     });
+    this.goRouteHole();
+    // this.getMenuOne();
+    this.getJacks();
     this.startBaseSub();
     this.db.comp.toArray().then((d) => {
       console.log(d);
       this.componentOptions.menu = [];
       d.map((item: Comp) => {
         item.hole.map((h) => {
-          this.componentOptions.menu.push({name: `${item.name}/${h.name}`, holes: h.holes });
+          this.componentOptions.menu.push({ name: `${item.name}/${h.name}`, holes: h.holes });
         });
       });
       console.log(this.componentOptions.menu);
@@ -170,133 +178,84 @@ export class TaskComponent implements OnInit {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       console.log('777777', control);
       return from(this.odb.repetition('task',
-                  (item: TensionTask) => item.name === control.value &&
-                  item.component === control.root.value.component &&
-                  item.project === control.root.value.project &&
-                  item.id !== control.root.value.id)).pipe(
-        map(item => {
-          return item ? { reperition: `${control.value} 已存在!!` } : null;
-        }),
-      );
+        (item: TensionTask) => item.name === control.value &&
+          item.component === control.root.value.component &&
+          item.project === control.root.value.project &&
+          item.id !== control.root.value.id)).pipe(
+            map(item => {
+              return item ? { reperition: `${control.value} 已存在!!` } : null;
+            }),
+          );
     };
   }
+  /** 跳转到路由数据孔号 */
+  async goRouteHole() {
+    await this.getProjectMenu();
+    if (this.routeData.project) {
+      console.log(this.routeData, this.projectMneu);
+      this.project = this.projectMneu.filter(item => item.id === Number(this.routeData.project))[0];
+      await this.getMenuOne();
+    }
+    if (this.routeData.component) {
+      await this.onMenuOne(this.routeData.component);
+    }
+    if (this.routeData.selectBridge) {
+      await this.onMenubridge(this.routeData.selectBridge);
+    }
+    if (this.routeData.editGroupName) {
+      this.onHoleRadio(this.routeData.editGroupName);
+    }
+  }
   /** 获取项目菜单 */
-  getProjectMenu() {
-    this.db.project.toArray().then((d) => {
-      console.log(d);
-      this.projectMneu = d.map(item => {
-        return { name: item.projectName, id: item.id };
-      });
-      /** 路由跳转 */
-      if (this.routeData.project) {
-        this.project = this.projectMneu.filter(item => item.id === Number(this.routeData.project))[0];
-        this.getMenuOne().then(() => {
-          this.onMenuOne(this.routeData.component).then(() => {
-            this.onMenubridge(Number(this.routeData.selectBridge));
-          });
-        });
-      }
-      console.log(this.project);
-    }).catch(() => {
-      this.message.error('获取菜单数据错误!!');
-    });
-  }
-  /** 获取顶数据 */
-  getJacks() {
-    console.log('获取jack');
-    this.db.jack.toArray().then((d: Array<Jack>) => {
-      this.jacks = d.map(item => {
-        return {
-          value: item.id,
-          label: item.name,
-          children: carterJaskMenu(item.jackMode)
-        };
-      });
-      console.log(d, this.jacks);
-    });
-  }
-  /** 获取顶明细 */
-  getJackDel(id) {
-    this.db.jack.filter(j => j.id === id).first().then((jack: Jack) => {
-      this.jackData = jack;
-      console.log(this.jackData);
+  async getProjectMenu() {
+    const ps = await this.db.project.toArray();
+    this.projectMneu =  ps.map(item => {
+      return { name: item.projectName, id: item.id };
     });
   }
   /** 获取一级菜单 */
-  getMenuOne(project = this.project.id): Promise<void> {
-    this.menu.component = [];
-    console.log(project);
-    return new Promise((resolve, reject) => {
-      this.db.task.where({ project }).each((t) => {
-        console.log(t);
-        if (this.menu.component.indexOf(t.component) < 0) {
-          this.menu.component.push(t.component);
-        }
-      }).then(() => {
-        resolve();
-      }).catch((err) => {
-        console.log(err);
-        this.message.error('获取一级菜单数据错误!!');
-        reject();
-      });
-    });
-  }
-  /** 一级数据分组 */
-  groupBy(array: Array<TensionTask>) {
-    const s = [];
-    from(array).pipe(
-      groupBy(t => t.component),
-      map(t => t.key)
-    ).subscribe(t => s.push(t));
-    console.log(s);
-    return s;
+  async getMenuOne(project = this.project.id) {
+    const ps = await this.db.task.filter(t => t.project === project).toArray();
+    console.log(project, ps);
+    this.menu.component = this.groupBy(ps);
   }
   /** 获取二级菜单 */
-  onMenuOne(component = null): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (component === null || this.ifEdit()) { return; }
-      this.menu.bridge = [];
-      if (this.menu.selectComponent !== null || component === this.menu.selectComponent) {
-        this.menu.selectComponent = null;
-        this.menu.selectBridge = null;
-        this.data = null;
-        this.editGroupIndex = null;
-        this.editGroupName = null;
-      } else {
-        this.db.task.where({ project: this.project.id, component }).each(f => {
-          this.menu.bridge.push({ name: f.name, id: f.id });
-          this.menu.selectComponent = component;
-          resolve();
-        }).catch(() => {
-          this.message.error('获取二级菜单数据错误!!');
-          reject();
-        });
-      }
-    });
+  async onMenuOne(component = null) {
+    if (component === null || this.ifEdit()) { return; }
+    this.menu.bridge = [];
+    if (this.menu.selectComponent !== null || component === this.menu.selectComponent) {
+      this.menu.selectComponent = null;
+      this.menu.selectBridge = null;
+      this.data = null;
+      this.editGroupIndex = null;
+      this.holeData = null;
+      this.editGroupName = null;
+    } else {
+      const ps = await this.db.task.where({ project: this.project.id, component }).toArray();
+      this.menu.selectComponent = component;
+      this.menu.bridge =  ps.map(f => {
+        return { name: f.name, id: f.id };
+      });
+    }
   }
   /** 选择梁菜单 */
-  onMenubridge(id: any = 'null', copyData = null) {
-    console.log('选择梁', id);
+  async onMenubridge(id: any = 'null', copyData = null) {
+    console.log('选择梁', id , copyData);
+    id = Number(id);
     if (id === 'null' || this.ifEdit()) { return; }
     id = id === 'null' ? null : id;
     this.cliceBaseSub();
     this.menu.selectBridge = id;
     if (id) {
-      this.db.task.where({ id }).first((task: TensionTask) => {
-        this.data = task;
-        this.validateForm.reset(this.data);
-        this.groupData = JSON.parse(JSON.stringify(task.groups));
-        console.log(this.data);
-        this.getJackDel(this.data.device[0]);
-        this.startBaseSub();
-        /** 路由跳转 */
-        if (this.routeData.editGroupName) {
-          this.onHoleRadio(this.routeData.editGroupName);
-        }
-      }).catch(error => {
-        console.error(error.stack || error);
-      });
+      console.log('45465456456');
+      this.data = await this.db.task.filter(t => t.id === id).first();
+      console.log('000000', this.data);
+      this.validateForm.reset(this.data);
+      this.groupData = JSON.parse(JSON.stringify(this.data.groups));
+      await this.getJackDel(this.data.device[0]);
+      // this.startBaseSub();
     } else {
+      console.log('aaaaaaaaaaaaaaaaaaaaaaa');
       if (copyData) {
         this.data = copyData;
       } else {
@@ -316,9 +275,70 @@ export class TaskComponent implements OnInit {
       this.appS.edit = true;
     }
   }
+  /** 切换张拉组 */
+  onHoleRadio(name) {
+    if (this.edit || !this.data.id) { return; }
+    if (this.holeSub$) {
+      this.holeSub$.unsubscribe();
+      this.holeSub$ = null;
+    }
+    this.holeData = this.groupData.filter((g, i) => {
+      if (g.name === name) {
+        this.editGroupIndex = i;
+        this.editGroupName = name;
+      }
+      return g.name === name;
+    })[0];
+    console.log('切换张拉组', name, this.groupData, this.editGroupIndex, this.holeData);
+    // this.taskDataDom.holeForm.reset(data);
+    this.taskDataDom.createHoleform(this.holeData, this.jackData);
+    // this.taskDataDom.tensionStageArrF();
+    if (this.holeSub$ === null) {
+      this.holeSub$ = this.taskDataDom.holeForm.valueChanges.subscribe((s) => {
+        console.log('编辑2监控', s);
+        this.edit = true;
+        this.appS.edit = true;
+      });
+    }
+  }
+  /** 获取顶数据 */
+  getJacks() {
+    console.log('获取jack');
+    this.db.jack.toArray().then((d: Array<Jack>) => {
+      this.jacks = d.map(item => {
+        return {
+          value: item.id,
+          label: item.name,
+          children: carterJaskMenu(item.jackMode)
+        };
+      });
+      console.log(d, this.jacks);
+    });
+  }
+  /** 获取顶明细 */
+  async getJackDel(id) {
+    this.jackData = await this.db.jack.filter(j => j.id === id).first();
+    // this.db.jack.filter(j => j.id === id).first().then((jack: Jack) => {
+    //   this.jackData = jack;
+    //   console.log(this.jackData);
+    // });
+  }
+
+  /** 一级数据分组 */
+  groupBy(array: Array<TensionTask>) {
+    const s = [];
+    from(array).pipe(
+      groupBy(t => t.component),
+      map(t => t.key)
+    ).subscribe(t => s.push(t));
+    console.log(s);
+    return s;
+  }
+
   /** 启动基础数据修改监听 */
   startBaseSub() {
     this.editGroupIndex = null;
+    this.holeData = null;
     this.editGroupName = null;
     if (this.baseSub$ === null) {
       this.baseSub$ = this.validateForm.valueChanges.subscribe(() => {
@@ -359,33 +379,7 @@ export class TaskComponent implements OnInit {
   steelStrandOnChanges(value) {
     console.log(value);
   }
-  /** 切换张拉组 */
-  onHoleRadio(name) {
-    if (this.edit || !this.data.id) { return; }
-    if (this.holeSub$) {
-      this.holeSub$.unsubscribe();
-      this.holeSub$ = null;
-    }
-    const data = this.groupData.filter((g, i) => {
-      if (g.name === name) {
-        this.editGroupIndex = i;
-        this.editGroupName = name;
-      }
-      return g.name === name;
-    })[0];
-    // this.taskDataDom.holeForm.reset(data);
-    this.taskDataDom.createHoleform(data);
-    this.holeData = data;
-    console.log('切换张拉组', name, this.groupData, this.editGroupIndex, data);
-    // this.taskDataDom.tensionStageArrF();
-    if (this.holeSub$ === null) {
-      this.holeSub$ = this.taskDataDom.holeForm.valueChanges.subscribe((s) => {
-        console.log('编辑2监控', s);
-        this.edit = true;
-        this.appS.edit = true;
-      });
-    }
-  }
+
   /** 保存张拉组修改 */
   holeSubmitForm() {
     // tslint:disable-next-line:forin
@@ -440,6 +434,7 @@ export class TaskComponent implements OnInit {
         steelStrandNumber: 0,
         tensionStage: 4,
         stage: [10, 20, 50, 100, 101],
+        time: [30, 30, 30, 300, 300],
         returnMm: 6,
         twice: false,
       };
@@ -483,6 +478,7 @@ export class TaskComponent implements OnInit {
     const data = this.validateForm.value;
     if (this.data.id) {
       const value = this.taskDataDom.holeForm.value;
+      this.holeData = value;
       this.groupData[this.editGroupIndex] = value;
     }
 
@@ -501,12 +497,13 @@ export class TaskComponent implements OnInit {
         this.edit = false;
         this.appS.edit = false;
         this.menu.selectComponent = null;
-        this.getMenuOne().then(() => {
-          this.onMenuOne(this.data.component).then(() => {
-            this.onMenubridge(id);
-          });
-        });
-        // new Promise(this.getMenuOne).then(this.onMenuOne).then(this.onMenubridge);
+        this.routeData = {
+          project: this.data.project,
+          component: this.data.component,
+          selectBridge: id,
+          editGroupName: null
+        }
+        this.goRouteHole();
         console.log(id);
       }).catch((err) => {
         this.message.error('添加失败😔');
@@ -555,27 +552,33 @@ export class TaskComponent implements OnInit {
   }
   /** 复制 */
   copy() {
-    console.log('复制');
-    const copy = Object.assign(JSON.parse(JSON.stringify(this.data)), { id: null, name: null });
+    const copy: TensionTask = Object.assign(JSON.parse(JSON.stringify(this.data)), { id: null, name: null });
+    for (const c of copy.groups) {
+      delete c.record;
+    }
+    console.log('复制', copy);
     this.onMenubridge(null, copy);
   }
   /** 张拉 */
   tension() {
-    console.log('张拉', this.holeData);
+    console.log('张拉', this.holeData, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
     if (this.tensionDeviceState()) {
       this.tensionDevice.state = true;
       this.tensionDevice.names = taskModeStr[this.holeData.mode];
-      console.log('设备状态错误！！！');
+      console.log('记录', 'record' in this.holeData);
+    } else {
+      // await this.PLCS.selectJack(this.jackData.id);
+      localStorage.setItem('autoTask', JSON.stringify({
+        project: this.project.id,
+        component: this.menu.selectComponent,
+        id: this.data.id,
+        jackId: this.jackData.id,
+        groupData: this.holeData
+      }));
+      this.router.navigate(['/auto']);
     }
-    // localStorage.setItem('autoTask', JSON.stringify({
-    //   project: this.project.id,
-    //   component: this.menu.selectComponent,
-    //   id: this.data.id,
-    //   groupData: this.holeData
-    // }));
-    // this.router.navigate(['/auto']);
   }
-  /** 设备状态 */
+  /** 检查设备状态 */
   tensionDeviceState(): boolean {
     let s = false;
     for (const name of taskModeStr[this.holeData.mode]) {
@@ -644,4 +647,69 @@ export class TaskComponent implements OnInit {
       }
     }
   }
+  /** 选择导出模板 */
+  selectTemplate() {
+    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    this.e.ipcRenderer.send('selectTemplate', { channel });
+    this.e.ipcRenderer.once(channel, (event, data) => {
+      if (data.templatePath && data.outPath) {
+        this.derived = {
+          templatePath: data.templatePath,
+          outPath: data.outPath
+        };
+      }
+      console.log('模板选择结果', this.derived);
+    });
+  }
+  /** 导出 */
+  derivedExcel() {
+    if (!this.derived.outPath || !this.derived.templatePath) {
+      this.message.error('模板或导出路径错误！！');
+      return;
+    }
+    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    const outdata = {
+      record: [],
+      data: null
+    };
+    this.data.groups.map(g => {
+      if (g.record) {
+        const elongation: Elongation = TensionMm(g);
+        taskModeStr[g.mode].map(name => {
+          outdata.record.push({
+            name: g.name,
+            devName: name,
+            mpa: g.record[name].mpa,
+            kn: g.record[name].mpa,
+            mm: g.record[name].mm,
+            setKn: g.tensionKn,
+            theoryMm: g[name].theoryMm,
+            lengthM: g.length,
+            tensiongMm: elongation[name].sumMm,
+            percent: elongation[name].percent,
+            wordMm: g.cA.wordMm,
+            returnMm: g.returnMm,
+            returnKn: {
+              mpa: 1,
+              kn: 2,
+              mm: 3,
+              countMm: 4
+            }
+          });
+        });
+      }
+    });
+    outdata.data = JSON.stringify(outdata.record);
+    console.log('导出的数据', outdata);
+    this.e.ipcRenderer.send('derivedExcel', {
+      channel,
+      templatePath: this.derived.templatePath,
+      outPath: this.derived.outPath,
+      data: outdata
+    });
+    this.e.ipcRenderer.once(channel, (event, data) => {
+      console.log('导出', data);
+    });
+  }
+
 }

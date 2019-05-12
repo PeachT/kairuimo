@@ -208,6 +208,11 @@ detect-libc@^1.0.3:
   resolved "http://registry.npm.taobao.org/detect-libc/download/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
 
+ejsexcel@^3.5.3:
+  version "3.5.3"
+  resolved "https://registry.npm.taobao.org/ejsexcel/download/ejsexcel-3.5.3.tgz#3558cffce3b1bf36ba40408de0f6c152f2fccbbd"
+  integrity sha1-NVjP/OOxvza6QECN4PbBUvL8y70=
+
 electron-updater@^4.0.6:
   version "4.0.6"
   resolved "http://registry.npm.taobao.org/electron-updater/download/electron-updater-4.0.6.tgz#9c4f495ae0e80bf4425e3e1b801c5ed2ab933c2d"

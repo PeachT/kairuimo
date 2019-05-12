@@ -7,11 +7,12 @@
     "email": "peachlin@outlook.com",
     "url": "https://github.com/PeachT/kairuimo"
   },
-  "description" : "柳州凯瑞姆智能设备",
+  "description": "柳州凯瑞姆智能设备",
   "scripts": {
     "tsc": "tsc"
   },
   "dependencies": {
+    "ejsexcel": "^3.5.3",
     "electron-updater": "^4.0.6",
     "modbus-serial": "^7.5.1"
   },

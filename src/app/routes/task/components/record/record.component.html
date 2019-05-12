@@ -1,0 +1,76 @@
+<div>
+    <nz-divider style="min-width: auto;" nzText="记 录" nzOrientation="left"></nz-divider>
+  <table class="gridtable">
+    <thead>
+      <tr>
+        <th width="120">记录</th>
+        <th width="120">张拉孔道</th>
+        <th>初张拉</th>
+        <th>阶段一</th>
+        <th *ngIf="GroupData.tensionStage > 3">阶段二</th>
+        <th *ngIf="GroupData.tensionStage > 4">阶段三</th>
+        <th>终张拉</th>
+        <th width="120">伸长量mm</th>
+        <th width="120">偏差率</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="device-name text-c" colspan="2">
+          阶段
+        </td>
+        <td class="text-c" *ngFor="let item of tensionStageArr; index as i;">
+          {{GroupData.stage[i]}}
+        </td>
+      </tr>
+      <ng-container  *ngFor="let item of devModeStr; index as i">
+        <tr [class]="item">
+          <td class="device-name" rowSpan="2" class="text-c">
+            {{item}}
+          </td>
+          <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]" class="text-c">
+            {{holeNames[i / 2]}}
+          </td>
+          <td *ngFor="let k of tensionStageArr; index as kni;">
+            {{GroupData.record[item].mpa[kni]}}
+          </td>
+          <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
+            {{elongation[item].sumMm}}
+          </td>
+          <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
+            {{elongation[item].percent}}
+          </td>
+        </tr>
+        <tr [class]="item">
+          <!-- <td class="device-name" class="text-c">
+            {{item}}·mm
+          </td> -->
+          <!-- <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]" class="text-c">
+            {{holeNames[i / 2]}}
+          </td> -->
+          <td *ngFor="let k of tensionStageArr; index as kni;">
+            {{GroupData.record[item].mm[kni]}}
+          </td>
+          <!-- <td>
+            {{task[item].wordMm}}
+          </td>
+          <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
+            {{task[item].theoryMm}}
+          </td> -->
+        </tr>
+      </ng-container>
+      <!-- <tr>
+        <td class="device-name text-c" colspan="2">
+          保压时间
+        </td>
+        <td class="text-c" *ngFor="let item of tensionStageArr; index as i;">
+          {{task.time[i]}}
+        </td>
+      </tr> -->
+    </tbody>
+  </table>
+
+  <echarts-dynamic-line [show]="true" [devs]="svgData.names" [data]="svgData.mpa" name="压力 · Mpa">
+  </echarts-dynamic-line>
+  <echarts-dynamic-line [show]="true" [devs]="svgData.names" [data]="svgData.mm" name="位移 · mm"></echarts-dynamic-line>
+</div>

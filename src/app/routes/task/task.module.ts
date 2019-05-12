@@ -7,9 +7,10 @@ import { GroupComponent } from './components/group/group.component';
 import { TaskDataComponent } from './components/task-data/task-data.component';
 import { JackComponent } from './components/jack/jack.component';
 import { ProjectComponent } from './components/project/project.component';
+import { RecordComponent } from './components/record/record.component';
 
 @NgModule({
-  declarations: [TaskComponent, GroupComponent, TaskDataComponent, JackComponent, ProjectComponent],
+  declarations: [TaskComponent, GroupComponent, TaskDataComponent, JackComponent, ProjectComponent, RecordComponent],
   imports: [
     SharedModule,
     TaskRoutingModule,

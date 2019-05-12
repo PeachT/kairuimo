@@ -73,6 +73,7 @@
             </td>
           </div>
         </tr>
+
         <tr *ngFor="let item of devModeStr; index as i" [formGroupName]="item" [class]="item">
           <td class="device-name">
             {{item}}{{theoryIf[item]}}
@@ -80,7 +81,7 @@
           <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
             <nz-form-item>
               <nz-form-control>
-                <input nz-input  [ngClass]="{'row2' : theoryIf[item] === 2}" [value]="holeNames[i / 2]">
+                <input nz-input [ngClass]="{'row2' : theoryIf[item] === 2}" [value]="holeNames[i / 2]">
               </nz-form-control>
             </nz-form-item>
           </td>
@@ -103,13 +104,28 @@
           <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
             <nz-form-item>
               <nz-form-control>
-                <input [ngClass]="{'row2' : theoryIf[item]===2}" type="number" nz-input
-                  formControlName="theoryMm">
+                <input [ngClass]="{'row2' : theoryIf[item]===2}" type="number" nz-input formControlName="theoryMm">
               </nz-form-control>
             </nz-form-item>
           </td>
         </tr>
-       </tbody>
+        <tr>
+          <td class="device-name">
+            保压时间
+          </td>
+          <td class="device-name">
+          </td>
+          <div formArrayName="time" style="display: contents;">
+            <td *ngFor="let item of tensionStageArr; index as i;">
+              <nz-form-item>
+                <nz-form-control>
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)">
+                </nz-form-control>
+              </nz-form-item>
+            </td>
+          </div>
+        </tr>
+      </tbody>
     </table>
   </nz-form-item>
 </form>
