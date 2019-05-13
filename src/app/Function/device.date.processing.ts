@@ -23,12 +23,12 @@ function fixedNumber() {
 export function plcToMpa(plcData: number, mpaArr: Array<number>): number {
   const mpa = plcData / mpaCoefficient;
   if (mpaArr === null) {
-    return Number(mpa.toFixed(fixedNumber()));
+    return myToFixed(mpa);
   } else {
     let index = Math.ceil(mpa / 10) - 1;
     index = index > 5 ? 5 : index;
     const reviseValue = index >= 0 ? mpaArr[index] : 1;
-    return Number((mpa * reviseValue).toFixed(fixedNumber()));
+    return myToFixed((mpa * reviseValue));
   }
 }
 
@@ -43,13 +43,13 @@ export function plcToMpa(plcData: number, mpaArr: Array<number>): number {
 export function plcToMm(plcData: number, mmArr: Array<number>): number {
   const mm = plcData / mmCoefficient;
   if (mmArr === null) {
-    return Number(mm.toFixed(fixedNumber()));
+    return myToFixed(mm);
   } else {
     let index = Math.ceil(mm / 40) - 1;
     index = index > 5 ? 5 : index;
     const reviseValue = index >= 0 ? mmArr[index] : 1;
     // console.log(reviseValue, mm, index);
-    return Number((mm * reviseValue).toFixed(fixedNumber()));
+    return myToFixed(mm * reviseValue);
   }
 }
 
@@ -111,11 +111,11 @@ export function TensionMm(data: GroupItem): Elongation {
     if (taskModeStr[data.mode].indexOf(key) >= 0) {
       const mm = data.record[key].mm;
       elongation[key].mm =
-        Number(mm[mm.length - 1])
+        myToFixed(Number(mm[mm.length - 1])
         - (2 * mm[0])
         + Number(mm[1])
         - Number(data.returnMm)
-        - Number(data[key].wordMm);
+        - Number(data[key].wordMm));
     }
   });
   taskModeStr[data.mode].map(key => {
@@ -123,9 +123,18 @@ export function TensionMm(data: GroupItem): Elongation {
       const k = key[1];
       const mm = elongation[`z${k}`].mm + elongation[`c${k}`].mm;
       const tmm = data[key].theoryMm;
-      elongation[`z${k}`].sumMm = mm.toFixed(2);
-      elongation[`z${k}`].percent = ((mm - tmm) / tmm * 100).toFixed(2);
+      elongation[`z${k}`].sumMm = myToFixed(mm);
+      elongation[`z${k}`].percent = myToFixed((mm - tmm) / tmm * 100);
     }
   });
   return elongation;
+}
+
+function myToFixed(data): number {
+  let length = Number(localStorage.getItem('FicedLength'));
+  if (!length) {
+    localStorage.setItem('FicedLength', '2');
+    length = 2;
+  }
+  return Number(data.toFixed(length));
 }

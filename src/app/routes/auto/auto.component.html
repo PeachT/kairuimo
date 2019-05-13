@@ -22,17 +22,17 @@
           {{holeNames[i / 2]}}
         </td>
 
-        <td>{{PLCS.PD[item].state}}·{{PLCS.PD[item].autoState[0]}}</td>
+        <td>{{PLCS.PD[item].state}}·{{auto.runState ? PLCS.PD[item].autoState[0] : selfInspectMsg[selfInspectData.state[item]]}}</td>
         <td>{{PLCS.PD[item].showMpa}}</td>
         <td>{{task[item].kn[task.record?.tensionStage]}}</td>
         <td>{{PLCS.PD[item].showMm}}</td>
-        <td>单顶伸长量</td>
+        <td>{{elongation[item].mm}}</td>
 
         <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
-          总伸长量
+          {{elongation[item].sumMm}}
         </td>
         <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
-          实时偏差率
+          {{elongation[item].percent}}
         </td>
       </tr>
     </tbody>
@@ -159,7 +159,7 @@
 
 <ng-template #btn>
   <div class="kvm-btn-group">
-    <button nz-button nzType="primary" class="z" nzShape="round" (click)="selfInspectRun()">张 拉</button>
+    <button nz-button nzType="primary" class="z" nzShape="round" (click)="selfRead()">张 拉</button>
     <button nz-button nzType="primary" class="r" nzShape="round" (click)="re()">回 顶</button>
     <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancel()" *ngIf="!auto.runState">取消张拉</button>
     <button nz-button nzType="primary" class="z" nzShape="round" (click)="saveOut()" *ngIf="auto.runState">保存退出</button>

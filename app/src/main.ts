@@ -197,7 +197,7 @@ ipcMain.on('derivedExcel', async (event, data) => {
   //   outPath: null,
   // };
   const filePath = data.templatePath;
-  const savePath = `${data.outPath}/out.xlsx`;
+  const savePath = `${data.outPath}/${new Date().getTime()}.xlsx`;
   try {
     console.log(filePath, savePath, data.data);
     const exlBuf = await readFileAsync(filePath);

@@ -9,8 +9,9 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { AutoService } from 'src/app/services/auto.service';
 import { PLC_D, PLC_S, PLC_M, PLC_Y } from 'src/app/models/IPCChannel';
 import { GroupItem } from 'src/app/models/task.models';
-import { mpaToPlc } from 'src/app/Function/device.date.processing';
+import { mpaToPlc, TensionMm } from 'src/app/Function/device.date.processing';
 import { AutoDate } from 'src/app/models/device';
+import { Elongation } from 'src/app/models/live';
 
 @Component({
   selector: 'app-auto',
@@ -19,9 +20,9 @@ import { AutoDate } from 'src/app/models/device';
 })
 export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mainContent')
-    mainDom: ElementRef;
+  mainDom: ElementRef;
   @ViewChild('table')
-    tableDom: ElementRef;
+  tableDom: ElementRef;
 
   svgHeight = 0;
   db: DB;
@@ -63,26 +64,75 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   // 卸荷完成
   unloading = false;
   /** 自检状态 */
-  selfInspectState = {
-    zA: 0,
-    zB: 0,
-    zC: 0,
-    zD: 0,
-    cA: 0,
-    cB: 0,
-    cC: 0,
-    cD: 0,
-    state: false,
-    devIndex: 0,
-    name: null,
-    mm: {zA: 0,
+  selfInspectData = {
+    mm: {
+      zA: 0,
       zB: 0,
       zC: 0,
       zD: 0,
       cA: 0,
       cB: 0,
       cC: 0,
-      cD: 0,},
+      cD: 0,
+    },
+    state: {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    },
+    device: [],
+    index: 0,
+    zt: null,
+    ct: null,
+  };
+  selfInspectMsg = [null, '自检中', '自检完成', '自检错误'];
+  /** 伸长量/偏差率 */
+  elongation: Elongation = {
+    zA: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    zB: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    zC: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    zD: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    cA: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    cB: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    cC: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
+    cD: {
+      mm: 0,
+      sumMm: 0,
+      percent: 0
+    },
   };
 
   constructor(
@@ -128,6 +178,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.PLCS.ipcSend('zF05', PLC_S(10), false);
     this.PLCS.ipcSend('cF05', PLC_S(10), false);
     clearInterval(this.svgt);
+    clearInterval(this.selfInspectData.zt);
+    clearInterval(this.selfInspectData.ct);
   }
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit() {
@@ -171,79 +223,93 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.alarm.name = `${name}报警状态`;
   }
 
-  /** 自检 */
-  selfInspectRun() {
-    this.selfInspect();
-    const t = setInterval(() => {
-      let s = true;
-      taskModeStr[this.task.mode].map((name, index) => {
-        if (this.selfInspectState[name] !== 3) {
-          s = false;
+  selfRead() {
+    if (this.task.mode !== 'zA' && this.task.mode !== 'zB') {
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      this.PLCS.ipcSend('cF05', PLC_S(10), true);
+      this.selfInspectStart('z');
+      this.selfInspectStart('c');
+    } else {
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      this.selfInspectStart('z');
+    }
+    this.modal.state = false;
+  }
+  /**
+   * 自检
+   * !这个功能没有测试
+   */
+
+  selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
+    this.selfInspectData[`${device}t`] = setInterval(() => {
+      // console.log('运行中');
+      const nameSatate = this.selfInspectData.state[name];
+      names.map(n => {
+        const subMm = Number(this.PLCS.PD[n].showMm) - Number(this.selfInspectData.mm[n]);
+        console.log(n, this.PLCS.PD[n].showMm, '-', this.selfInspectData.mm[n], '=', subMm);
+        if (n === name) {
+          if (subMm > 2) {
+            this.selfInspectData.state[name] = 2;
+          } else if (subMm < -2) {
+            this.selfInspectData.state[name] = 3;
+          }
+        } else if (subMm > 2 || subMm < -2) {
+          this.selfInspectData.state[name] = 3;
         }
       });
-      if (s) {
-        this.message.success('自检完成！！');
-        clearInterval(t);
-      } else {
-        this.selfInspectMonitoring();
+      if (nameSatate > 2) {
+        console.log(name, device, '失败');
+        clearInterval(this.selfInspectData[`${device}t`]);
+        console.log(this.selfInspectData.state);
+        this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
+      } else if (nameSatate === 2) {
+        this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
+        console.log(name, device, '成功');
+        clearInterval(this.selfInspectData[`${device}t`]);
+
+        let state = true;
+        taskModeStr[this.task.mode].map(key => {
+          if (key.indexOf(device) > -1 && this.selfInspectData.state[key] !== 2) {
+            state = false;
+          }
+        });
+        if (state) {
+          console.log(device, '全部测试通过', this.selfInspectData.state);
+          this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
+          this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
+          let allState = true;
+          taskModeStr[this.task.mode].map(key => {
+            if (this.selfInspectData.state[key] !== 2) {
+              allState = false;
+            }
+          });
+          if (allState) {
+            this.run();
+          }
+        } else {
+          this.selfInspectData.index++;
+          this.selfInspectStart(device);
+        }
       }
     }, 1000);
   }
-  /** 设备自检 */
-  selfInspect() {
-    taskModeStr[this.task.mode].map((key) => {
-      this.selfInspectState.mm[key] = this.PLCS.PD[key].showMm;
+  selfInspectStart(device: string) {
+    const names = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}[device];
+    const name = names[this.selfInspectData.index];
+    console.log(name, device, '开始自检');
+    names.map(n => {
+      this.selfInspectData.mm[n] = this.PLCS.PD[n].showMm;
     });
-    this.selfInspectState.name = groupModeStr(this.task.mode)[this.selfInspectState.devIndex];
-    console.log('自检', this.selfInspectState);
-    // this.selfInspectMonitoring(groupModeStr(this.task.mode)[this.selfInspectState.devIndex], mm);
-  }
-  selfInspectMonitoring() {
-    const name = this.selfInspectState.name;
-    const mm = this.selfInspectState.mm;
-    const zName = `z${name}`;
-    const z = this.selfInspectState[`z${name}`];
-    const address = { A: 16, B: 20, C: 24, D: 28}[name];
-    if (z === 0) {
-      this.PLCS.ipcSend('zF05', PLC_Y(address), true);
-      this.selfInspectState[`z${name}`] = 1;
-    }
-    if (z === 1) {
-      const plc = this.PLCS.PD;
-      for (const key of taskModeStr[this.task.mode]) {
-        console.log(key, plc[key].showMm, mm[key]);
-        if (zName === key) {
-          if (plc[key].showMm > mm[key] + 10) {
-            console.log(key, '自检成功', this.selfInspectState);
-            this.selfInspectState[`z${name}`] = 2;
-            // this.PLCS.ipcSend('zF05', PLC_Y(address), false);
-            // if (groupModeStr(this.task.mode).length > this.selfInspectState.devIndex) {
-            //   this.selfInspectState.devIndex++;
-            //   return;
-            // }
-          }
-          if (plc[key].showMm < mm[key] - 1 || plc[zName].showMpa > 1.5) {
-            this.selfInspectState[`z${name}`] = 3;
-            break;
-          }
-        } else {
-          if (plc[key].showMm < mm[key] - 1 || plc[key].showMm > mm[key] + 1) {
-            this.selfInspectState[`z${name}`] = 5;
-            break;
-          }
-        }
-      }
-      if (this.selfInspectState[`z${name}`] >= 3) {
-        this.message.error(`${zName}自检错误！！！！`);
-        console.log('自检错误111', this.selfInspectState[`z${name}`], this.selfInspectState, this.PLCS.PD);
-        // this.PLCS.ipcSend('zF05', PLC_Y(address), false);
-      }
-    }
+    this.selfInspectData.state[name] = 1;
+    const address = { A: 16, B: 20, C: 24, D: 28}[name[1]];
+    this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), true);
+
+    this.selfInspectRun(device, name, names, address);
   }
   /** 启动张拉 */
   run() {
     this.auto.runState = true;
-    this.modal.state = false;
+
     this.downPLCData();
     this.ec();
   }
@@ -289,7 +355,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   /** 手动下一段 */
   namualNext() {
     console.log(this.task);
-    if (this.task.record.tensionStage + 1 === this.task.tensionStage ) {
+    if (this.task.record.tensionStage + 1 === this.task.tensionStage) {
       this.tensionOk = true;
       let un = true;
       let unok = true;
@@ -444,6 +510,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           // this.svgData.mm[i].push(value - Math.random() * 10);
         }
       });
+
+      if (this.task.record.tensionStage >= 1) {
+        this.elongation = TensionMm(this.task);
+      }
       console.log('曲线数据', this.svgData);
     }, 1000);
   }
@@ -455,6 +525,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   cancel() {
     this.go();
     localStorage.setItem('autoTask', null);
+    this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
+      console.log('查询结果', this.autoS.task.id, d);
+    });
   }
   /** 保存数据退出 */
   saveOut() {
@@ -478,8 +551,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   /** 保存数据 */
   save() {
-    this.odb.db.task.filter(f => f.id = this.autoS.task.id).first((d) => {
-      console.log('查询结果', d);
+    this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
+      console.log('查询结果', this.autoS.task.id, d);
       let index = null;
       d.groups.filter((f, i) => {
         if (f.name === this.task.name) {
@@ -491,7 +564,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.db.task.update(this.autoS.task.id, d).then((updata) => {
         this.message.success('保存成功🙂');
       }).catch((err) => {
-        this.message.error(`保存失败😔${err}`);
+        console.log(`保存失败😔`, err);
+        this.message.error(`保存失败😔`);
       });
     });
   }
