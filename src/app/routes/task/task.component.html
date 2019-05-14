@@ -21,8 +21,8 @@
       </ng-container>
     </ul>
     <ul class="menu-2">
-      <li *ngFor="let item of menu.bridge; index as i" [ngClass]="{'active': menu.selectBridge === item.id}"
-        (click)="onMenubridge(item.id)">{{item.name}}</li>
+      <li *ngFor="let item of menu.bridge; index as i" [ngClass]="{'active': menu.selectBridge === item.id}" [class]="'bridge' + item.cls"
+        (click)="onMenubridge(item.id)">{{item.name}}-{{item.cls}}</li>
     </ul>
   </div>
   <div class="main">

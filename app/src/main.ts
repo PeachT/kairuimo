@@ -1,4 +1,11 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+const ejsexcel = require('../static/ejsexcel');
+// const ejsexcel = require('../node_modules/ejsexcel/index');
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
 import { bf } from './bufferToNumber';
 import ModbusRTU from 'modbus-serial';
 import { ModbusTCP } from './modbus';
@@ -9,12 +16,6 @@ import { ModbusTCP } from './modbus';
 // const { autoUpdater } = require('electron-updater');
 import { autoUpdater } from 'electron-updater';
 
-const ejsexcel = require('ejsExcel');
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
 
 
 // 运行环境判断

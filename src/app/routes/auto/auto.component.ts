@@ -9,7 +9,7 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { AutoService } from 'src/app/services/auto.service';
 import { PLC_D, PLC_S, PLC_M, PLC_Y } from 'src/app/models/IPCChannel';
 import { GroupItem } from 'src/app/models/task.models';
-import { mpaToPlc, TensionMm } from 'src/app/Function/device.date.processing';
+import { mpaToPlc, TensionMm, myToFixed } from 'src/app/Function/device.date.processing';
 import { AutoDate } from 'src/app/models/device';
 import { Elongation } from 'src/app/models/live';
 
@@ -25,10 +25,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   tableDom: ElementRef;
 
   svgHeight = 0;
+  tableHeight = 0;
   db: DB;
   /** 实时曲线数据 */
   svgData = {
-    map: [],
+    mpa: [],
     mm: []
   };
   /** 张拉数据 */
@@ -54,6 +55,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   auto = {
     runState: false,
     stopState: false,
+    superElongation: false,
+    pause: false,
+    nowPause: false,
+    pauseMsg: null,
+    twoTension: false,
   };
   autoData: AutoDate;
   // 张拉完成
@@ -134,6 +140,51 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       percent: 0
     },
   };
+  /** 张拉平衡 */
+  balanceState = {
+    zA: false,
+    zB: false,
+    zC: false,
+    zD: false,
+    cA: false,
+    cB: false,
+    cC: false,
+    cD: false,
+  };
+  /** 二次张拉位移保存 */
+  twoMm = {
+    live: {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    },
+    record: {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    }
+  };
+  /** 目标压力 */
+  target = {
+    zA: 0,
+    zB: 0,
+    zC: 0,
+    zD: 0,
+    cA: 0,
+    cB: 0,
+    cC: 0,
+    cD: 0,
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -165,7 +216,6 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       // });
       this.PLCS.getMpaRevise();
       this.tensionStageArrF();
-      this.initSvg();
     }
   }
 
@@ -184,16 +234,28 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit() {
     console.log(this.mainDom.nativeElement.offsetHeight, this.tableDom.nativeElement.offsetHeight);
+    this.tableHeight = this.tableDom.nativeElement.offsetHeight;
     this.svgHeight = (this.mainDom.nativeElement.offsetHeight - this.tableDom.nativeElement.offsetHeight) / 2;
+    this.initSvg();
+    console.log('二次张拉', this.task.record && this.task.record.tensionStage > 0)
   }
   /** 初始化曲线 */
   initSvg() {
-    this.svgData.map.push(['time']);
-    this.svgData.mm.push(['time']);
-    taskModeStr[this.task.mode].map((name, index) => {
-      this.svgData.map.push([name]);
-      this.svgData.mm.push([name]);
-    });
+    if (this.task.record) {
+      this.svgData.mpa.push(this.task.record.time);
+      this.svgData.mm.push(this.task.record.time);
+      taskModeStr[this.task.mode].map((name, index) => {
+        this.svgData.mpa.push(this.task.record[name].mapData);
+        this.svgData.mm.push(this.task.record[name].mmData);
+      });
+    } else {
+      this.svgData.mpa.push(['time']);
+      this.svgData.mm.push(['time']);
+      taskModeStr[this.task.mode].map((name, index) => {
+        this.svgData.mpa.push([name]);
+        this.svgData.mm.push([name]);
+      });
+    }
   }
   // 获取阶段数据
   tensionStageArrF() {
@@ -223,8 +285,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.alarm.name = `${name}报警状态`;
   }
 
+  /**
+   * *自检
+   */
   selfRead() {
-    if (this.task.mode !== 'zA' && this.task.mode !== 'zB') {
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
       this.PLCS.ipcSend('zF05', PLC_S(10), true);
       this.PLCS.ipcSend('cF05', PLC_S(10), true);
       this.selfInspectStart('z');
@@ -236,10 +301,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.modal.state = false;
   }
   /**
-   * 自检
-   * !这个功能没有测试
+   * *自检
    */
-
   selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
     this.selfInspectData[`${device}t`] = setInterval(() => {
       // console.log('运行中');
@@ -306,17 +369,24 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.selfInspectRun(device, name, names, address);
   }
-  /** 启动张拉 */
+  /**
+   * *启动张拉
+   */
   run() {
-    this.auto.runState = true;
-
-    this.downPLCData();
+    if (this.task.record && this.task.record.tensionStage > 0) {
+      this.twoDownPLCsata();
+    } else {
+      this.downPLCData();
+    }
     this.ec();
   }
-  /** 任务下载到PLC */
+  /**
+   * *任务下载到PLC
+   */
   downPLCData() {
+    this.auto.runState = true;
+    this.auto.twoTension = false;
     let stage = 0;
-    console.log(this.task);
     if (this.task.record) {
       stage = this.task.record.tensionStage;
     } else {
@@ -337,22 +407,54 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.delay = Number(this.task.time[this.task.record.tensionStage]); // 保压时间
     this.nowDelay = 0;
-    const pMpa: any = {};
-    for (const name of taskModeStr.AB8) {
-      /** 数据转换 */
-      pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task.zA.kn[stage], this.PLCS.mpaRevise[name]) : 0;
-    }
-    if (this.task.mode !== 'zA' && this.task.mode !== 'zB') {
-      this.PLCS.ipcSend(`zF016`, PLC_D(450), [pMpa.zA, pMpa.zB, pMpa.zC, pMpa.zD]);
-      this.PLCS.ipcSend(`cF016`, PLC_D(450), [pMpa.cA, pMpa.cB, pMpa.cC, pMpa.cD]);
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.PLCS.ipcSend('cF05', PLC_S(10), true);
-    } else {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.PLCS.ipcSend(`zF016`, PLC_D(450), [pMpa.zA, pMpa.zB, pMpa.zC, pMpa.zD]);
-    }
+    const pMpa = {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    };
+    /** 数据转换 */
+    taskModeStr[this.task.mode].map(name => {
+      pMpa[name] = mpaToPlc(this.task[name].kn[stage], this.PLCS.mpaRevise[name]);
+      this.target[name] = this.task[name].kn[stage];
+    });
+    this.setPLCMpa(pMpa);
+    console.log('二次数据下载', this.task.record, pMpa, this.twoMm);
   }
-  /** 手动下一段 */
+  /**
+   * *二次任务下载到PLC
+   */
+  twoDownPLCsata() {
+    this.delay = 15; // 保压时间
+    this.nowDelay = 0;
+    const pMpa = {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    };
+    const stage = this.task.record.tensionStage;
+    /** 数据转换 */
+    taskModeStr[this.task.mode].map(name => {
+      pMpa[name] = mpaToPlc(this.task.record[name].mpa[stage], this.PLCS.mpaRevise[name]);
+      this.target[name] = this.task.record[name].mpa[stage]
+      this.twoMm.record[name] = this.task.record[name].mm[stage];
+    });
+    this.setPLCMpa(pMpa);
+    this.auto.twoTension = true;
+    console.log('二次数据下载', this.task.record, pMpa, this.twoMm);
+  }
+  /**
+   * *手动下一段
+   */
   namualNext() {
     console.log(this.task);
     if (this.task.record.tensionStage + 1 === this.task.tensionStage) {
@@ -376,6 +478,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         for (const name of taskModeStr.AB8) {
           /** 数据转换 */
           pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task.zA.kn[0], this.PLCS.mpaRevise[name]) : 0;
+          this.target[name] = this.task.zA.kn[0];
         }
         this.setPLCD(454, pMpa); // 设置卸荷压力
         this.setPLCM(523, true); // 启动卸荷阀
@@ -399,7 +502,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
-  /** 保压延时 */
+  /**
+   * *保压延时
+   */
   delayF() {
     let ten = true;
     for (const name of taskModeStr[this.task.mode]) {
@@ -421,7 +526,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
-  /** 卸荷/回程 */
+  /**
+   * *卸荷/回程
+   */
   unre() {
     this.tensionOk = true;
     let un = true;
@@ -443,6 +550,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       for (const name of taskModeStr.AB8) {
         /** 数据转换 */
         pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task.zA.kn[0], this.PLCS.mpaRevise[name]) : 0;
+        this.target[name] = this.task.zA.kn[0];
       }
       this.setPLCD(454, pMpa); // 设置卸荷压力
       this.setPLCM(523, true); // 启动卸荷阀
@@ -463,7 +571,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   setPLCM(address: number, state = false) {
-    if (this.task.mode !== 'zA' && this.task.mode !== 'zB') {
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
       this.PLCS.ipcSend('zF05', PLC_M(address), state);
       this.PLCS.ipcSend('cF05', PLC_M(address), state);
     } else {
@@ -471,39 +579,141 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   setPLCD(address: number, data) {
-    if (this.task.mode !== 'zA' && this.task.mode !== 'zB') {
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
       this.PLCS.ipcSend('zF016', PLC_D(address), [data.zA, data.zB, data.zC, data.zD]);
       this.PLCS.ipcSend('cF016', PLC_D(address), [data.cA, data.cB, data.cC, data.cD]);
     } else {
       this.PLCS.ipcSend('zF016', PLC_D(address), [data.zA, data.zB, data.zC, data.zD]);
     }
   }
-  /** 曲线采集 */
+  setPLCMpa(mpa) {
+    this.PLCS.ipcSend(`zF016`, PLC_D(450), [mpa.zA, mpa.zB, mpa.zC, mpa.zD]);
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      this.PLCS.ipcSend(`cF016`, PLC_D(450), [mpa.cA, mpa.cB, mpa.cC, mpa.cD]);
+    }
+  }
+  /**
+   * *张拉平衡
+   */
+  balance() {
+    const names = taskModeStr[this.task.mode];
+    const arrMm = [];
+
+    for (const key of names) {
+      /** 超伸长量 */
+      if (this.elongation[key].percent > this.autoData.superElongation) {
+        this.auto.pauseMsg = `${key[1]}·超伸长量${this.elongation[key].percent }`;
+        if (!this.auto.pause) {
+          const msg = `超伸长量${this.elongation[key].percent }`;
+          this.pushMake(msg, key);
+          this.pause();
+          return;
+        }
+      } else {
+        this.auto.pauseMsg = null;
+      }
+      arrMm.push(this.elongation[key].mm);
+    }
+    if (this.auto.pause) {
+      return;
+    }
+    // const max = Math.max.apply(null, arrMm);
+    const min = Math.min.apply(null, arrMm);
+    let s = false;
+    names.map(n => {
+      // console.log(n, '平衡控制', this.elongation[n].mm - min, this.autoData.tensionBalance);
+      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n]) {
+        this.balanceState[n] = true;
+        s = true;
+      }
+      if (this.elongation[n].mm - min <= 0 && this.balanceState[n]) {
+        this.balanceState[n] = false;
+        s = true;
+      }
+    });
+    if (s && this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      this.PLCS.ipcSend(`zF15`, PLC_M(526), [this.balanceState.zA, this.balanceState.zB, this.balanceState.zC, this.balanceState.zD]);
+      this.PLCS.ipcSend(`cF15`, PLC_M(526), [this.balanceState.cA, this.balanceState.cB, this.balanceState.cC, this.balanceState.cD]);
+    } else if (s) {
+      this.PLCS.ipcSend(`zF15`, PLC_M(526), [this.balanceState.zA, this.balanceState.zB, this.balanceState.zC, this.balanceState.zD]);
+      // console.log('张拉暂定', this.balanceState);
+    }
+  }
+  /**
+   * *压力差
+   */
+  cmpMpa() {
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      const names = taskModeStr[this.task.mode];
+      for (const key of names) {
+        const cmpMpa = myToFixed(Math.abs(this.PLCS.PD[`z${key[1]}`].showMpa - this.PLCS.PD[`c${key[1]}`].showMpa));
+        console.log(cmpMpa);
+        if (key[0] === 'z' && cmpMpa > this.autoData.pressureDifference) {
+          if (!this.auto.pause) {
+            const msg = `压力差${cmpMpa}`;
+            this.pushMake(msg, key);
+            this.pause();
+            return;
+          }
+        }
+      }
+    }
+  }
+  /**
+   * *报警监控
+   */
+  alarmMonitoring() {
+    this.auto.nowPause = false;
+    const names = taskModeStr[this.task.mode];
+    for (const key of names) {
+      /** 极限报警 || 超伸长量 */
+      if (this.PLCS.PD[key].alarm.length > 0) {
+        this.auto.nowPause = true;
+        if (!this.auto.pause) {
+          const msg = this.PLCS.PD[key].alarm.join('|');
+          this.pushMake(msg, key);
+          this.pause();
+          return;
+        }
+      }
+    }
+  }
+  /**
+   * *曲线采集与监控
+   */
   ec() {
     this.svgt = setInterval(() => {
+      this.alarmMonitoring();
       if (this.tensionOk) {
         this.unre();
-      } else {
+      } else if (!this.auto.pause) {
         this.delayF();
       }
 
       this.index = this.index + 1;
       const value = Math.random() * 10 + 10 + this.index % 100;
-      this.svgData.map.map((item, i) => {
+      this.svgData.mpa.map((item, i) => {
         if (i === 0) {
           /** 添加时间轴 */
           item.push(new Date().getTime());
           this.svgData.mm[i] = item;
           this.task.record.time = item;
         } else {
-          /** 添加数据 */
+          /** 添加曲线数据 */
           item.push(this.PLCS.PD[item[0]].showMpa);
           this.svgData.mm[i].push(this.PLCS.PD[item[0]].showMm);
           this.task.record[item[0]].mapData = item;
           this.task.record[item[0]].mmData = this.svgData.mm[i];
-          if (!this.tensionOk) {
+          /** 压力位移记录保存 */
+          if (this.auto.runState && !this.tensionOk && !this.auto.pause) {
             this.task.record[item[0]].mpa[this.task.record.tensionStage] = this.PLCS.PD[item[0]].showMpa;
-            this.task.record[item[0]].mm[this.task.record.tensionStage] = this.PLCS.PD[item[0]].showMm;
+            const livemm = (this.PLCS.PD[item[0]].showMm - this.twoMm.live[item[0]]);
+            this.task.record[item[0]].mm[this.task.record.tensionStage] = myToFixed(this.twoMm.record[item[0]] + livemm);
+            // console.log('位移', this.PLCS.PD[item[0]].showMm, this.twoMm.live[item[0]], livemm);
+          }
+          /** 二次张拉位移记录 */
+          if (this.auto.twoTension) {
+            this.twoMm.live[item[0]] = this.PLCS.PD[item[0]].showMm;
           }
           /** 模拟数据 */
           // item.push(value - Math.random() * 10);
@@ -511,15 +721,42 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
 
-      if (this.task.record.tensionStage >= 1) {
-        this.elongation = TensionMm(this.task);
+      if (this.auto.runState && !this.tensionOk) {
+        this.cmpMpa();
+        if (this.task.record.tensionStage >= 1) {
+          this.elongation = TensionMm(this.task);
+          this.balance();
+        }
       }
-      console.log('曲线数据', this.svgData);
+      // console.log('曲线数据', this.svgData);
     }, 1000);
+  }
+  /**
+   * *make记录
+   */
+  pushMake(msg, name: string) {
+    if (this.auto.runState) {
+      this.task.record[name].make.push({
+        msg,
+        index: this.task.record.time.length
+      });
+    }
   }
   /** 手动回顶 */
   re() {
 
+  }
+  /** 张拉暂停 */
+  pause() {
+    this.auto.pause = true;
+    this.modal.state = true;
+    this.setPLCM(520, true);
+  }
+  /** 继续张拉 */
+  continue() {
+    this.auto.pause = false;
+    this.modal.state = false;
+    this.setPLCM(520, false);
   }
   /** 取消张拉 */
   cancel() {
@@ -531,8 +768,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   /** 保存数据退出 */
   saveOut() {
-    this.go();
-    localStorage.setItem('autoTask', null);
+    this.save(true);
   }
   /** 取消保存退出 */
   cancelOut() {
@@ -550,7 +786,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.modal.state = true;
   }
   /** 保存数据 */
-  save() {
+  save(out = false) {
     this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
       console.log('查询结果', this.autoS.task.id, d);
       let index = null;
@@ -563,6 +799,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log('更新数据', d);
       this.db.task.update(this.autoS.task.id, d).then((updata) => {
         this.message.success('保存成功🙂');
+        if (out) {
+          localStorage.setItem('autoTask', null);
+          this.go();
+        }
       }).catch((err) => {
         console.log(`保存失败😔`, err);
         this.message.error(`保存失败😔`);

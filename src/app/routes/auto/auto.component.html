@@ -9,8 +9,8 @@
         <th>目标压力·Mpa</th>
         <th>设备位移·mm</th>
         <th>单顶伸长量·mm</th>
-        <th>总伸长量·mm</th>
-        <th>实时偏差率· %</th>
+        <th>总伸长量/理论伸长量·mm</th>
+        <th>实时偏差率·%</th>
       </tr>
     </thead>
     <tbody>
@@ -22,14 +22,14 @@
           {{holeNames[i / 2]}}
         </td>
 
-        <td>{{PLCS.PD[item].state}}·{{auto.runState ? PLCS.PD[item].autoState[0] : selfInspectMsg[selfInspectData.state[item]]}}</td>
+        <td>{{PLCS.PD[item].state}}·{{auto.runState || auto.twoTension ? PLCS.PD[item].autoState[0] : selfInspectMsg[selfInspectData.state[item]]}}</td>
         <td>{{PLCS.PD[item].showMpa}}</td>
-        <td>{{task[item].kn[task.record?.tensionStage]}}</td>
+        <td>{{target[item]}}</td>
         <td>{{PLCS.PD[item].showMm}}</td>
         <td>{{elongation[item].mm}}</td>
 
         <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
-          {{elongation[item].sumMm}}
+          {{elongation[item].sumMm}}/{{task[item].theoryMm}}
         </td>
         <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
           {{elongation[item].percent}}
@@ -37,17 +37,19 @@
       </tr>
     </tbody>
   </table>
-  <echarts-dynamic-line *ngIf="svgHeight > 0" [height]="svgHeight" [devs]="devNames" [data]="svgData.map"
+  <echarts-dynamic-line *ngIf="svgHeight > 0" [height]="svgHeight" [devs]="devNames" [data]="svgData.mpa"
     [index]="index" name="压力 · Mpa"></echarts-dynamic-line>
   <echarts-dynamic-line *ngIf="svgHeight > 0" [height]="svgHeight" [devs]="devNames" [data]="svgData.mm" [index]="index"
     name="位移 · mm"></echarts-dynamic-line>
 </div>
 
-<nz-modal *ngIf="task" nzWidth="95%" nzMaskClosable="false" nzTitle="自动张拉数据" [nzVisible]="modal.state" [nzFooter]="btn">
+<nz-modal *ngIf="task" nzWidth="95%"  nzMaskClosable="false" nzTitle="自动张拉数据" [nzVisible]="modal.state" [nzFooter]="btn">
   <div nz-row nzGutter="25">
     <nz-divider style="min-width: auto;" nzText="设备状态" nzOrientation="left"></nz-divider>
+    <h2 style="color: red;">{{auto.pauseMsg}}</h2>
     <div nz-col nzSm="24" nzLg="12" class="title" *ngFor="let name of devNames; index as i">
-      <h1>{{name}}·{{PLCS.PD.zA.state}}-{{PLCS.PD[name].alarm | json}}</h1>
+      <h1>{{name}}·{{PLCS.PD[name].state}}-{{PLCS.PD[name].alarm | json}}</h1>
+      <h1 style="color: red;" *ngIf="task.record && task.record[name].make.length > 0">{{task.record[name].make[task.record[name].make.length - 1].msg}}</h1>
       <div *ngIf="PLCS.PD[name].alarm.length > 0" class="alarm">
         <nz-alert nzType="error" [nzMessage]="PLCS.PD[name].alarm[0]" nzShowIcon>
         </nz-alert>
@@ -115,25 +117,25 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="压力差Mpa">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0"
             [(ngModel)]="autoData.pressureDifference" ></nz-input-number>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="超伸长量%">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="6"
             [(ngModel)]="autoData.superElongation" ></nz-input-number>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="张拉平衡mm">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="1"
             [(ngModel)]="autoData.tensionBalance" ></nz-input-number>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="回顶位移mm">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="autoData.backMm"
+          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="20" [(ngModel)]="autoData.backMm"
             ></nz-input-number>
         </nz-input-group>
       </nz-col>
@@ -150,7 +152,7 @@
   </div>
 
 
-  <nz-modal nzZIndex="99999" [nzVisible]="modal.cancel" nzWidth="95%" nzMaskClosable="false" nzTitle="取消张拉"
+  <nz-modal [nzVisible]="modal.cancel" nzWidth="50%" nzMaskClosable="false" nzTitle="取消张拉"
     (nzOnCancel)="modal.cancel = false" (nzOnOk)="outOk()">
     <h1>张拉数保存选择</h1>
     <p>保存数据可以调整好设备可以继续使用该记录张拉</p>
@@ -159,7 +161,8 @@
 
 <ng-template #btn>
   <div class="kvm-btn-group">
-    <button nz-button nzType="primary" class="z" nzShape="round" (click)="selfRead()">张 拉</button>
+    <button nz-button nzType="primary" class="z" nzShape="round" (click)="selfRead()" *ngIf="!auto.pause">张 拉</button>
+    <button nz-button nzType="primary" class="z" nzShape="round" (click)="continue()" *ngIf="auto.pause" [disabled]="auto.nowPause || auto.pauseMsg">继续张拉</button>
     <button nz-button nzType="primary" class="r" nzShape="round" (click)="re()">回 顶</button>
     <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancel()" *ngIf="!auto.runState">取消张拉</button>
     <button nz-button nzType="primary" class="z" nzShape="round" (click)="saveOut()" *ngIf="auto.runState">保存退出</button>

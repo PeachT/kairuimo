@@ -234,8 +234,26 @@ export class TaskComponent implements OnInit {
       const ps = await this.db.task.where({ project: this.project.id, component }).toArray();
       this.menu.selectComponent = component;
       this.menu.bridge =  ps.map(f => {
-        return { name: f.name, id: f.id };
+        let cls = 0;
+        let cls2 = 0;
+        for (const g of f.groups) {
+          if (g.record) {
+            if (g.record.tensionStage + 1 === g.tensionStage) {
+              cls = 2;
+            } else {
+              cls = 3;
+              break;
+            }
+          } else {
+            cls2 = 1;
+          }
+        }
+        if (cls === 2 && cls2 === 1) {
+          cls = 1;
+        }
+        return { name: f.name, id: f.id, cls };
       });
+      console.log('梁数据', ps, this.menu.bridge );
     }
   }
   /** 选择梁菜单 */
@@ -247,9 +265,8 @@ export class TaskComponent implements OnInit {
     this.cliceBaseSub();
     this.menu.selectBridge = id;
     if (id) {
-      console.log('45465456456');
       this.data = await this.db.task.filter(t => t.id === id).first();
-      console.log('000000', this.data);
+      console.log('选择梁', this.data);
       this.validateForm.reset(this.data);
       this.groupData = JSON.parse(JSON.stringify(this.data.groups));
       await this.getJackDel(this.data.device[0]);
@@ -708,6 +725,9 @@ export class TaskComponent implements OnInit {
       data: outdata
     });
     this.e.ipcRenderer.once(channel, (event, data) => {
+      if (data.success) {
+        this.message.success('导出完成');
+      }
       console.log('导出', data);
     });
   }

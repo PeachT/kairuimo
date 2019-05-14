@@ -52,8 +52,8 @@ export interface Curve {
 }
 
 export interface Make {
-  msg?: string;
-    index?: number;
+  msg?: any;
+  index?: number;
 }
 export interface AB {
   kn: Array<number>;

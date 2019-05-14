@@ -130,7 +130,10 @@ export function TensionMm(data: GroupItem): Elongation {
   return elongation;
 }
 
-function myToFixed(data): number {
+/**
+ *  *保留小数点
+ */
+export function myToFixed(data): number {
   let length = Number(localStorage.getItem('FicedLength'));
   if (!length) {
     localStorage.setItem('FicedLength', '2');

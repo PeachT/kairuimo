@@ -41,4 +41,5 @@ Thumbs.db
 # my fliter
 /app/dist
 /app/js
+/app/static/ejsexcel
 /win
