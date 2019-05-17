@@ -411,6 +411,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         twice: false,
         time: null,
         state: 0,
+        make: []
       };
       taskModeStr[this.task.mode].map((name, index) => {
         this.task.record[name] = {
@@ -534,13 +535,17 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.auto.nowDelay = true;
       this.nowDelay++;
       if (this.nowDelay >= this.delay) {
+        let msg = `${this.stageStr[this.task.record.tensionStage]}完成`;
+        if (this.tensionOk) {
+          msg = '卸荷完成';
+        }
+        this.pushMake(msg);
         if ((this.task.record.tensionStage === this.task.tensionStage)
           || (this.task.twice && !this.task.record.twice && this.task.record.tensionStage === 2)) {
           this.tensionOk = true;
           this.delay = Number(this.autoData.unloadingDelay); // 卸荷延时时间
           this.nowDelay = 0;
         } else {
-          // this.pushMake({})
           this.task.record.tensionStage += 1;
           this.auto.nowDelay = false;
           this.downPLCData();
@@ -780,9 +785,16 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * *make记录
    */
-  pushMake(msg, name: string) {
+  pushMake(msg, name: string = null) {
     if (this.auto.runState) {
-      this.task.record[name].make.push({
+      if (name) {
+        this.task.record[name].make.push({
+          msg,
+          index: this.task.record.time.length
+        });
+        msg = `${name}-${msg}`;
+      }
+      this.task.record.make.push({
         msg,
         index: this.task.record.time.length
       });

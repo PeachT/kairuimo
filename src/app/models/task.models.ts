@@ -39,6 +39,7 @@ export interface Record {
   time: Array<string | number>;
   /** 张拉状态 0未 1张拉中断2完成 3偏差不合格 4二次张拉 */
   state: number;
+  make: Array<Make>;
   zA?: Curve;
   zB?: Curve;
   zC?: Curve;
