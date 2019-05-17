@@ -34,6 +34,8 @@ export interface Record {
   tensionStage: number;
   twice: boolean;
   time: Array<string | number>;
+  /** 张拉状态 0未 1张拉中断2完成 3偏差不合格 4二次张拉 */
+  state: number;
   zA?: Curve;
   zB?: Curve;
   zC?: Curve;

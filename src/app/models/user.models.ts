@@ -6,6 +6,7 @@
 export interface LoginUser {
   name: string;
   jurisdiction: number;
+  nameId: string;
 }
 
 /**

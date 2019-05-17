@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, SimpleChanges } from '@angular/core';
 import { Record, GroupItem } from 'src/app/models/task.models';
 import { taskModeStr, tableDev } from 'src/app/models/jack';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -10,9 +10,9 @@ import { TensionMm } from 'src/app/Function/device.date.processing';
   templateUrl: './record.component.html',
   styleUrls: ['./record.component.less']
 })
-export class RecordComponent implements OnInit {
+export class RecordComponent implements OnInit, OnChanges {
   @Input()
-  GroupData: GroupItem;
+    GroupData: GroupItem;
 
   /** 曲线数据 */
   svgData = {
@@ -30,7 +30,6 @@ export class RecordComponent implements OnInit {
   constructor(private fb: FormBuilder) { }
 
   ngOnInit() {
-    this.tensionStageArrF();
     const data = this.GroupData;
     this.svgData = {
       names: taskModeStr[data.mode],
@@ -44,10 +43,14 @@ export class RecordComponent implements OnInit {
       this.svgData.mpa.push(data.record[key].mapData);
       this.svgData.mm.push(data.record[key].mmData);
     });
-    this.elongation = TensionMm(data);
+    this.tensionStageArrF();
     console.log('记录数据处理', this.svgData, this.elongation);
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('数据变更');
+    this.tensionStageArrF();
+  }
   // 获取阶段数据
   tensionStageArrF() {
     this.tensionStageArr = [...Array(this.GroupData.tensionStage)];
@@ -55,6 +58,7 @@ export class RecordComponent implements OnInit {
     this.theoryIf = tableDev(mode, 4);
     this.devModeStr = taskModeStr[mode];
     this.holeNames = this.GroupData.name.split('/');
+    this.elongation = TensionMm(this.GroupData);
     console.log('011445445456456456456', this.devModeStr, mode, this.theoryIf);
   }
 }

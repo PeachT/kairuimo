@@ -21,8 +21,17 @@
       </ng-container>
     </ul>
     <ul class="menu-2">
-      <li *ngFor="let item of menu.bridge; index as i" [ngClass]="{'active': menu.selectBridge === item.id}" [class]="'bridge' + item.cls"
-        (click)="onMenubridge(item.id)">{{item.name}}-{{item.cls}}</li>
+      <li *ngFor="let item of menu.bridge; index as i" [ngClass]="{'active': menu.selectBridge === item.id}"
+        (click)="onMenubridge(item.id)">
+        <div class="state">
+          <div *ngIf="item.cls.e" style="background-color: #d9d9d9"></div>
+          <div *ngIf="item.cls.a" style="background-color: #45b787"></div>
+          <div *ngIf="item.cls.d" style="background-color: #51c4d3"></div>
+          <div *ngIf="item.cls.b" style="background-color: #fcd337"></div>
+          <div *ngIf="item.cls.c" style="background-color: #f34718"></div>
+        </div>
+        {{item.name}}
+      </li>
     </ul>
   </div>
   <div class="main">
@@ -78,9 +87,11 @@
               <nz-form-control>
                 <nz-radio-group [nzButtonStyle]="'solid'" [nzDisabled]="edit">
                   <label nz-radio-button [nzValue]="item"
-                    *ngFor="let item of validateForm.controls['holeRadio'].value; index as i"
-                    (click)="onHoleRadio(item)"
-                    [ngClass]="{'hole-active': editGroupIndex === i,'hole-base': editGroupIndex===null}">{{item}}</label>
+                    *ngFor="let item of holeNames; index as i"
+                    (click)="onHoleRadio(item.name)"
+                    [ngClass]="{'hole-active': editGroupIndex === i,'hole-base': editGroupIndex===null}"
+                    [class]="'hole' + item.cls"
+                    >{{item.name}}-{{item.cls}}</label>
                 </nz-radio-group>
                 <nz-form-explain style="color: #f5222d;"
                   *ngIf="validateForm.get('holeRadio').dirty && validateForm.get('holeRadio').errors">

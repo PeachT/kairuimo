@@ -96,7 +96,8 @@ export class LoginComponent implements OnInit {
           // sessionStorage.setItem('user', JSON.stringify(admin));
           this.appS.userInfo = {
             name: user.name,
-            jurisdiction: user.jurisdiction
+            jurisdiction: user.jurisdiction,
+            nameId: `${user.name}${user.id}`
           };
           this.message.success('登录成功🙂');
           this.router.navigate(['/task']);
@@ -110,4 +111,7 @@ export class LoginComponent implements OnInit {
   // usersInput(value: string): void {
   //   this.sUsers = this.users.filter(option => option.toLowerCase().indexOf(value.toLowerCase()) === 0);
   // }
+  touch(msg) {
+    console.log(msg);
+  }
 }

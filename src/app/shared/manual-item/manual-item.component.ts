@@ -146,8 +146,9 @@ export class ManualItemComponent implements OnInit {
     this.zero = this.PLCD.showMm;
   }
 
-  /** 松开 */
+  /** 按下 */
   onDown(i: number) {
+    console.log('按下');
     if (this.dev.setMpa > 0 || i > 0) {
       console.log(this.setM[i]);
       this.PLCS.ipcSend(`${this.devName}F05`, PLC_M(this.setM[i]), true);
@@ -156,8 +157,9 @@ export class ManualItemComponent implements OnInit {
       this.message.warning('设置压力不能等于0MPa');
     }
   }
-  /** 按下 */
+  /** 松开 */
   onUp(i) {
+    console.log('松开');
     if (this.setMState[i]) {
       console.log(this.setM[i]);
       this.PLCS.ipcSend(`${this.devName}F05`, PLC_M(this.setM[i]), false);

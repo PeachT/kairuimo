@@ -117,6 +117,8 @@ export class TaskComponent implements OnInit {
     templatePath: null,
     outPath: null,
   };
+  /**  */
+  holeNames: any;
 
   constructor(
     private fb: FormBuilder,
@@ -135,11 +137,19 @@ export class TaskComponent implements OnInit {
       if (queryParams.project) {
         this.routeData = queryParams;
       } else {
-        this.routeData = {
-          project: null,
-          component: null,
-          selectBridge: null,
-          editGroupName: null
+        let data = null;
+        if (this.appS.userInfo) {
+          data = JSON.parse(localStorage.getItem(this.appS.userInfo.nameId));
+        }
+        if (data) {
+          this.routeData = data;
+        } else {
+          this.routeData = {
+            project: null,
+            component: null,
+            selectBridge: null,
+            editGroupName: null
+          };
         }
       }
       console.log('路由', this.routeData, queryParams.project);
@@ -234,22 +244,27 @@ export class TaskComponent implements OnInit {
       const ps = await this.db.task.where({ project: this.project.id, component }).toArray();
       this.menu.selectComponent = component;
       this.menu.bridge =  ps.map(f => {
-        let cls = 0;
-        let cls2 = 0;
+        let cls = {
+          a: false,
+          b: false,
+          c: false,
+          d: false,
+          e: false,
+        };
         for (const g of f.groups) {
           if (g.record) {
-            if (g.record.tensionStage + 1 === g.tensionStage) {
-              cls = 2;
-            } else {
-              cls = 3;
-              break;
+            if (g.record.state === 2) {
+              cls.a = true;
+            } else if (g.record.state === 1) {
+              cls.b = true;
+            } else if (g.record.state === 3) {
+              cls.c = true;
+            } else if (g.record.state === 4) {
+              cls.d = true;
             }
           } else {
-            cls2 = 1;
+            cls.e = true;
           }
-        }
-        if (cls === 2 && cls2 === 1) {
-          cls = 1;
         }
         return { name: f.name, id: f.id, cls };
       });
@@ -270,6 +285,29 @@ export class TaskComponent implements OnInit {
       this.validateForm.reset(this.data);
       this.groupData = JSON.parse(JSON.stringify(this.data.groups));
       await this.getJackDel(this.data.device[0]);
+      this.editGroupIndex = null;
+      this.holeData = null;
+      this.holeNames = [];
+      this.data.groups.map(g => {
+        let cls = 0;
+        if (g.record) {
+          cls = g.record.state;
+        }
+        this.holeNames.push({name: g.name, cls});
+      });
+      localStorage.setItem(this.appS.userInfo.nameId, JSON.stringify(
+        {
+          project: this.data.project,
+          component: this.data.component,
+          selectBridge: this.data.id,
+          editGroupName: null
+      }));
+      // {
+      //   project: null,
+      //   component: null,
+      //   selectBridge: null,
+      //   editGroupName: null
+      // }
       // this.startBaseSub();
     } else {
       console.log('aaaaaaaaaaaaaaaaaaaaaaa');
