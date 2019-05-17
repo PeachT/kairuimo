@@ -65,11 +65,12 @@
         <tr>
           <th width="120">任务</th>
           <th width="120">张拉孔道</th>
-          <th>初张拉</th>
+          <th *ngFor="let item of stageStr">{{item}}</th>
+          <!-- <th>初张拉</th>
           <th>阶段一</th>
           <th *ngIf="tensionStageArr.length > 3">阶段二</th>
           <th *ngIf="tensionStageArr.length > 4">阶段三</th>
-          <th>终张拉</th>
+          <th>终张拉</th> -->
           <th width="120">工作长度mm</th>
           <th width="120">理论伸长量mm</th>
         </tr>

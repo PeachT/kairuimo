@@ -4,6 +4,7 @@ import { taskModeStr, tableDev } from 'src/app/models/jack';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Elongation } from 'src/app/models/live';
 import { TensionMm } from 'src/app/Function/device.date.processing';
+import { getStageString } from 'src/app/Function/stageString';
 
 @Component({
   selector: 'app-record',
@@ -26,6 +27,7 @@ export class RecordComponent implements OnInit, OnChanges {
   theoryIf = null;
   devModeStr = null;
   holeNames = null;
+  stageStr = ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉'];
 
   constructor(private fb: FormBuilder) { }
 
@@ -53,7 +55,8 @@ export class RecordComponent implements OnInit, OnChanges {
   }
   // 获取阶段数据
   tensionStageArrF() {
-    this.tensionStageArr = [...Array(this.GroupData.tensionStage)];
+    this.tensionStageArr = [...Array(this.GroupData.tensionStage + 1)];
+    this.stageStr = getStageString(this.GroupData);
     const mode = this.GroupData.mode;
     this.theoryIf = tableDev(mode, 4);
     this.devModeStr = taskModeStr[mode];

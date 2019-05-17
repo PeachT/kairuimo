@@ -18,7 +18,10 @@ export interface GroupItem {
   stage: Array<number>;
   time: Array<number>;
   returnMm: number;
+  /** 二次张拉 */
   twice: boolean;
+  /** 超张拉 */
+  super: boolean;
   zA?: AB;
   zB?: AB;
   zC?: AB;

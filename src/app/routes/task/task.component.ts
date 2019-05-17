@@ -330,7 +330,9 @@ export class TaskComponent implements OnInit {
       this.appS.edit = true;
     }
   }
-  /** 切换张拉组 */
+  /**
+   * *切换张拉组
+   */
   onHoleRadio(name) {
     if (this.edit || !this.data.id) { return; }
     if (this.holeSub$) {
@@ -350,7 +352,7 @@ export class TaskComponent implements OnInit {
     // this.taskDataDom.tensionStageArrF();
     if (this.holeSub$ === null) {
       this.holeSub$ = this.taskDataDom.holeForm.valueChanges.subscribe((s) => {
-        console.log('编辑2监控', s);
+        // console.log('编辑2监控', s);
         this.edit = true;
         this.appS.edit = true;
       });
@@ -487,11 +489,12 @@ export class TaskComponent implements OnInit {
         length: 0,
         tensionKn: 0,
         steelStrandNumber: 0,
-        tensionStage: 4,
-        stage: [10, 20, 50, 100, 101],
-        time: [30, 30, 30, 300, 300],
+        tensionStage: 3,
+        stage: [10, 20, 50, 100, 0, 0, 0],
+        time: [30, 30, 30, 300, 0, 0, 0],
         returnMm: 6,
         twice: false,
+        super: false,
       };
       taskModeStr[this.group.mode].map(d => {
         taskBase[d] = {
@@ -505,6 +508,11 @@ export class TaskComponent implements OnInit {
       this.groupData.push(taskBase);
     });
     this.validateForm.controls.holeRadio.setValue(this.group.g);
+    this.holeNames = [];
+    this.group.g.map(g => {
+      this.holeNames.push({name: g, cls: 0});
+    });
+    console.log(this.holeNames, this.group.g);
     console.log(this.groupData);
     this.groupIsVisible = false;
   }
@@ -599,6 +607,7 @@ export class TaskComponent implements OnInit {
   add() {
     this.group.mode = null;
     this.componentOptions.holes = null;
+    this.holeNames = [];
     this.onMenubridge(null);
   }
   /** 修改 */
@@ -643,7 +652,7 @@ export class TaskComponent implements OnInit {
         const i0 = Number(this.holeData[name].kn[index - 1]);
         const i1 = Number(this.holeData[name].kn[index]);
         console.log(i0, '>=', i1, '=', i0 >= i1);
-        if ((i0 >= i1) || i0 > 56 || i1 > 56) {
+        if ((i0 > i1) || i0 > 56 || i1 > 56) {
           this.tensionDevice[name] = '阶段压力设置错误';
           s = true;
         }

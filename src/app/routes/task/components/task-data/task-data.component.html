@@ -24,10 +24,12 @@
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>张拉段数</nz-form-label>
     <nz-form-control [nzSm]="5">
-      <nz-select formControlName="tensionStage" #tensionStage (ngModelChange)="onStage($event)">
-        <nz-option [nzValue]="3" nzLabel="三段"></nz-option>
-        <nz-option [nzValue]="4" nzLabel="四段"></nz-option>
-        <nz-option [nzValue]="5" nzLabel="五段"></nz-option>
+      <nz-select formControlName="tensionStage" #tensionStage (ngModelChange)="onStage()">
+        <nz-option [nzValue]="2" nzLabel="三段"></nz-option>
+        <nz-option [nzValue]="3" nzLabel="四段"></nz-option>
+        <nz-option [nzValue]="4" nzLabel="五段"></nz-option>
+        <nz-option [nzValue]="5" nzLabel="六段" [nzDisabled]="true"></nz-option>
+        <nz-option [nzValue]="6" nzLabel="七段" [nzDisabled]="true"></nz-option>
       </nz-select>
     </nz-form-control>
     <!--  -->
@@ -37,7 +39,11 @@
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>二次张拉</nz-form-label>
     <nz-form-control [nzSm]="5">
-      <nz-switch formControlName="twice" (ngModelChange)="onTwice($event)"></nz-switch>
+      <nz-switch formControlName="twice" (ngModelChange)="onTwice()"></nz-switch>
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>超张拉</nz-form-label>
+    <nz-form-control [nzSm]="5">
+      <nz-switch formControlName="super" (ngModelChange)="onSuper()"></nz-switch>
     </nz-form-control>
   </nz-form-item>
 
@@ -47,11 +53,13 @@
         <tr>
           <th width="80">任务</th>
           <th width="80">张拉孔道</th>
-          <th>初张拉</th>
-          <th>阶段一</th>
+          <th *ngFor="let item of stageStr">{{item}}</th>
+          <!-- <th>阶段一</th>
           <th *ngIf="tensionStage.value > 3">阶段二</th>
-          <th *ngIf="tensionStage.value > 4">阶段三</th>
+          <th *ngIf="holeForm.value.twice">阶段二·2</th>
+          <th *ngIf="!holeForm.value.super && !holeForm.value.twice && tensionStage.value > 4">阶段三</th>
           <th>终张拉</th>
+          <th *ngIf="holeForm.value.super">超张拉</th> -->
           <th width="100">工作长度</th>
           <th width="100">理论伸长量</th>
         </tr>

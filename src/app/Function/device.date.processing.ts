@@ -107,15 +107,23 @@ export function TensionMm(data: GroupItem): Elongation {
     cC: { mm: 0, sumMm: 0, percent: 0 },
     cD: { mm: 0, sumMm: 0, percent: 0 },
   };
-  taskModeStr.AB8.map(key => {
-    if (taskModeStr[data.mode].indexOf(key) >= 0) {
-      const mm = data.record[key].mm;
-      elongation[key].mm =
-        myToFixed(Number(mm[mm.length - 1])
-        - (2 * mm[0])
-        + Number(mm[1])
+  /** 单顶位移 */
+  taskModeStr[data.mode].map(key => {
+    const mm = data.record[key].mm;
+    // console.log('位移数据', mm, key, data.twice && data.record.twice);
+    if (data.twice && data.record.twice && mm.length > 3) {
+      elongation[key].mm = myToFixed(
+        Number(mm[2]) - (2 * mm[0]) + Number(mm[1])
+        + Number(mm[mm.length - 1]) - Number(mm[3])
         - Number(data.returnMm)
-        - Number(data[key].wordMm));
+        - Number(data[key].wordMm)
+      );
+    } else {
+      elongation[key].mm = myToFixed(
+        Number(mm[mm.length - 1]) - (2 * mm[0]) + Number(mm[1])
+        - Number(data.returnMm)
+        - Number(data[key].wordMm)
+      );
     }
   });
   taskModeStr[data.mode].map(key => {

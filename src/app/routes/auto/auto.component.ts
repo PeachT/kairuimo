@@ -12,6 +12,7 @@ import { GroupItem } from 'src/app/models/task.models';
 import { mpaToPlc, TensionMm, myToFixed, mmToPlc } from 'src/app/Function/device.date.processing';
 import { AutoDate } from 'src/app/models/device';
 import { Elongation } from 'src/app/models/live';
+import { getStageString } from 'src/app/Function/stageString';
 
 @Component({
   selector: 'app-auto',
@@ -63,6 +64,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     goBack: false,
     nowBack: false,
     nowDelay: false,
+    nowTwice: false,
   };
   autoData: AutoDate;
   // 张拉完成
@@ -188,6 +190,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     cC: 0,
     cD: 0,
   };
+  stageStr = ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉'];
 
   constructor(
     private fb: FormBuilder,
@@ -223,8 +226,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
+    this.stageStr = getStageString(this.task);
     await this.PLCS.selectJack(this.autoS.task.jackId);
-
   }
   ngOnDestroy() {
     console.log('退出');
@@ -251,6 +254,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.svgData.mpa.push(this.task.record[name].mapData);
         this.svgData.mm.push(this.task.record[name].mmData);
       });
+      if (this.task.record.tensionStage > 1) {
+        this.elongation = TensionMm(this.task);
+      }
     } else {
       this.svgData.mpa.push(['time']);
       this.svgData.mm.push(['time']);
@@ -268,7 +274,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     const tensionStage = this.task.tensionStage;
     this.theoryIf = tableDev(mode);
     this.devNames = taskModeStr[mode];
-    this.tensionStageArr = [...Array(tensionStage)];
+    this.tensionStageArr = [...Array( tensionStage + 1)];
     this.holeNames = name.split('/');
     console.log('011445445456456456456', this.devNames, mode);
   }
@@ -379,9 +385,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *启动张拉
    */
   run() {
-    if (this.task.record && this.task.record.tensionStage > 0) {
+    if (this.task.record && this.task.record.tensionStage > 0 && this.task.record.state !== 4) {
       this.twoDownPLCdata();
     } else {
+      if (this.task.record && this.task.record.state === 4) {
+        console.log('二次张拉22222222');
+        this.task.record.tensionStage++;
+      }
       this.downPLCData();
     }
     this.ec();
@@ -524,11 +534,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.auto.nowDelay = true;
       this.nowDelay++;
       if (this.nowDelay >= this.delay) {
-        if (this.task.record.tensionStage + 1 === this.task.tensionStage) {
+        if ((this.task.record.tensionStage === this.task.tensionStage)
+          || (this.task.twice && !this.task.record.twice && this.task.record.tensionStage === 2)) {
           this.tensionOk = true;
           this.delay = Number(this.autoData.unloadingDelay); // 卸荷延时时间
           this.nowDelay = 0;
         } else {
+          // this.pushMake({})
           this.task.record.tensionStage += 1;
           this.auto.nowDelay = false;
           this.downPLCData();
@@ -630,7 +642,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     let s = false;
     names.map(n => {
       // console.log(n, '平衡控制', this.elongation[n].mm - min, this.autoData.tensionBalance);
-      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n]) {
+      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n] && !this.auto.nowDelay) {
         this.balanceState[n] = true;
         s = true;
       }
@@ -655,7 +667,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       const names = taskModeStr[this.task.mode];
       for (const key of names) {
         const cmpMpa = myToFixed(Math.abs(this.PLCS.PD[`z${key[1]}`].showMpa - this.PLCS.PD[`c${key[1]}`].showMpa));
-        console.log(cmpMpa);
+        console.log('压力差', cmpMpa);
         if (key[0] === 'z' && cmpMpa > this.autoData.pressureDifference) {
           if (!this.auto.pause) {
             const msg = `压力差${cmpMpa}`;
@@ -751,10 +763,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         });
       }
-
-      if (this.auto.runState && !this.tensionOk && !this.auto.pause && !this.auto.nowBack) {
+      /** 压力差与张拉平衡 */
+      if (
+        this.auto.runState && !this.tensionOk && !this.auto.pause && !this.auto.nowBack
+        && ( !this.task.record.twice || this.task.record.tensionStage > 3)
+      ) {
         this.cmpMpa();
-        if (this.task.record.tensionStage >= 1) {
+        if (this.task.record.tensionStage >= 1 && (!this.task.record.twice || this.task.record.tensionStage > 3)) {
           this.elongation = TensionMm(this.task);
           this.balance();
         }
@@ -832,13 +847,18 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   /** 保存数据 */
   save(out = false) {
     if (this.tensionOk) {
-      this.task.record.state = 2;
-      const names = taskModeStr[this.task.mode];
-      names.map(n => {
-        if (n[0] === 'z' && Math.abs(this.elongation[n].percent) > 6) {
-          this.task.record.state = 3;
-        }
-      });
+      if (this.task.twice && this.task.record.tensionStage === 2) {
+        this.task.record.state = 4;
+        this.task.record.twice = true;
+      } else {
+        this.task.record.state = 2;
+        const names = taskModeStr[this.task.mode];
+        names.map(n => {
+          if (n[0] === 'z' && Math.abs(this.elongation[n].percent) > 6) {
+            this.task.record.state = 3;
+          }
+        });
+      }
     } else {
       this.task.record.state = 1;
     }
