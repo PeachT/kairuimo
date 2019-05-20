@@ -177,21 +177,9 @@ export function carterJaskMenu(mode: number) {
  * @returns
  */
 export function tableDev(mode: string, rowSpan = 2) {
-  let zA = 0;
-  let zB = 0;
-  if (mode === 'AB4' || mode === 'AB8') {
-    zA = rowSpan;
-    zB = rowSpan;
-  }
-  if (mode === 'A2') {
-    zA = rowSpan;
-  }
-  if (mode === 'B2') {
-    zA = rowSpan;
-  }
   return {
-    zA: mode === 'A1' ? 1 : zA,
-    zB: mode === 'B1' ? 1 : zB,
+    zA: mode === 'A1' ? 1 : rowSpan,
+    zB: mode === 'B1' ? 1 : rowSpan,
     zC: mode === 'AB8' ? rowSpan : 0,
     zD: mode === 'AB8' ? rowSpan : 0,
     cA: 0,

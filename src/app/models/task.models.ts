@@ -68,4 +68,4 @@ export interface AB {
 }
 
 /** 用户索引 */
-export const TaskIndex = '++id,&name,component, project';
+export const TaskIndex = '++id, name, component, project';

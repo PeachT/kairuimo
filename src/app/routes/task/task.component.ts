@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { DB, DbService } from 'src/app/services/db.service';
+import { DB, DbService, tableName } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
 import { User } from 'src/app/models/user.models';
@@ -219,7 +219,7 @@ export class TaskComponent implements OnInit {
   /** 获取项目菜单 */
   async getProjectMenu() {
     const ps = await this.db.project.toArray();
-    this.projectMneu =  ps.map(item => {
+    this.projectMneu = ps.map(item => {
       return { name: item.projectName, id: item.id };
     });
   }
@@ -231,6 +231,7 @@ export class TaskComponent implements OnInit {
   }
   /** 获取二级菜单 */
   async onMenuOne(component = null) {
+    console.log(component, this.menu);
     if (component === null || this.ifEdit()) { return; }
     this.menu.bridge = [];
     if (this.menu.selectComponent !== null || component === this.menu.selectComponent) {
@@ -243,8 +244,8 @@ export class TaskComponent implements OnInit {
     } else {
       const ps = await this.db.task.where({ project: this.project.id, component }).toArray();
       this.menu.selectComponent = component;
-      this.menu.bridge =  ps.map(f => {
-        let cls = {
+      this.menu.bridge = ps.map(f => {
+        const cls = {
           a: false,
           b: false,
           c: false,
@@ -268,12 +269,12 @@ export class TaskComponent implements OnInit {
         }
         return { name: f.name, id: f.id, cls };
       });
-      console.log('梁数据', ps, this.menu.bridge );
+      console.log('梁数据', ps, this.menu.bridge);
     }
   }
   /** 选择梁菜单 */
   async onMenubridge(id: any = 'null', copyData = null) {
-    console.log('选择梁', id , copyData);
+    console.log('选择梁', id, copyData);
     id = Number(id);
     if (id === 'null' || this.ifEdit()) { return; }
     id = id === 'null' ? null : id;
@@ -293,7 +294,7 @@ export class TaskComponent implements OnInit {
         if (g.record) {
           cls = g.record.state;
         }
-        this.holeNames.push({name: g.name, cls});
+        this.holeNames.push({ name: g.name, cls });
       });
       localStorage.setItem(this.appS.userInfo.nameId, JSON.stringify(
         {
@@ -301,7 +302,7 @@ export class TaskComponent implements OnInit {
           component: this.data.component,
           selectBridge: this.data.id,
           editGroupName: null
-      }));
+        }));
       // {
       //   project: null,
       //   component: null,
@@ -498,7 +499,7 @@ export class TaskComponent implements OnInit {
       };
       taskModeStr[this.group.mode].map(d => {
         taskBase[d] = {
-          kn: [0, 0, 0, 0, 0],
+          kn: [0, 0, 0, 0, 0, 0, 0],
           wordMm: 4,
         };
         if (d.indexOf('zA') > -1 || d.indexOf('zB') > -1 || d.indexOf('zC') > -1 || d.indexOf('zD') > -1) {
@@ -510,7 +511,7 @@ export class TaskComponent implements OnInit {
     this.validateForm.controls.holeRadio.setValue(this.group.g);
     this.holeNames = [];
     this.group.g.map(g => {
-      this.holeNames.push({name: g, cls: 0});
+      this.holeNames.push({ name: g, cls: 0 });
     });
     console.log(this.holeNames, this.group.g);
     console.log(this.groupData);
@@ -518,7 +519,7 @@ export class TaskComponent implements OnInit {
   }
 
   /** 保存数据 */
-  save() {
+  async save() {
     // tslint:disable-next-line:forin
     for (const i in this.validateForm.controls) {
       if (i !== 'name') {
@@ -539,7 +540,7 @@ export class TaskComponent implements OnInit {
     console.log(this.data);
     // const data = Object.assign(this.data, this.validateForm.value);
     const data = this.validateForm.value;
-    if (this.data.id) {
+    if (this.data &&  this.data.id) {
       const value = this.taskDataDom.holeForm.value;
       this.holeData = value;
       this.groupData[this.editGroupIndex] = value;
@@ -555,7 +556,9 @@ export class TaskComponent implements OnInit {
     // 添加
     if (!this.data.id) {
       delete this.data.id;
-      this.db.task.add(this.data).then((id) => {
+      const r = await this.odb.addAsync(tableName.task, this.data,
+        (t: TensionTask) => t.project === this.data.project && t.component === this.data.component && t.name === this.data.name);
+      if (r.success) {
         this.message.success('添加成功🙂');
         this.edit = false;
         this.appS.edit = false;
@@ -563,23 +566,41 @@ export class TaskComponent implements OnInit {
         this.routeData = {
           project: this.data.project,
           component: this.data.component,
-          selectBridge: id,
+          selectBridge: r.id,
           editGroupName: null
-        }
+        };
         this.goRouteHole();
-        console.log(id);
-      }).catch((err) => {
+      } else {
         this.message.error('添加失败😔');
-        console.log(err);
-      });
+        console.log('添加失败😔', r.msg);
+      }
     } else {
-      this.db.task.update(this.data.id, this.data).then((updata) => {
+      const r = await this.odb.updateAsync(tableName.task, this.data,
+        (t: TensionTask) => t.project === this.data.project
+        && t.component === this.data.component && t.name === this.data.name && t.id !== this.data.id);
+      if (r.success) {
         this.message.success('修改成功🙂');
         this.edit = false;
         this.appS.edit = false;
-      }).catch((err) => {
-        this.message.error(`修改失败😔${err}`);
-      });
+        this.menu.selectComponent = null;
+        this.routeData = {
+          project: this.data.project,
+          component: this.data.component,
+          selectBridge: this.data.id,
+          editGroupName: this.editGroupName
+        };
+        this.goRouteHole();
+      } else {
+        this.message.error(`修改失败😔`);
+        console.log(r.msg);
+      }
+      // this.db.task.update(this.data.id, this.data).then((updata) => {
+      //   this.message.success('修改成功🙂');
+      //   this.edit = false;
+      //   this.appS.edit = false;
+      // }).catch((err) => {
+      //   this.message.error(`修改失败😔${err}`);
+      // });
     }
   }
 
@@ -623,7 +644,9 @@ export class TaskComponent implements OnInit {
     console.log('复制', copy);
     this.onMenubridge(null, copy);
   }
-  /** 张拉 */
+  /**
+   * *张拉
+   */
   tension() {
     console.log('张拉', this.holeData, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
     if (this.tensionDeviceState()) {
@@ -644,10 +667,21 @@ export class TaskComponent implements OnInit {
   }
   /** 检查设备状态 */
   tensionDeviceState(): boolean {
+    if (!this.PLCS.plcState.z) {
+      return true;
+    }
+    if (this.holeData.mode !== 'A1' && this.holeData.mode !== 'B1' && !this.PLCS.plcState.c) {
+      return true;
+    }
     let s = false;
     for (const name of taskModeStr[this.holeData.mode]) {
       console.log(this.PLCS.PD[name].alarm, this.PLCS.PD[name].state);
       this.tensionDevice[name] = null;
+      if (Number(this.holeData[name].kn[this.holeData.tensionStage]) < 2) {
+        this.tensionDevice[name] = '最终张拉压力不能 < 2Mpa';
+        s = true;
+        break;
+      }
       for (let index = 1; index < this.holeData.tensionStage; index++) {
         const i0 = Number(this.holeData[name].kn[index - 1]);
         const i1 = Number(this.holeData[name].kn[index]);

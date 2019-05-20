@@ -21,14 +21,14 @@ export class TaskDataComponent implements OnInit {
   devModeStr = [];
   holeNames = [];
   theoryIf: any = {
-    zA: false,
-    zB: false,
-    zC: false,
-    zD: false,
-    cA: false,
-    cB: false,
-    cC: false,
-    cD: false,
+    zA: 1,
+    zB: 1,
+    zC: 1,
+    zD: 1,
+    cA: 0,
+    cB: 0,
+    cC: 0,
+    cD: 0,
   };
   holeForm: FormGroup;
   modeName = modeName;
@@ -77,27 +77,11 @@ export class TaskDataComponent implements OnInit {
     });
     this.holeForm = this.fb.group(group);
     if (data) {
-      // let stage = data.tensionStage;
-      // console.log(stage);
-      // if (data.twice) {
-      //   stage -= 1;
-      // }
-      // if (data.super) {
-      //   stage -= 1;
-      // }
-      // this.stageStr = this.stageStrs[stage];
-      // console.log(stage, this.stageStr);
-      // if (data.twice) {
-      //   this.stageStr.splice(3, 0, '阶段二·2');
-      // }
-      // if (data.super) {
-      //   this.stageStr.push('超张拉');
-      // }
-      getStageString(data);
       this.holeForm.reset(data);
+      this.stageStr = getStageString(data);
     }
     console.log(this.holeForm.value);
-    this.tensionStageArrF();
+    this.tensionStageArrF(true);
   }
   /** 创建设备from */
   createDevFrom() {
@@ -199,80 +183,61 @@ export class TaskDataComponent implements OnInit {
     // this.inputKn();
   }
   // 获取阶段数据
-  tensionStageArrF(value = this.holeForm.controls.tensionStage.value) {
+  tensionStageArrF(state = false) {
+    const value = this.holeForm.controls.tensionStage.value;
     this.tensionStageArr =  [...Array(value + 1)];
     const stage = this.holeForm.value.stage;
     const time = this.holeForm.value.time;
-    this.stageStr.map((s, i) => {
-      console.log(s);
-      switch (s) {
-        case '初张拉':
-          stage[i] = 10;
-          time[i] = 30;
-          break;
-        case '阶段一':
-          stage[i] = 20;
-          time[i] = 30;
-          break;
-        case '阶段二':
-          stage[i] = 50;
-          if (this.stageStr.indexOf('阶段二·2') > -1) {
-            time[i] = 300;
-          } else {
+    if (!state) {
+      this.stageStr.map((s, i) => {
+        console.log(s);
+        switch (s) {
+          case '初张拉':
+            stage[i] = 10;
             time[i] = 30;
-          }
-          break;
-        case '阶段二·2':
-          stage[i] = 50;
-          time[i] = 30;
-          break;
-        case '阶段三':
-          stage[i] = 80;
-          time[i] = 300;
-          break;
-        case '终张拉':
-          stage[i] = 100;
-          time[i] = 300;
-          break;
-        case '超张拉':
-          stage[i] = 103;
-          time[i] = 300;
-          break;
-        default:
-          break;
-      }
-    });
+            break;
+          case '阶段一':
+            stage[i] = 20;
+            time[i] = 30;
+            break;
+          case '阶段二':
+            stage[i] = 50;
+            if (this.stageStr.indexOf('阶段二·2') > -1) {
+              time[i] = 300;
+            } else {
+              time[i] = 30;
+            }
+            break;
+          case '阶段二·2':
+            stage[i] = 50;
+            time[i] = 30;
+            break;
+          case '阶段三':
+            stage[i] = 80;
+            time[i] = 300;
+            break;
+          case '终张拉':
+            stage[i] = 100;
+            time[i] = 300;
+            break;
+          case '超张拉':
+            stage[i] = 103;
+            time[i] = 300;
+            break;
+          default:
+            break;
+        }
+      });
+    }
     this.holeForm.controls.stage.setValue(stage);
     this.holeForm.controls.time.setValue(time);
     console.log(this.holeForm.value.stage);
     // console.log(this.tensionStageArr);
     const mode = this.holeForm.controls.mode.value;
-    let zA = 0;
-    let zB = 0;
-    if (mode === 'AB4' || mode === 'AB8') {
-      zA = 2;
-      zB = 2;
-    }
-    if (mode === 'A2') {
-      zA = 2;
-    }
-    if (mode === 'B2') {
-      zA = 2;
-    }
-    this.theoryIf = {
-      zA: mode === 'A1' ? 1 : zA,
-      zB: mode === 'B1' ? 1 : zB,
-      zC: mode === 'AB8' ? 2 : 0,
-      zD: mode === 'AB8' ? 2 : 0,
-      cA: 0,
-      cB: 0,
-      cC: 0,
-      cD: 0,
-    };
     this.theoryIf = tableDev(mode);
     this.devModeStr = taskModeStr[mode];
     this.holeNames = this.holeForm.value.name.split('/');
-    // console.log('011445445456456456456', this.devModeStr, mode);
+    console.log('011445445456456456456', this.theoryIf, mode);
     this.inputKn();
   }
 }

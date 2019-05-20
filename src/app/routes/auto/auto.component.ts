@@ -211,15 +211,6 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.autoS.task = autoTask;
       this.task = autoTask.groupData;
       console.log('12312313123123131', autoTask);
-      // this.odb.db.task.filter(f => f.id = this.autoS.task.id).first((d) => {
-      //   console.log(d);
-      //   d.groups.filter((f, i) => {
-      //     if (f.name === this.task.name) {
-      //       console.log('下标', i);
-      //     }
-      //     return f.name === this.task.name;
-      //   });
-      // });
       this.PLCS.getMpaRevise();
       this.tensionStageArrF();
     }
@@ -236,6 +227,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     clearInterval(this.svgt);
     clearInterval(this.selfInspectData.zt);
     clearInterval(this.selfInspectData.ct);
+    localStorage.setItem('autoTask', null);
   }
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit() {
@@ -243,7 +235,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.tableHeight = this.tableDom.nativeElement.offsetHeight;
     this.svgHeight = (this.mainDom.nativeElement.offsetHeight - this.tableDom.nativeElement.offsetHeight) / 2;
     this.initSvg();
-    console.log('二次张拉', this.task.record && this.task.record.tensionStage > 0)
+    console.log('二次张拉', this.task.record);
   }
   /** 初始化曲线 */
   initSvg() {
@@ -264,6 +256,12 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.svgData.mpa.push([name]);
         this.svgData.mm.push([name]);
       });
+    }
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      this.PLCS.ipcSend('cF06', PLC_D(409), 1);
+      this.PLCS.ipcSend('zF06', PLC_D(409), 1);
+    } else {
+      this.PLCS.ipcSend('zF06', PLC_D(409), 0);
     }
   }
   // 获取阶段数据
@@ -316,27 +314,32 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *自检
    */
   selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
+    let is = 0;
     this.selfInspectData[`${device}t`] = setInterval(() => {
       // console.log('运行中');
       const nameSatate = this.selfInspectData.state[name];
       names.map(n => {
         const subMm = Number(this.PLCS.PD[n].showMm) - Number(this.selfInspectData.mm[n]);
-        console.log(n, this.PLCS.PD[n].showMm, '-', this.selfInspectData.mm[n], '=', subMm);
+        console.log(n, subMm, is);
         if (n === name) {
-          if (subMm > 2) {
+          if (subMm > 1) {
             this.selfInspectData.state[name] = 2;
-          } else if (subMm < -2) {
+          } else if (subMm < -2 || this.PLCS.PD[n].showMpa > 1.5) {
             this.selfInspectData.state[name] = 3;
           }
         } else if (subMm > 2 || subMm < -2) {
           this.selfInspectData.state[name] = 3;
         }
       });
-      if (nameSatate > 2) {
+      if (nameSatate > 2 || is > 10) {
         console.log(name, device, '失败');
         clearInterval(this.selfInspectData[`${device}t`]);
         console.log(this.selfInspectData.state);
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
+        this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
+        this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
+        this.auto.pauseMsg = `${name}自检错误！切换到手动模式测试设备是否正常！`;
+        this.pause();
       } else if (nameSatate === 2) {
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
         console.log(name, device, '成功');
@@ -344,7 +347,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
 
         let state = true;
         taskModeStr[this.task.mode].map(key => {
-          if (key.indexOf(device) > -1 && this.selfInspectData.state[key] !== 2) {
+          if (key[0] === device && this.selfInspectData.state[key] !== 2) {
             state = false;
           }
         });
@@ -366,12 +369,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.selfInspectStart(device);
         }
       }
+      is ++;
     }, 1000);
   }
   selfInspectStart(device: string) {
     const names = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}[device];
-    const name = names[this.selfInspectData.index];
-    console.log(name, device, '开始自检');
+    // const name = names[this.selfInspectData.index];
+    const name = taskModeStr[this.task.mode][this.selfInspectData.index];
     names.map(n => {
       this.selfInspectData.mm[n] = this.PLCS.PD[n].showMm;
     });
@@ -385,7 +389,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *启动张拉
    */
   run() {
+    console.log('开始', this.task.record);
     if (this.task.record && this.task.record.tensionStage > 0 && this.task.record.state !== 4) {
+      console.log('二次任务');
       this.twoDownPLCdata();
     } else {
       if (this.task.record && this.task.record.state === 4) {
@@ -441,7 +447,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.target[name] = this.task[name].kn[stage];
     });
     this.setPLCMpa(pMpa);
-    console.log('二次数据下载', this.task.record, pMpa, this.twoMm);
+    console.log('数据下载', this.task.record, pMpa, this.twoMm);
   }
   /**
    * *二次任务下载到PLC
@@ -482,22 +488,31 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       let unok = true;
       let tensionOk = true;
       for (const name of taskModeStr[this.task.mode]) {
-        if (this.PLCS.PD.cA.autoState[0] !== '等待保压') {
+        if (this.PLCS.PD[name].autoState[0] !== '等待保压') {
           un = false;
         }
-        if (this.PLCS.PD.cA.autoState[0] !== '卸荷完成') {
+        if (this.PLCS.PD[name].autoState[0] !== '卸荷完成') {
           unok = false;
         }
-        if (this.PLCS.PD.cA.autoState[0] !== '张拉完成') {
+        if (this.PLCS.PD[name].autoState[0] !== '张拉完成') {
           tensionOk = false;
         }
       }
       if (un) {
-        const pMpa: any = {};
-        for (const name of taskModeStr.AB8) {
+        const pMpa: any = {
+          zA: 0,
+          zB: 0,
+          zC: 0,
+          zD: 0,
+          cA: 0,
+          cB: 0,
+          cC: 0,
+          cD: 0,
+        };
+        for (const name of taskModeStr[this.task.mode]) {
           /** 数据转换 */
-          pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task.zA.kn[0], this.PLCS.mpaRevise[name]) : 0;
-          this.target[name] = this.task.zA.kn[0];
+          pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task[name].kn[0], this.PLCS.mpaRevise[name]) : 0;
+          this.target[name] = this.task[name].kn[0];
         }
         this.setPLCD(454, pMpa); // 设置卸荷压力
         this.setPLCM(523, true); // 启动卸荷阀
@@ -511,7 +526,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       let ten = true;
       for (const name of taskModeStr[this.task.mode]) {
-        if (this.PLCS.PD.cA.autoState[0] !== '等待保压') {
+        if (this.PLCS.PD[name].autoState[0] !== '等待保压') {
           ten = false;
         }
       }
@@ -527,7 +542,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   delayF() {
     let ten = true;
     for (const name of taskModeStr[this.task.mode]) {
-      if (this.PLCS.PD.cA.autoState[0] !== '等待保压') {
+      if (this.PLCS.PD[name].autoState[0] !== '等待保压') {
         ten = false;
       }
     }
@@ -562,22 +577,31 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     let unok = true;
     let tensionOk = true;
     for (const name of taskModeStr[this.task.mode]) {
-      if (this.PLCS.PD.cA.autoState[0] !== '等待保压') {
+      if (this.PLCS.PD[name].autoState[0] !== '等待保压') {
         un = false;
       }
-      if (this.PLCS.PD.cA.autoState[0] !== '卸荷完成') {
+      if (this.PLCS.PD[name].autoState[0] !== '卸荷完成') {
         unok = false;
       }
-      if (this.PLCS.PD.cA.autoState[0] !== '张拉完成') {
+      if (this.PLCS.PD[name].autoState[0] !== '张拉完成') {
         tensionOk = false;
       }
     }
     if (un) {
-      const pMpa: any = {};
-      for (const name of taskModeStr.AB8) {
+      const pMpa: any = {
+        zA: 0,
+        zB: 0,
+        zC: 0,
+        zD: 0,
+        cA: 0,
+        cB: 0,
+        cC: 0,
+        cD: 0,
+      };
+      for (const name of taskModeStr[this.task.mode]) {
         /** 数据转换 */
-        pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task.zA.kn[0], this.PLCS.mpaRevise[name]) : 0;
-        this.target[name] = this.task.zA.kn[0];
+        pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task[name].kn[0], this.PLCS.mpaRevise[name]) : 0;
+        this.target[name] = this.task[name].kn[0];
       }
       this.setPLCD(454, pMpa); // 设置卸荷压力
       this.setPLCM(523, true); // 启动卸荷阀
@@ -647,7 +671,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     let s = false;
     names.map(n => {
       // console.log(n, '平衡控制', this.elongation[n].mm - min, this.autoData.tensionBalance);
-      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n] && !this.auto.nowDelay) {
+      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n]) {
         this.balanceState[n] = true;
         s = true;
       }
@@ -693,7 +717,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     let backOk = true;
     for (const key of names) {
       /** 极限报警 || 超伸长量 */
-      if (this.PLCS.PD[key].alarm.length > 0) {
+      if (this.PLCS.PD[key].alarm.length > 0 || this.comm()) {
         this.auto.nowPause = true;
         if (!this.auto.pause) {
           const msg = this.PLCS.PD[key].alarm.join('|');
@@ -722,6 +746,17 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.pause();
         this.auto.goBack = true;
       }
+    }
+  }
+  /**
+   * *通信状态
+   */
+  comm() {
+    if (!this.PLCS.plcState.z) {
+      return true;
+    }
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1' && !this.PLCS.plcState.c) {
+      return true;
     }
   }
   /**
@@ -770,7 +805,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       /** 压力差与张拉平衡 */
       if (
-        this.auto.runState && !this.tensionOk && !this.auto.pause && !this.auto.nowBack
+        this.auto.runState && !this.tensionOk  && !this.auto.nowBack
         && ( !this.task.record.twice || this.task.record.tensionStage > 3)
       ) {
         this.cmpMpa();

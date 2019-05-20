@@ -24,7 +24,41 @@ export class DbService {
 
   /** 判断数据是否重复 */
   // tslint:disable-next-line:max-line-length
-  public repetition(tName: string, filterFunction: { (obj: Project | TensionTask | Comp | User): boolean; projectName?: any; }): Observable<boolean> {
+  public async repetitionAsync(tName: string, filterFunction: (obj: Project | TensionTask | Comp | User) => boolean) {
+    const count = await this.db[tName].filter(filterFunction).count();
+    return count;
+  }
+
+  public async addAsync(tName: string, data: Project | TensionTask | Comp | User, filterFunction: (obj: any) => boolean) {
+    if (await this.repetitionAsync(tName, filterFunction) > 0) {
+      return {success: false, msg: '已存在'};
+    }
+    try {
+      const r = await this.db[tName].add(data);
+      console.log('保存结果', r);
+      return {success: true, id: r};
+    } catch (error) {
+      console.log('错误', error);
+      return {success: false, msg: error};
+    }
+  }
+
+  public async updateAsync(tName: string, data: Project | TensionTask | Comp | User, filterFunction: (obj: any) => boolean) {
+    if (await this.repetitionAsync(tName, filterFunction) > 0) {
+      return {success: false, msg: '已存在'};
+    }
+    try {
+      const r = await this.db[tName].update(data.id, data);
+      console.log('保存结果', r);
+      return {success: true, id: r};
+    } catch (error) {
+      console.log('错误', error);
+      return {success: false, msg: error};
+    }
+  }
+  /** 判断数据是否重复 */
+  // tslint:disable-next-line:max-line-length
+  public repetition(tName: string, filterFunction: (obj: Project | TensionTask | Comp | User) => boolean): Observable<boolean> {
     return from(this.db[tName].filter(filterFunction).count()).pipe(
       map(item => {
           return item > 0;
@@ -36,12 +70,12 @@ export class DbService {
    *
    * @param {string} tName 表名称
    * @param {Project | TensionTask} data 数据
-   * @param {{ (obj: any): boolean; projectName?: any; }} filterFunction 判断重复
+   * @param {{ (obj: any): boolean;}} filterFunction 判断重复
    * @returns {(Observable<number | null>)} 成功返回id 失败错误返回null'
    * @memberof DbService
    */
   public add(tName: string, data: Project | TensionTask | Comp | User,
-             filterFunction: { (obj: any): boolean; projectName?: any; }): Observable<number | null> {
+             filterFunction: (obj: any) => boolean): Observable<number | null> {
     return this.repetition(tName, filterFunction).pipe(
       map(item => {
         return item ?  Observable.create(_ => null) : from(this.db[tName].add(data));
@@ -49,7 +83,7 @@ export class DbService {
     );
   }
   public update(tName: string, data: Project | TensionTask | Comp | User,
-                filterFunction: { (obj: any): boolean; projectName?: any; }): Observable<number | null> {
+                filterFunction: (obj: any) => boolean): Observable<number | null> {
     return this.repetition(tName, filterFunction).pipe(
       map(item => {
         return item ?  Observable.create(_ => null) : from(this.db[tName].update(data.id, data));
@@ -72,22 +106,9 @@ export class DB extends Dexie {
       users: userIndex,
       task: TaskIndex,
       jack: JackIndex,
-    });
-    this.version(2).stores({
-      users: userIndex,
-      task: TaskIndex,
-      jack: JackIndex,
       project: projectIndex,
       comp: compIndex,
     });
-    this.version(3).stores({
-      comp: compIndex,
-    });
-    // this.version(3).stores({
-    //   users: userIndex,
-    //   task: TaskIndex,
-    //   jack: JackIndex,
-    // });
     this.open();
   }
 }
