@@ -13,6 +13,7 @@ import { mpaToPlc, mmToPlc } from 'src/app/Function/device.date.processing';
   styleUrls: ['./manual-item.component.less']
 })
 export class ManualItemComponent implements OnInit {
+  [x: string]: any;
   /** 设备名称 */
   @Input()
     name: any;

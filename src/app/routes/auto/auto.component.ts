@@ -666,16 +666,24 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.auto.pause) {
       return;
     }
+
+    let ten = false;
+    for (const name of taskModeStr[this.task.mode]) {
+      if (this.PLCS.PD[name].autoState[0] === '等待保压') {
+        ten = true;
+        break;
+      }
+    }
     // const max = Math.max.apply(null, arrMm);
     const min = Math.min.apply(null, arrMm);
     let s = false;
     names.map(n => {
       // console.log(n, '平衡控制', this.elongation[n].mm - min, this.autoData.tensionBalance);
-      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n]) {
+      if (this.elongation[n].mm - min > this.autoData.tensionBalance && !this.balanceState[n] && !this.auto.nowDelay && !ten) {
         this.balanceState[n] = true;
         s = true;
       }
-      if ((this.elongation[n].mm - min <= 0 || this.auto.nowDelay) && this.balanceState[n]) {
+      if ((this.elongation[n].mm - min <= 0 || this.auto.nowDelay || ten) && this.balanceState[n]) {
         this.balanceState[n] = false;
         s = true;
       }

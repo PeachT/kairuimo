@@ -648,6 +648,7 @@ export class TaskComponent implements OnInit {
    * *张拉
    */
   tension() {
+    this.tensionDevice.state = true;
     console.log('张拉', this.holeData, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
     if (this.tensionDeviceState()) {
       this.tensionDevice.state = true;
@@ -662,6 +663,7 @@ export class TaskComponent implements OnInit {
         jackId: this.jackData.id,
         groupData: this.holeData
       }));
+      this.tensionDevice.state = false;
       this.router.navigate(['/auto']);
     }
   }

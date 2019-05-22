@@ -49,6 +49,7 @@ const PIPE = [
     ...COMPONENTS,
     ...MODULES,
     ...PIPE,
-  ]
+  ],
+  entryComponents: [ManualItemComponent]
 })
 export class SharedModule { }

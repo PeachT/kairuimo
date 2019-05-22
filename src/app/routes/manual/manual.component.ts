@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DbService, DB } from 'src/app/services/db.service';
@@ -6,13 +6,18 @@ import { AppService } from 'src/app/services/app.service';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D, PLC_M, PLC_S } from 'src/app/models/IPCChannel';
 import { plcToMpa } from 'src/app/Function/device.date.processing';
+import { ManualItemComponent } from 'src/app/shared/manual-item/manual-item.component';
 
 @Component({
   selector: 'app-manual',
   templateUrl: './manual.component.html',
   styleUrls: ['./manual.component.less']
 })
-export class ManualComponent implements OnInit, OnDestroy {
+export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('domz', { read: ViewContainerRef })
+    domz: ViewContainerRef;
+  @ViewChild('domc', { read: ViewContainerRef })
+    domc: ViewContainerRef;
   db: DB;
   selectedJack: any;
   selectedI: any = null;
@@ -90,6 +95,7 @@ export class ManualComponent implements OnInit, OnDestroy {
     public appService: AppService,
     public PLCS: PLCService,
     private message: NzMessageService,
+    private cfr: ComponentFactoryResolver
   ) {
     this.db = this.odb.db;
   }
@@ -112,7 +118,30 @@ export class ManualComponent implements OnInit, OnDestroy {
     this.selectManual('c');
     this.getManualData('z');
     this.getManualData('c');
+    console.log('init');
+    this.devModeStr.z.map(name => {
+      console.log('添加', name);
+      const com = this.cfr.resolveComponentFactory(ManualItemComponent);
+      const comp = this.domz.createComponent(com);
+      // dev
+      // name
+      comp.instance.dev = this.setDev[name];
+      comp.instance.name = name;
+    });
+    this.devModeStr.c.map(name => {
+      console.log('添加', name);
+      const com = this.cfr.resolveComponentFactory(ManualItemComponent);
+      const comp = this.domc.createComponent(com);
+      // dev
+      // name
+      comp.instance.dev = this.setDev[name];
+      comp.instance.name = name;
+    });
   }
+
+  ngAfterViewInit() {
+  }
+
   ngOnDestroy() {
     console.log('退出');
     clearInterval(this.it);

@@ -12,20 +12,16 @@
     <div class="content z" [ngClass]="{'form-edit': !PLCS.plcState.z}">
       <div class="btn" [ngClass]="{'coerce': zMarginMode[1]}">
         <nz-divider style="min-width: auto;" nzText="主 站" nzOrientation="left"></nz-divider>
-          <button nzSize="large" nz-button nzShape="round"
+          <!-- <button nzSize="large" nz-button nzShape="round"
           *ngFor="let item of devModeStr.z"
-          [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button>
+          [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button> -->
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[0]}" (click)="setF15(0)">点动</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[1]}" (click)="setF15(1)">强制运行</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[2]}" (click)="setF15(2)">自动补压</button>
       </div>
-      <div nz-row class="data">
-        <ng-container *ngFor="let item of devModeStr.z">
-          <app-manual-item nz-col nzSm="24" nzLg="12"
-            [dev]="setDev[item]"
-            [name]='item'
-            *ngIf="showDev[item]"></app-manual-item>
-        </ng-container>
+      <div nz-row class="manual-data">
+        <div #domz>
+        </div>
       </div>
       <div class="edit" *ngIf="!PLCS.plcState.z">设备未连接！！</div>
     </div>
@@ -33,18 +29,21 @@
     <div class="content c" [ngClass]="{'form-edit': !PLCS.plcState.c}">
       <div class="btn" [ngClass]="{'coerce': cMarginMode[1]}">
           <nz-divider style="min-width: auto;" nzText="从 站" nzOrientation="left"></nz-divider>
-          <button nzSize="large" nz-button nzShape="round"
+          <!-- <button nzSize="large" nz-button nzShape="round"
           *ngFor="let item of devModeStr.c"
-          [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button>
+          [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button> -->
 
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[0]}" (click)="setF15(0, 'c')">点动</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[1]}" (click)="setF15(1, 'c')">强制运行</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[2]}" (click)="setF15(2, 'c')">自动补压</button>
       </div>
-      <div nz-row class="data">
+      <!-- <div nz-row class="data">
         <ng-container *ngFor="let item of devModeStr.c">
           <app-manual-item nz-col nzSm="24" nzLg="12" [dev]="setDev[item]" [name]='item' *ngIf="showDev[item]"></app-manual-item>
         </ng-container>
+      </div> -->
+      <div nz-row class="manual-data">
+        <div #domc hidden></div>
       </div>
       <div class="edit" *ngIf="!PLCS.plcState.c">设备未连接！！</div>
     </div>
