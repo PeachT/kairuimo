@@ -30,6 +30,7 @@ export class SettingComponent implements OnInit, OnDestroy {
   mpaRevise: MpaRevise;
   mpaToPlc = mpaToPlc;
   autoData: AutoDate;
+  heartbeatRateValue = null;
 
   constructor(
     private e: ElectronService,
@@ -41,6 +42,13 @@ export class SettingComponent implements OnInit, OnDestroy {
     this.getData();
     this.mpaRevise = this.PLCS.getMpaRevise();
     this.autoData = this.PLCS.getAutoDate();
+    const heartbeatRate = localStorage.getItem('heartbeatRate');
+    if (heartbeatRate) {
+      this.heartbeatRate(heartbeatRate);
+    } else {
+      this.heartbeatRateValue = this.e.remote.getGlobal('heartbeatRate');
+      this.heartbeatRate(this.heartbeatRateValue);
+    }
   }
 
   ngOnInit() {
@@ -106,5 +114,15 @@ export class SettingComponent implements OnInit, OnDestroy {
   /** 修改自动参数 */
   setAuto() {
     this.PLCS.setAutoData(this.autoData);
+  }
+  /**
+   * *设置采集频率
+   */
+  heartbeatRate(delay) {
+    localStorage.setItem('heartbeatRate', delay);
+    this.e.ipcRenderer.send('heartbeatRate', delay);
+    console.log('设置采集频率', localStorage.getItem('heartbeatRate'));
+    this.PLCS.heartbeatRateValue = delay;
+    this.heartbeatRateValue = delay;
   }
 }

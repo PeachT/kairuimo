@@ -37,6 +37,12 @@
             </nz-radio-group>
           </nz-input-group>
         </nz-col>
+        <nz-col nz-col nzSpan="6">
+          <nz-input-group nzAddOnBefore="采集频率ms" >
+            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="100" [nzMax]="1000" [(ngModel)]="heartbeatRateValue"
+              (ngModelChange)="heartbeatRate($event)"></nz-input-number>
+          </nz-input-group>
+        </nz-col>
       </nz-row>
     <!-- </div>
     <br>

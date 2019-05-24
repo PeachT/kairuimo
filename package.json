@@ -15,10 +15,12 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "hmr": "ng serve -c=hmr",
+    "hmr": "ng serve --hmr",
     "dev": "concurrently \"ng serve\" \"electron . --dev\"",
     "edev": "electron . --dev",
     "win-pack": "ng build --prod --build-optimizer && electron-builder -w",
+    "win-ng-pack": "electron-builder -w",
+    "linux-pack-ng": "ng build --prod --build-optimizer && electron-builder --linux",
     "linux-pack": "electron-builder --linux",
     "all-pack": "electron-builder -mwl"
   },

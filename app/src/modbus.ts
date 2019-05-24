@@ -2,8 +2,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 const ModbusRTU = require('modbus-serial');
 import { bf } from './bufferToNumber';
-import { Channel } from './IPCChannel';
-import { cpus } from 'os';
 
 interface ConnectionStr {
   ip: string;
@@ -50,6 +48,8 @@ export class ModbusTCP {
 
     this.client = new ModbusRTU();
     console.log(this.dev, '---------time', this.client.getTimeout());
+    // tslint:disable-next-line:no-string-literal
+    console.log('global.heartbeatRate', global['heartbeatRate']);
     this.client.setTimeout(5000);
     console.log(this.dev, '---------time2', this.client.getTimeout());
     this.client.connectTCP(cStr.ip, { port: cStr.port }).then(() => {
@@ -140,7 +140,8 @@ export class ModbusTCP {
         this.IPCSend(`${this.dev}error`, {msg: '心跳链接错误'});
         clearInterval(this.heartbeatT);
       }
-    }, this.heartbeatRate);
+    // tslint:disable-next-line:no-string-literal
+    }, global['heartbeatRate']);
   }
   /**
    * 发送数据到UI

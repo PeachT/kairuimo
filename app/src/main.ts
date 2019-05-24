@@ -26,6 +26,9 @@ const dev = args.some((val) => val === '--dev');
 let ztcp: ModbusTCP;
 let ctcp: ModbusTCP;
 
+// tslint:disable-next-line:no-string-literal
+global['heartbeatRate'] = 1000;
+
 console.log(dev);
 // 设置调试环境和运行环境 的渲染进程路径
 const winURL = dev ? 'http://localhost:4200' :
@@ -102,27 +105,17 @@ function IPCOn(d: string = 'z', tcp: ModbusTCP) {
   ipcMain.on(`${d}F016_float`, (e, arg) => {
     tcp.F016_float(arg.address, arg.value, arg.channel);
   });
-  // 从站
-  // ipcMain.on('cF03', (e, arg) => {
-  //   ctcp.F03(arg.address, arg.length, arg.channel);
-  // });
-  // ipcMain.on('cF05', (e, arg) => {
-  //   ctcp.F05(arg.address, arg.state, arg.channel);
-  // });
-  // ipcMain.on('cF15', (e, arg) => {
-  //   ctcp.F15(arg.address, arg.array, arg.channel);
-  // });
-  // ipcMain.on('cF06', (e, arg) => {
-  //   ctcp.F06(arg.address, arg.value, arg.channel);
-  // });
-  // ipcMain.on('cF016', (e, arg) => {
-  //   ctcp.F016(arg.address, arg.array, arg.channel);
-  // });
-  // ipcMain.on('cF016_float', (e, arg) => {
-  //   ctcp.F016_float(arg.address, arg.array, arg.channel);
-  // });
 }
 
+/**
+ * *采集频率
+ */
+ipcMain.on('heartbeatRate', (e, delay) => {
+  // tslint:disable-next-line:no-string-literal
+  global['heartbeatRate'] = delay || 1000;
+  // tslint:disable-next-line:no-string-literal
+  console.log('global.heartbeatRate', global['heartbeatRate']);
+});
 // 主进程监听渲染进程传来的信息
 ipcMain.on('update', (e, arg) => {
   console.log('update');

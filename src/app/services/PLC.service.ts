@@ -113,6 +113,8 @@ export class PLCService {
   /** 搜索事件 */
   private plcSub = new Subject();
 
+  heartbeatRateValue = 0;
+
   constructor(
     private e: ElectronService,
     private message: NzMessageService,
@@ -147,7 +149,7 @@ export class PLCService {
     });
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
       // console.log(data);
-      this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`] - 1000;
+      this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`] - this.heartbeatRateValue;
       this.plcState[`${dev}OT`] = new Date().getTime();
       clearTimeout(this.plcState[`${dev}T`]);
       this.plcState[dev] = true;
