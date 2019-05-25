@@ -75,7 +75,7 @@ export class ReviseItemComponent implements OnInit {
   }
 
   countRevise() {
-    this.revise.value = this.revise.devValue / this.revise.measureValue;
+    this.revise.value = (this.revise.devValue / this.revise.measureValue).toFixed(5);
   }
   /** 获取设备值 */
   getDevValue() {

@@ -451,7 +451,9 @@ export class TaskComponent implements OnInit {
     console.log(JSON.stringify(value));
   }
 
-  /** 分组 */
+  /**
+   * *手动分组
+   */
   onGroup() {
     // const device = this.validateForm.controls.device.value;
     this.group.g = this.groupData.map(item => {
@@ -462,9 +464,10 @@ export class TaskComponent implements OnInit {
       // this.group.mode = device[1];
       this.groupIsVisible = true;
     } else {
-      this.message.error('请选择设备😔');
+      this.message.error('请选择设备与构建😔！');
+      return;
     }
-    this.componentChange();
+    // this.componentChange();
     this.groupDom.gmStr = groupModeStr(this.group.mode);
     this.groupDom.group.g = this.group.g;
     this.groupDom.holes = this.componentOptions.holes;
@@ -594,13 +597,6 @@ export class TaskComponent implements OnInit {
         this.message.error(`修改失败😔`);
         console.log(r.msg);
       }
-      // this.db.task.update(this.data.id, this.data).then((updata) => {
-      //   this.message.success('修改成功🙂');
-      //   this.edit = false;
-      //   this.appS.edit = false;
-      // }).catch((err) => {
-      //   this.message.error(`修改失败😔${err}`);
-      // });
     }
   }
 
@@ -649,23 +645,32 @@ export class TaskComponent implements OnInit {
    */
   tension() {
     this.tensionDevice.state = true;
-    console.log('张拉', this.holeData, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
-    if (this.tensionDeviceState()) {
-      this.tensionDevice.state = true;
-      this.tensionDevice.names = taskModeStr[this.holeData.mode];
-      console.log('记录', 'record' in this.holeData);
-    } else {
-      // await this.PLCS.selectJack(this.jackData.id);
-      localStorage.setItem('autoTask', JSON.stringify({
-        project: this.project.id,
-        component: this.menu.selectComponent,
-        id: this.data.id,
-        jackId: this.jackData.id,
-        groupData: this.holeData
-      }));
-      this.tensionDevice.state = false;
-      this.router.navigate(['/auto']);
-    }
+    // console.log('张拉', this.holeData, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
+    // if (this.tensionDeviceState()) {
+    //   this.tensionDevice.state = true;
+    //   this.tensionDevice.names = taskModeStr[this.holeData.mode];
+    //   console.log('记录', 'record' in this.holeData);
+    // } else {
+    //   // await this.PLCS.selectJack(this.jackData.id);
+    //   localStorage.setItem('autoTask', JSON.stringify({
+    //     project: this.project.id,
+    //     component: this.menu.selectComponent,
+    //     id: this.data.id,
+    //     jackId: this.jackData.id,
+    //     groupData: this.holeData
+    //   }));
+    //   this.tensionDevice.state = false;
+    //   this.router.navigate(['/auto']);
+    // }
+    localStorage.setItem('autoTask', JSON.stringify({
+      project: this.project.id,
+      component: this.menu.selectComponent,
+      id: this.data.id,
+      jackId: this.jackData.id,
+      groupData: this.holeData
+    }));
+    this.tensionDevice.state = false;
+    this.router.navigate(['/auto']);
   }
   /** 检查设备状态 */
   tensionDeviceState(): boolean {

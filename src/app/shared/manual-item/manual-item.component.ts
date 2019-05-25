@@ -41,17 +41,17 @@ export class ManualItemComponent implements OnInit {
 
 
   mpaMarks: any = {
-    0: '0Mpa',
-    20: '20Mpa',
-    10: '10Mpa',
-    30: '30Mpa',
-    40: '40Mpa',
-    50: '50Mpa',
+    0: '0',
+    20: '20',
+    10: '10',
+    30: '30',
+    40: '40',
+    50: '50',
     60: {
       style: {
         color: '#f50',
       },
-      label: '<strong>60Mpa</strong>',
+      label: '<strong>60</strong>',
     }
   };
   mpaMarksNull: any = {
@@ -64,16 +64,16 @@ export class ManualItemComponent implements OnInit {
     60: null
   };
   mmMarks: any = {
-    0: '0mm',
-    40: '40mm',
-    80: '80mm',
-    120: '120mm',
-    160: '160mm',
-    200: {
+    0: '0',
+    40: '40',
+    80: '80',
+    120: '120',
+    160: '160',
+    220: {
       style: {
         color: '#f50',
       },
-      label: '<strong>200mm</strong>',
+      label: '<strong>220</strong>',
     }
   };
   mmMarksNull: any = {

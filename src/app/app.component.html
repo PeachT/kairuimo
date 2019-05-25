@@ -1,12 +1,7 @@
 <div class="plc-state">
-  <div class="item" style="margin-bottom: 5px;" [ngClass]="{'active': PLCS.plcState.z}">
-      Z:{{PLCS.plcState.zLT}}
-  </div>
+  <div class="item" style="background-color: cornflowerblue;">{{time}}</div>
+  <div class="item" [ngClass]="{'active': PLCS.plcState.z}">Z:{{PLCS.plcState.zLT}}</div>
   <div class="item" [ngClass]="{'active': PLCS.plcState.c}">C:{{PLCS.plcState.cLT}}</div>
-  <!-- <p>{{tIndex}}</p> -->
-</div>
-<div class="time">
-  {{time}}
 </div>
 <router-outlet></router-outlet>
 <nz-modal [nzVisible]="appService.powerState" nzTitle="" [nzFooter]="null" [nzMaskClosable]="!appService.powerDelayT" nzClosable="false" (nzOnCancel)="appService.powerState = false">

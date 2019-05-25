@@ -12,6 +12,7 @@ import { DynamicLineComponent } from './echarts/dynamic-line/dynamic-line.compon
 import { JackItemComponent } from './jack-item/jack-item.component';
 import { ProjectComponent } from './project/project.component';
 import { ValidatorErrorPipe } from '../pipes/error.pipe';
+import { ToFixedrPipe } from '../pipes/toFixed.pipe';
 
 
 // pipe
@@ -33,6 +34,7 @@ const COMPONENTS = [
   ProjectComponent
 ];
 const PIPE = [
+  ToFixedrPipe,
   ValidatorErrorPipe,
 ];
 
@@ -50,6 +52,6 @@ const PIPE = [
     ...MODULES,
     ...PIPE,
   ],
-  entryComponents: [ManualItemComponent]
+  entryComponents: [ManualItemComponent, JackItemComponent]
 })
 export class SharedModule { }

@@ -149,7 +149,7 @@ export class PLCService {
     });
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
       // console.log(data);
-      this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`] - this.heartbeatRateValue;
+      this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`];
       this.plcState[`${dev}OT`] = new Date().getTime();
       clearTimeout(this.plcState[`${dev}T`]);
       this.plcState[dev] = true;

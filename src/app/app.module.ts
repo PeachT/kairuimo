@@ -14,6 +14,7 @@ import zh from '@angular/common/locales/zh';
 import { LayoutModule } from './layout/layout.module';
 
 import * as AllIcons from '@ant-design/icons-angular/icons';
+import { CoreModule } from './core/core.module';
 
 registerLocaleData(zh);
 
@@ -26,6 +27,7 @@ registerLocaleData(zh);
     NgxElectronModule,
     BrowserModule,
     AppRoutingModule,
+    CoreModule,
     NgZorroAntdModule,
     FormsModule,
     HttpClientModule,

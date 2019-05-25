@@ -5,40 +5,40 @@
       <button nzSize="large" nz-button nzType="default" (click)="onRevise()" *ngIf="reviseBtnShow">校 正</button>
     </nz-form-item>
     <nz-form-item>
-      <nz-form-label [nzSm]="2" nzRequired>千斤顶编号</nz-form-label>
-      <nz-form-control [nzSm]="6">
+      <nz-form-label [nzSm]="3" nzRequired>千斤顶编号</nz-form-label>
+      <nz-form-control [nzSm]="5">
         <input type="text" nz-input formControlName="jackNumber">
       </nz-form-control>
-      <nz-form-label [nzSm]="2" nzRequired>油泵编号</nz-form-label>
-      <nz-form-control [nzSm]="6">
+      <nz-form-label [nzSm]="3" nzRequired>油泵编号</nz-form-label>
+      <nz-form-control [nzSm]="5">
         <input type="text" nz-input formControlName="pumpNumber">
       </nz-form-control>
       <nz-form-control [nzSm]="8">
         &nbsp;
       </nz-form-control>
 
-      <nz-form-label [nzSm]="2" nzRequired>位移上限</nz-form-label>
-      <nz-form-control [nzSm]="6">
-        <input type="text" nz-input formControlName="upper">
+      <nz-form-label [nzSm]="3" nzRequired>位移上限</nz-form-label>
+      <nz-form-control [nzSm]="5">
+        <input type="number" min="2" max="220" nz-input formControlName="upper">
       </nz-form-control>
-      <nz-form-label [nzSm]="2" nzRequired>位移下限</nz-form-label>
-      <nz-form-control [nzSm]="6">
-        <input type="text" nz-input formControlName="floot">
+      <nz-form-label [nzSm]="3" nzRequired>位移下限</nz-form-label>
+      <nz-form-control [nzSm]="5">
+        <input type="number" min="2" max="220" nz-input formControlName="floot">
       </nz-form-control>
       <nz-form-control [nzSm]="8">
         &nbsp;
       </nz-form-control>
 
-      <nz-form-label [nzSm]="2" nzRequired>标定参数a</nz-form-label>
-      <nz-form-control [nzSm]="6">
+      <nz-form-label [nzSm]="3" nzRequired>标定参数a</nz-form-label>
+      <nz-form-control [nzSm]="5">
         <input type="number" nz-input formControlName="a">
       </nz-form-control>
-      <nz-form-label [nzSm]="2" nzRequired>标定参数b</nz-form-label>
-      <nz-form-control [nzSm]="6">
+      <nz-form-label [nzSm]="3" nzRequired>标定参数b</nz-form-label>
+      <nz-form-control [nzSm]="5">
         <input type="number" nz-input formControlName="b">
       </nz-form-control>
-      <nz-form-label [nzSm]="2" nzRequired>标定日期</nz-form-label>
-      <nz-form-control [nzSm]="6">
+      <nz-form-label [nzSm]="3" nzRequired>标定日期</nz-form-label>
+      <nz-form-control [nzSm]="5">
         <nz-date-picker class="revise-date" nzFormat="yyyy-MM-dd" formControlName="date"></nz-date-picker>
       </nz-form-control>
     </nz-form-item>
@@ -47,7 +47,7 @@
         <div *ngFor="let item of mmStage; index as i">
           <nz-form-label [nzSm]="2" nzRequired>{{item}}</nz-form-label>
           <nz-form-control [nzSm]="2">
-            <input type="number" nz-input [formControlName]="i">
+            <input type="number" readonly disabled nz-input [formControlName]="i">
           </nz-form-control>
         </div>
       </div>
@@ -55,6 +55,6 @@
   </div>
 </div>
 
-<nz-modal nzWidth="90%" *ngIf="revise.state" [(nzVisible)]="revise.state" [nzTitle]="name + '·位移校正'" (nzOnCancel)="cancel()" (nzOnOk)="handleOk()">
+<nz-modal nzWidth="90%" *ngIf="revise.state" [(nzVisible)]="revise.state" nzMaskClosable="false" nzClosable="false" [nzTitle]="name + '·位移校正'" (nzOnCancel)="cancel()" (nzOnOk)="handleOk()">
   <app-revise-item [name]="name" reviseName="mm" [reviseData]="formGroup.value[name].mm" #reviseDom></app-revise-item>
 </nz-modal>

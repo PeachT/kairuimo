@@ -47,6 +47,7 @@ export class JackItemComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    console.log('123123123');
   }
 
   onRevise() {

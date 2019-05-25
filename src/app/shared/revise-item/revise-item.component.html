@@ -1,12 +1,12 @@
 <div style="display: flex;">
   <app-manual-item style="flex: 1;" #manual class="kvm-slider" [dev]="setData" [name]='name'></app-manual-item>
   <div style="width: 30%; margin-left: 30px;">
-    <h1 style="text-align: center;">{{reviseName === 'mpa' ? '压力' : '位移'}}校正</h1>
+    <h1 style="text-align: center;">{{reviseName === 'mpa' ? '压力' : '位移'}}校正·{{setStage[setIndex]}}</h1>
     <nz-input-group nzSize="large" [nzAddOnBefore]="'设备' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')" [nzAddOnAfter]="suffixButton">
       <input type="number" nz-input [(ngModel)]="revise.devValue" (input)="countRevise()">
     </nz-input-group>
     <ng-template #suffixButton>
-      <button nz-button nzType="primary" (click)="getDevValue()">确 认</button>
+      <button nz-button nzType="primary" (click)="getDevValue()">获取设备值</button>
     </ng-template>
     <br><br>
     <nz-input-group nzSize="large" [nzAddOnBefore]="'测量' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')">
@@ -18,8 +18,8 @@
     </nz-input-group>
     <br><br>
     <button style="width: 100%;" nz-button nzType="primary" nzSize="large" (click)="reviseOk()"
-      [disabled]="!(revise.value > 0.97 && revise.value < 1.2) || setIndex === null">确 定</button>
-    <p>校正值应该在1.2 - 0.98 之间</p>
+      [disabled]="!(revise.value > 0.9 && revise.value < 1.2) || setIndex === null">确 定</button>
+    <p>校正值应该在1.2 - 0.9 之间</p>
   </div>
 </div>
 <br><br>
@@ -27,9 +27,11 @@
   <nz-form-item>
     <div formArrayName="setValue">
       <div *ngFor="let item of setStage; index as i">
-        <nz-form-label [nzSm]="2" nzRequired>{{item}}</nz-form-label>
-        <nz-form-control [nzSm]="2">
-          <input type="number" nz-input [formControlName]="i" (click)="setMm(i)">
+        <!-- <nz-form-label [nzSm]="1" >{{item}}</nz-form-label> -->
+        <nz-form-control [nzSm]="4">
+          <div style="display: flex; align-items: center; margin-right: 8px;">
+            {{item}}：<input type="number" style="border: 1px solid #d9d9d9;" readonly nz-input [formControlName]="i" (click)="setMm(i)">
+          </div>
         </nz-form-control>
       </div>
     </div>

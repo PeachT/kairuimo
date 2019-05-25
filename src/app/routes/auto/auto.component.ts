@@ -191,6 +191,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     cD: 0,
   };
   stageStr = ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉'];
+  handle = true;
+  stepNum = 0;
+  stepStageStr = [];
 
   constructor(
     private fb: FormBuilder,
@@ -218,6 +221,16 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async ngOnInit() {
     this.stageStr = getStageString(this.task);
+    this.stepStageStr = this.stageStr;
+    if (this.task.twice && (!this.task.record || (this.task.record && !this.task.record.twice))) {
+      this.stepStageStr = this.stepStageStr.slice(0, 3);
+    }
+    if (this.task.record) {
+      this.stepNum = this.task.record.tensionStage;
+      if (this.task.record.state === 4) {
+        this.stepNum ++;
+      }
+    }
     await this.PLCS.selectJack(this.autoS.task.jackId);
   }
   ngOnDestroy() {
@@ -448,6 +461,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this.setPLCMpa(pMpa);
     console.log('数据下载', this.task.record, pMpa, this.twoMm);
+    this.stepNum = this.task.record.tensionStage;
   }
   /**
    * *二次任务下载到PLC
@@ -560,6 +574,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.tensionOk = true;
           this.delay = Number(this.autoData.unloadingDelay); // 卸荷延时时间
           this.nowDelay = 0;
+          this.stepNum ++;
         } else {
           this.task.record.tensionStage += 1;
           this.auto.nowDelay = false;
@@ -612,6 +627,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       this.nowDelay++;
       if (this.unloading && this.nowDelay >= this.delay) {
+        this.stepNum ++;
         this.setPLCM(524, true);
         this.unloading = false;
         this.save();
@@ -949,5 +965,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         editGroupName: this.task.name,
       }
     });
+  }
+
+  handleCancel() {
+    console.log('关闭');
   }
 }

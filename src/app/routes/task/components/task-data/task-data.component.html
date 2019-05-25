@@ -2,12 +2,12 @@
   <nz-form-item>
     <nz-form-label [nzSm]="3" nzRequired>孔名称</nz-form-label>
     <nz-form-control [nzSm]="5">
-      <input type="text" nz-input formControlName="name">
+      <input type="text" readonly disabled nz-input formControlName="name">
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>张拉模式</nz-form-label>
     <nz-form-control [nzSm]="5">
       <!-- <input type="text" nz-input hidden formControlName="mode" #mode> -->
-      <input type="text" nz-input [value]="modeName[holeForm.value.mode]">
+      <input type="text" readonly disabled nz-input [value]="modeName[holeForm.value.mode]">
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>张拉长度</nz-form-label>
     <nz-form-control [nzSm]="5">
@@ -54,12 +54,6 @@
           <th width="80">任务</th>
           <th width="80">张拉孔道</th>
           <th *ngFor="let item of stageStr">{{item}}</th>
-          <!-- <th>阶段一</th>
-          <th *ngIf="tensionStage.value > 3">阶段二</th>
-          <th *ngIf="holeForm.value.twice">阶段二·2</th>
-          <th *ngIf="!holeForm.value.super && !holeForm.value.twice && tensionStage.value > 4">阶段三</th>
-          <th>终张拉</th>
-          <th *ngIf="holeForm.value.super">超张拉</th> -->
           <th width="100">工作长度</th>
           <th width="100">理论伸长量</th>
         </tr>
@@ -89,7 +83,7 @@
           <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
             <nz-form-item>
               <nz-form-control>
-                <input nz-input [ngClass]="{'row2' : theoryIf[item] === 2}" [value]="holeNames[i / 2]">
+                <input nz-input readonly disabled [ngClass]="{'row2' : theoryIf[item] === 2}" [value]="holeNames[i / 2]">
               </nz-form-control>
             </nz-form-item>
           </td>
@@ -97,7 +91,7 @@
             <td *ngFor="let item of tensionStageArr; index as i;">
               <nz-form-item>
                 <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i">
+                  <input type="number" readonly disabled nz-input [formControlName]="i">
                 </nz-form-control>
               </nz-form-item>
             </td>

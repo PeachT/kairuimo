@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
@@ -11,6 +11,7 @@ import { Jack } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D } from 'src/app/models/IPCChannel';
 import { ManualComponent } from '../manual/manual.component';
+import { JackItemComponent } from 'src/app/shared/jack-item/jack-item.component';
 
 // const jackFromBase = {
 //   jackNumber: [],
@@ -28,6 +29,9 @@ import { ManualComponent } from '../manual/manual.component';
   styleUrls: ['./jack.component.less']
 })
 export class JackComponent implements OnInit {
+  @ViewChild('device', { read: ViewContainerRef })
+    deviceDom: ViewContainerRef;
+
   jackForm: FormGroup;
   data: Jack;
   db: DB;
@@ -45,6 +49,7 @@ export class JackComponent implements OnInit {
     private router: Router,
     private modalService: NzModalService,
     public PLCS: PLCService,
+    private cfr: ComponentFactoryResolver,
   ) {
     this.db = this.odb.db;
   }
@@ -54,6 +59,7 @@ export class JackComponent implements OnInit {
     // this.getMenuOne();
     this.createJackForm();
     // this.startBaseSub();
+
   }
   createJackForm() {
     this.jackForm = this.fb.group({
@@ -97,6 +103,7 @@ export class JackComponent implements OnInit {
   }
   onMneu(id) {
     console.log(id);
+    if (this.ifEdit()) { return; }
     if (this.menu.select !== id) {
       this.menu.select = id;
       this.db.jack.filter(a => a.id === id).first().then((jack: Jack) => {
@@ -104,6 +111,7 @@ export class JackComponent implements OnInit {
         if (jack) {
           this.data = jack;
           this.jackForm.reset(this.data);
+          this.f5();
           // this.getPLCData('z', (id - 1) * 100);
           // this.getPLCData('c', (id - 1) * 100);
         } else {
@@ -161,8 +169,10 @@ export class JackComponent implements OnInit {
       nzCancelText: '继续编辑',
       nzOnOk: () => {
         this.appS.edit = false;
-        this.data = null;
-        this.createJackForm();
+        // this.data = null;
+        this.jackForm.reset(this.data);
+        this.f5();
+        // this.createJackForm();
         if (this.menu.select) {
           this.onMneu(this.menu.select);
         }
@@ -219,5 +229,33 @@ export class JackComponent implements OnInit {
       return n;
     }
     return 0;
+  }
+  f5() {
+    const devModeStr = [
+      [],
+      ['zA', 'cA'],
+      ['zA', 'zB', 'cA', 'cB'],
+      [],
+      ['zA', 'zB', 'zC', 'zD', 'cA', 'cB', 'cC', 'cD']
+    ];
+    this.deviceDom.clear();
+    devModeStr[this.jackForm.value.jackMode].map(name => {
+      const com = this.cfr.resolveComponentFactory(JackItemComponent);
+      const comp = this.deviceDom.createComponent(com);
+      comp.instance.formGroup = this.jackForm;
+      comp.instance.name = name;
+      console.log('添加', name);
+    });
+  }
+
+  /**
+   * *判断编辑状态
+   */
+  ifEdit(): boolean {
+    if (this.appS.edit) {
+      this.message.warning('请完成编辑！');
+      return true;
+    }
+    return false;
   }
 }

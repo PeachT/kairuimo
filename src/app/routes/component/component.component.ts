@@ -87,7 +87,7 @@ export class ComponentComponent implements OnInit {
       /** 名字 */
       name: [null, [Validators.required, reperitionValidator('hole')]],
       /** 孔明细 */
-      holes: [],
+      holes: [null, [Validators.required]],
       /** 图片 */
       ImgBase64: [],
     });
@@ -109,9 +109,9 @@ export class ComponentComponent implements OnInit {
     });
   }
   onMneu(id, copy = null) {
-    console.log('选项目', id);
+    console.log('构建', id);
+    if (this.ifEdit()) { return; }
     console.log(this.menu);
-    if ((id !== null && this.menu.select === id) || this.ifEdit()) { return; }
     if (id !== null) {
       this.menu.select = id;
       this.db.comp.filter(a => a.id === id).first().then((p: Comp) => {
@@ -149,8 +149,12 @@ export class ComponentComponent implements OnInit {
 
   /** 保存数据 */
   save() {
+    console.log(this.formGroup.valid);
+    if (!this.formGroup.valid) {
+      this.message.error('数据输入有误！！');
+      return;
+    }
     const data = this.formGroup.value;
-    console.log(data, !data.id);
     if (!data.id) {
       delete data.id;
       this.odb.add(tableName.comp, data, (p: Comp) => p.name === data.name).subscribe((r) => {
@@ -179,7 +183,9 @@ export class ComponentComponent implements OnInit {
       });
     }
   }
-  /** 取消编辑 */
+  /**
+   * *取消编辑
+   */
   cancelEdit() {
     const m = this.modalService.warning({
       nzTitle: '确定取消编辑吗？',
@@ -187,8 +193,9 @@ export class ComponentComponent implements OnInit {
       nzCancelText: '继续编辑',
       nzOnOk: () => {
         this.appS.edit = false;
-        this.data = null;
-        this.createFormGroup();
+        // this.data = null;
+        // this.createFormGroup();
+        // this.onMneu(this.data.id);
         if (this.menu.select) {
           this.onMneu(this.menu.select);
         }
@@ -228,7 +235,11 @@ export class ComponentComponent implements OnInit {
     control.push(this.createHoleForm());
     this.data = this.formGroup.value;
   }
-  subHole(index) {
+  /**
+   * *删除梁型
+   * @param index 序号
+   */
+  delHole(index) {
     // tslint:disable-next-line:no-angle-bracket-type-assertion
     const control = <FormArray> this.formGroup.controls.hole;
     control.removeAt(index);
@@ -237,7 +248,7 @@ export class ComponentComponent implements OnInit {
 
   handleClose(form: FormControl, tag): void {
     const v = form.value || [];
-    console.log(tag, v)
+    console.log(tag, v);
     const tags = v.filter(f => f !== tag);
     form.setValue(tags);
   }
@@ -255,9 +266,13 @@ export class ComponentComponent implements OnInit {
   }
 
   handleInputConfirm(event, form: FormControl): void {
-    const iv = event.target.value;
+    const iv = event.target.value.replace(/\s+/g, '');
+    console.log(iv, iv.length);
+    if (iv.length <= 0) {
+      return;
+    }
     const v = form.value || [];
-    console.log(event, form, v);
+    // console.log(event, form, v);
     if (v.indexOf(iv) === -1) {
       // this.tags = [...this.tags, this.inputValue];
       form.setValue([...v, iv]);

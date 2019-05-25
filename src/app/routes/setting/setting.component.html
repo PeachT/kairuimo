@@ -4,7 +4,7 @@
       <nz-row>
         <nz-col nz-col nzSpan="6">
           <nz-input-group nzAddOnBefore="压力上限Mpa" >
-            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate[0]"
+            <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate[0]"
               (ngModelChange)="setF06(410, mpaToPlc($event, null))"></nz-input-number>
           </nz-input-group>
         </nz-col>
@@ -28,9 +28,10 @@
         </nz-col>
       </nz-row>
       <nz-row>
-        <nz-col nz-col nzSpan="6">
-          <nz-input-group nzAddOnBefore="设备模式" >
-            <nz-radio-group [(ngModel)]="systenDate[4]" (ngModelChange)="setF06(408, $event)">
+        <nz-col nz-col nzSpan="18">
+          <nz-input-group nzAddOnBefore="设备模式" nzSize="large" >
+            <nz-input-number nzSize="large" style="width: 1px"></nz-input-number>
+            <nz-radio-group [(ngModel)]="systenDate[4]" (ngModelChange)="setF06(408, $event)" nzSize="large">
               <label nz-radio [nzValue]="4">一泵四顶</label>
               <label nz-radio [nzValue]="2">一泵两顶</label>
               <label nz-radio [nzValue]="1">一泵一顶</label>
@@ -104,7 +105,7 @@
         <tr *ngFor="let name of revise.dev; index as i" height="60" [class]="name">
           <!-- <td width="56">{{name}}</td> -->
           <td *ngFor="let item of revise.mpaStage; index as i">
-            <input nzSize="large" type="number" nz-input [value]="mpaRevise[name][i]">
+            <input nzSize="large" readonly disabled type="number" nz-input [value]="mpaRevise[name][i]">
           </td>
           <td><button nzSize="large" nz-button nzType="default" (click)="onRevise(name)" [disabled]="!PLCS.plcState.z">{{name}}校 正</button></td>
         </tr>
@@ -113,6 +114,6 @@
   </main>
 
 
-<nz-modal *ngIf="revise.state" nzWidth="95%" [(nzVisible)]="revise.state" [nzTitle]="revise.name + '·压力校正'" (nzOnCancel)="cancel()" (nzOnOk)="ok()">
+<nz-modal *ngIf="revise.state" nzWidth="95%" [(nzVisible)]="revise.state" nzMaskClosable="false" nzClosable="false" [nzTitle]="revise.name + '·压力校正'" (nzOnCancel)="cancel()" (nzOnOk)="ok()" nzOkText="保 存">
   <app-revise-item #reviseDom [name]="revise.name" reviseName="mpa" [reviseData]="mpaRevise[revise.name]" ></app-revise-item>
 </nz-modal>

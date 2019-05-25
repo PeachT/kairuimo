@@ -89,6 +89,8 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   it = null;
+
+  connection = true;
   constructor(
     private e: ElectronService,
     private odb: DbService,
@@ -119,24 +121,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getManualData('z');
     this.getManualData('c');
     console.log('init');
-    this.devModeStr.z.map(name => {
-      console.log('添加', name);
-      const com = this.cfr.resolveComponentFactory(ManualItemComponent);
-      const comp = this.domz.createComponent(com);
-      // dev
-      // name
-      comp.instance.dev = this.setDev[name];
-      comp.instance.name = name;
-    });
-    this.devModeStr.c.map(name => {
-      console.log('添加', name);
-      const com = this.cfr.resolveComponentFactory(ManualItemComponent);
-      const comp = this.domc.createComponent(com);
-      // dev
-      // name
-      comp.instance.dev = this.setDev[name];
-      comp.instance.name = name;
-    });
+    // this.f5();
   }
 
   ngAfterViewInit() {
@@ -163,6 +148,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
     this.devModeStr = devModeStr[jack.jackMode];
     console.log(jack, this.devModeStr);
+    this.f5();
   }
 
   /** 切换手动 */
@@ -198,5 +184,36 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     this.alarm.state = true;
     this.alarm.datas = this.PLCS.PD[name].alarm;
     this.alarm.name = `${name}报警状态`;
+  }
+  /**
+   * *刷新
+   */
+  f5() {
+    console.log('刷新', this.devModeStr);
+    this.domz.clear();
+    this.domc.clear();
+    this.devModeStr.z.map(name => {
+      const com = this.cfr.resolveComponentFactory(ManualItemComponent);
+      const comp = this.domz.createComponent(com);
+      // dev
+      // name
+      comp.instance.dev = this.setDev[name];
+      comp.instance.name = name;
+    });
+    this.devModeStr.c.map(name => {
+      console.log('添加', name);
+      const com = this.cfr.resolveComponentFactory(ManualItemComponent);
+      const comp = this.domc.createComponent(com);
+      // dev
+      // name
+      comp.instance.dev = this.setDev[name];
+      comp.instance.name = name;
+    });
+  }
+  /**
+   * *单机联机
+   */
+  onConnention() {
+    // this.f5();
   }
 }

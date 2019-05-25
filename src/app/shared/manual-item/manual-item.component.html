@@ -17,26 +17,28 @@
   <div style="margin: 0 25px;">
     <div>
       <nz-row style="margin-bottom: 4px;">
-        <nz-col nz-col nzSpan="8">
-          <nz-input-group nzAddOnBefore="设置压力 Mpa">
-            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="dev.setMpa"
-              (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-input-number>
+        <nz-col nz-col nzXl="8" nzMd="12">
+          <nz-input-group nzAddOnBefore="设置压力 Mpa" nzSize="large">
+            <input nz-input type="number" min="0" max="60" [(ngModel)]="dev.setMpa" (change)="set(setAeeress[0], $event)"/>
+            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="dev.setMpa"
+              (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-input-number> -->
           </nz-input-group>
         </nz-col>
-        <nz-col nzSpan="16">
+        <nz-col nzXl="16" nzMd="12">
           <nz-slider [nzMarks]="mpaMarks" [nzMin]="0" [nzMax]="60" [nzStep]="0.5" [(ngModel)]="dev.setMpa"
             (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-slider>
         </nz-col>
       </nz-row>
       <nz-row>
-        <nz-col nzSpan="8">
-          <nz-input-group nzAddOnBefore="设备压力 Mpa">
-            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+        <nz-col nzXl="8" nzMd="12">
+          <nz-input-group nzAddOnBefore="设备压力 Mpa" nzSize="large">
+            <input nz-input type="number" readonly [value]="PLCD.showMpa"/>
+            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
               [(ngModel)]="PLCD.showMpa">
-            </nz-input-number>
+            </nz-input-number> -->
           </nz-input-group>
         </nz-col>
-        <nz-col nzSpan="16">
+        <nz-col nzXl="16" nzMd="12">
           <nz-slider class="show" [nzMarks]="mpaMarksNull" nzDisabled="true" [nzMin]="0" [nzMax]="60" [nzStep]="0.01"
             [(ngModel)]="PLCD.showMpa"></nz-slider>
         </nz-col>
@@ -44,36 +46,36 @@
     </div>
     <div >
       <nz-row style="margin-bottom: 4px;">
-        <nz-col nz-col nzSpan="8">
-          <nz-input-group nzAddOnBefore="设置位移 Mm">
-            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="200" [(ngModel)]="dev.setMm"
-              (ngModelChange)="set(setAeeress[1], $event)"></nz-input-number>
+        <nz-col nz-col nzXl="8" nzMd="12">
+          <nz-input-group nzAddOnBefore="设置位移 Mm" nzSize="large">
+            <input nz-input type="number" min="0" max="220" [(ngModel)]="dev.setMm" (change)="set(setAeeress[1], $event)"/>
+            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="220" [(ngModel)]="dev.setMm"
+              (ngModelChange)="set(setAeeress[1], $event)"></nz-input-number> -->
           </nz-input-group>
         </nz-col>
-        <nz-col nzSpan="16">
-          <nz-slider [nzMarks]="mmMarks" [nzMin]="0" [nzMax]="200" [nzStep]="1" [(ngModel)]="dev.setMm"
+        <nz-col nzXl="16" nzMd="12">
+          <nz-slider [nzMarks]="mmMarks" [nzMin]="0" [nzMax]="220" [nzStep]="1" [(ngModel)]="dev.setMm"
             (ngModelChange)="set(setAeeress[1], $event)"></nz-slider>
         </nz-col>
       </nz-row>
       <nz-row>
-        <nz-col nzSpan="8">
-          <nz-input-group nzAddOnBefore="设备位移 Mm">
-            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="200"
+        <nz-col nzXl="8" nzMd="12">
+          <nz-input-group nzAddOnBefore="设备位移 Mm" nzSize="large">
+            <input nz-input type="number" readonly [value]="PLCD.showMm" />
+            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="220"
               [(ngModel)]="PLCD.showMm">
-            </nz-input-number>
+            </nz-input-number> -->
           </nz-input-group>
         </nz-col>
-        <nz-col nzSpan="16">
-          <nz-slider class="show" [nzMarks]="mmMarksNull" nzDisabled="true" [nzMin]="0" [nzMax]="200" [nzStep]="0.01"
+        <nz-col nzXl="16" nzMd="12">
+          <nz-slider class="show" [nzMarks]="mmMarksNull" nzDisabled="true" [nzMin]="0" [nzMax]="220" [nzStep]="0.01"
             [(ngModel)]="PLCD.showMm"></nz-slider>
         </nz-col>
       </nz-row>
       <nz-row>
         <nz-col nzSpan="24" class="relative">
-          <nz-input-group nzSearch  nzAddOnBefore="相对位移 Mm" [nzAddOnAfter]="relativeBtn">
-            <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="200"
-              [(ngModel)]="PLCD.showMm - zero">
-            </nz-input-number>
+          <nz-input-group nzSearch  nzAddOnBefore="相对位移 Mm" [nzAddOnAfter]="relativeBtn" nzSize="large">
+            <input nz-input readonly  [value]="PLCD.showMm - zero | ToFixedr" />
           </nz-input-group>
         </nz-col>
         <ng-template #relativeBtn>

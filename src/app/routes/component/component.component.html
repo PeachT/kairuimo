@@ -20,9 +20,9 @@
     <div class="scroll-content">
       <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formGroup">
         <nz-form-item>
-          <nz-form-label [nzSm]="3" nzRequired nzFor="name">项目名称</nz-form-label>
+          <nz-form-label [nzSm]="3" nzRequired nzFor="name">构建名称：</nz-form-label>
           <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formGroup.get('name').errors}">
-            <input type="text" nz-input placeholder="梁号" formControlName="name">
+            <input type="text" nz-input placeholder="构建名称" formControlName="name">
             <nz-form-explain *ngIf="appS.edit">{{formGroup.get('name').errors | ValidatorError}}</nz-form-explain>
           </nz-form-control>
         </nz-form-item>
@@ -37,9 +37,7 @@
               <div class="card">
                 <div class="btn">
                   <button nz-button *ngIf="formArr.controls.length > 1" nzType="default" nzShape="circle"
-                    (click)="subHole()"><i nz-icon type="close"></i></button>
-                  <!-- <button nz-button nzType="default" nzShape="circle" (click)="subHole()"><i nz-icon
-                      nzType="edit"></i></button> -->
+                    (click)="delHole(i)"><i nz-icon type="close"></i></button>
                 </div>
                 <div class="content">
                   <nz-form-item>
@@ -52,18 +50,24 @@
                   <nz-form-item>
                     <nz-form-label [nzSm]="4" nzRequired>梁名称</nz-form-label>
                     <nz-form-control [nzSm]="20" [ngClass]="{'in-error': item.get('name').errors}">
-                      <input type="text" nz-input placeholder="孔名称" formControlName="name">
+                      <input type="text" nz-input placeholder="梁名称" formControlName="name">
                       <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain>
                     </nz-form-control>
                   </nz-form-item>
 
                   <div>
-                    <span>孔号：</span>
-                    <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text" style="width: 78px;"
+                    <nz-form-item>
+                      <nz-form-label [nzSm]="4" >孔号</nz-form-label>
+                      <nz-form-control [nzSm]="20" >
+                          <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text"
+                          (blur)="handleInputConfirm($event, item.get('holes'))"
+                          (keydown.enter)="handleInputConfirm($event, item.get('holes'))" />
+                      </nz-form-control>
+                    </nz-form-item>
+                    <!-- <span>孔号：</span>
+                    <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text"
                     (blur)="handleInputConfirm($event, item.get('holes'))"
-                    (keydown.enter)="handleInputConfirm($event, item.get('holes'))" />
-                    <br>
-                    <br>
+                    (keydown.enter)="handleInputConfirm($event, item.get('holes'))" /> -->
                     <div class="hole-tag">
                       <span *ngFor="let tag of item.get('holes').value; index as hi">
                         {{tag}}

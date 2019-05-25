@@ -1,3 +1,17 @@
+.step {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding-right: 136px;
+  padding-left: 10px;
+  background-color: rgba(0, 0,0, .9);
+  nz-steps {
+    flex: 1;
+    .ant-steps-item-process > .ant-steps-item-content > .ant-steps-item-title {
+      color: white;
+    }
+  }
+}
 .custom-tooltip {
   width: 100% !important;
   height: 10% !important;
@@ -45,7 +59,7 @@
 .gridtable {
   width: 100%;
   font-family: verdana,arial,sans-serif;
-  font-size:16px;
+  font-size: 14px;
   color:#616161;
   border-width: 1px;
   border-color: #b0bec5;
@@ -64,7 +78,7 @@
     padding: 4px 8px;
     border-style: solid;
     border-color: #b0bec5;
-    background-color: #eceff1;
+    background-color: white;
     &.center{
       text-align: center;
     }
@@ -75,9 +89,14 @@
 }
 
 .kvm-btn-group {
+  z-index: 9999999999;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
   border: 0;
   margin-bottom: 0;
   box-shadow: none;
+  background-color: rgba(0, 0, 0, 0.65);
   button {
     width: auto;
   }
