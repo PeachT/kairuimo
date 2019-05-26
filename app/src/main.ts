@@ -6,6 +6,9 @@ const path = require('path');
 const util = require('util');
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
+
+const exec = require('child_process').exec;
+
 import { bf } from './bufferToNumber';
 import ModbusRTU from 'modbus-serial';
 import { ModbusTCP } from './modbus';
@@ -229,4 +232,30 @@ ipcMain.on('selectTemplate', (event, data) => {
     }
   }
   event.sender.send(data.channel, {msg: `获取成功`, outPath, templatePath, data});
+});
+
+/**
+ * *键盘
+ */
+// let pid = null;
+ipcMain.on('onKdNumber', (event, data) => {
+  console.log('onKdNumber');
+  exec('onboard');
+  // const np = exec('onboard -s 480x640 -l number -x 0 -y 0', { async: true }, (code, stdout, stderr) => {
+  //   console.log('Exit code:', code);
+  //   console.log('Program output:', stdout);
+  //   console.log('Program stderr:', stderr);
+  //   np.kill();
+  // });
+  // pid = np.pid + 1;
+});
+
+ipcMain.on('offKdNumber', (event, data) => {
+  console.log('onKdNumber');
+  // const np = exec(`kill ${pid}`, { async: true }, (code, stdout, stderr) => {
+  //   console.log('Exit code:', code);
+  //   console.log('Program output:', stdout);
+  //   console.log('Program stderr:', stderr);
+  //   np.kill();
+  // });
 });

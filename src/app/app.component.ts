@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { AppService } from './services/app.service';
 import { DbService, DB } from './services/db.service';
@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
     private message: NzMessageService,
     private router: Router,
     public PLCS: PLCService,
+    public el: ElementRef,
   ) {
     // 判断运行环境适合是 Electron
     this.appService.Environment = navigator.userAgent.indexOf('Electron') !== -1;

@@ -1,7 +1,7 @@
 <nz-layout>
   <nz-header>
     <span class="company-name">
-      柳州凯瑞姆
+      柳州凯瑞姆 | @0.0.3
     </span>
   </nz-header>
   <nz-content>
@@ -17,6 +17,8 @@
                 nz-input
                 formControlName="userName"
                 [nzAutocomplete]="auto"
+                (focus)="onFocus()"
+                (blur)="onBlur()"
               />
               <nz-autocomplete [nzDataSource]="users" #auto> </nz-autocomplete>
             </nz-input-group>

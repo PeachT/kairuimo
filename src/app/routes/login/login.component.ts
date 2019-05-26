@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ElectronService } from 'ngx-electron';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService } from 'ng-zorro-antd';
@@ -36,6 +37,7 @@ export class LoginComponent implements OnInit {
     private odb: DbService,
     private message: NzMessageService,
     private router: Router,
+    private e: ElectronService,
   ) {
     this.db = this.odb.db;
   }
@@ -113,5 +115,14 @@ export class LoginComponent implements OnInit {
   // }
   touch(msg) {
     console.log(msg);
+  }
+
+
+  onFocus() {
+    console.log('获取焦点1');
+    this.appS.onKeyboard();
+  }
+  onBlur() {
+    console.log('失去获取焦点2');
   }
 }
