@@ -239,7 +239,11 @@ export class ComponentComponent implements OnInit {
    * *删除梁型
    * @param index 序号
    */
-  delHole(index) {
+  delHole(index = null, event) {
+    console.log('删除构建梁', index, event, event.x);
+    if (index === null || event.x === 0) {
+      return;
+    }
     // tslint:disable-next-line:no-angle-bracket-type-assertion
     const control = <FormArray> this.formGroup.controls.hole;
     control.removeAt(index);

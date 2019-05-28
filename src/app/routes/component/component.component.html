@@ -36,8 +36,10 @@
             <div nz-col nzSm="24" nzLg="12" *ngFor="let item of formArr.controls; index as i" [formGroupName]="i">
               <div class="card">
                 <div class="btn">
-                  <button nz-button *ngIf="formArr.controls.length > 1" nzType="default" nzShape="circle"
-                    (click)="delHole(i)"><i nz-icon type="close"></i></button>
+                  <div (click)="delHole(i, $event)">
+                    <button nz-button *ngIf="formArr.controls.length > 1" nzType="default" nzShape="circle"
+                      ><i nz-icon type="close"></i></button>
+                  </div>
                 </div>
                 <div class="content">
                   <nz-form-item>

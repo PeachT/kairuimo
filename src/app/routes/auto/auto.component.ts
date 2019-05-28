@@ -192,8 +192,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   };
   stageStr = ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉'];
   handle = true;
+  /** 张拉阶段 */
   stepNum = 0;
   stepStageStr = [];
+  /** 力筋回缩量 */
+  reData = {};
 
   constructor(
     private fb: FormBuilder,
@@ -430,7 +433,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         twice: false,
         time: null,
         state: 0,
-        make: []
+        make: [],
       };
       taskModeStr[this.task.mode].map((name, index) => {
         this.task.record[name] = {
@@ -438,7 +441,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           mmData: [],
           make: [],
           mpa: [],
-          mm: []
+          mm: [],
+          reData: { mm: NaN, map: NaN}
         };
       });
     }
@@ -602,6 +606,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         tensionOk = false;
       }
     }
+    /** 开始卸荷 */
     if (un) {
       const pMpa: any = {
         zA: 0,
@@ -614,6 +619,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         cD: 0,
       };
       for (const name of taskModeStr[this.task.mode]) {
+        this.reData[name] = this.PLCS.PD[name].showMm;
         /** 数据转换 */
         pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task[name].kn[0], this.PLCS.mpaRevise[name]) : 0;
         this.target[name] = this.task[name].kn[0];
@@ -621,7 +627,15 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.setPLCD(454, pMpa); // 设置卸荷压力
       this.setPLCM(523, true); // 启动卸荷阀
     }
+    /** 卸荷完成/回程 */
     if (unok || this.unloading) {
+      taskModeStr[this.task.mode].map(name => {
+        this.task.record[name].reData.mm =
+          myToFixed(
+            this.task.record[name].mm[this.task.record.tensionStage] - (this.reData[name] - this.PLCS.PD[name].showMm)
+          );
+        this.task.record[name].reData.map = this.PLCS.PD[name].showMpa;
+      });
       if (!this.unloading) {
         this.unloading = true;
       }

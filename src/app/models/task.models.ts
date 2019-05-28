@@ -55,6 +55,10 @@ export interface Curve {
   make: Array<Make>;
   mpa: Array<number>;
   mm: Array<number>;
+  reData: {
+    map: number;
+    mm: number;
+  };
 }
 
 export interface Make {

@@ -2,13 +2,13 @@
   <app-manual-item style="flex: 1;" #manual class="kvm-slider" [dev]="setData" [name]='name'></app-manual-item>
   <div style="width: 30%; margin-left: 30px;">
     <h1 style="text-align: center;">{{reviseName === 'mpa' ? '压力' : '位移'}}校正·{{setStage[setIndex]}}</h1>
-    <nz-input-group nzSize="large" [nzAddOnBefore]="'设备' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')" [nzAddOnAfter]="suffixButton">
+    <nz-input-group nzSize="large" [nzAddOnBefore]="'设备' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')">
       <input type="number" nz-input [(ngModel)]="revise.devValue" (input)="countRevise()">
     </nz-input-group>
-    <ng-template #suffixButton>
-      <button nz-button nzType="primary" (click)="getDevValue()">获取设备值</button>
-    </ng-template>
-    <br><br>
+    <nz-input-group>
+      <button nz-button nzType="primary" nzSize="large" style="width: 100%;" (click)="getDevValue()">获取设备值</button>
+    </nz-input-group>
+    <br>
     <nz-input-group nzSize="large" [nzAddOnBefore]="'测量' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')">
       <input type="number" nz-input [(ngModel)]="revise.measureValue" (input)="countRevise()">
     </nz-input-group>

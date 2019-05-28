@@ -61,7 +61,7 @@ export class RecordComponent implements OnInit, OnChanges {
     this.theoryIf = tableDev(mode, 4);
     this.devModeStr = taskModeStr[mode];
     this.holeNames = this.GroupData.name.split('/');
-    this.elongation = TensionMm(this.GroupData);
+    this.elongation = TensionMm(this.GroupData, true);
     console.log('011445445456456456456', this.devModeStr, mode, this.theoryIf);
   }
 }

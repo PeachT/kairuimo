@@ -42,4 +42,6 @@ export interface ElongationItem {
   sumMm: number;
   /** 偏差率 */
   percent: number;
+  /** 回缩量 */
+  remm?: number;
 }

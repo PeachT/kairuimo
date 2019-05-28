@@ -96,16 +96,27 @@ export function mmToPlc(mm: number, mmArr: Array<number>): number {
   }
 }
 
-export function TensionMm(data: GroupItem): Elongation {
+// 总伸长量LZ=(LK+L1-2L0)-NS-LQ
+// 伸长量偏差=（LZ-LL）/LL
+// 力筋回缩量Sn=（LK-LM）-(1-σ0/σk)LQ
+/**
+ * 计算记录数据
+ *
+ * @export
+ * @param {GroupItem} data 数据
+ * @param {boolean} [re=false] 回缩量计算
+ * @returns {Elongation}
+ */
+export function TensionMm(data: GroupItem, re = false): Elongation {
   const elongation: Elongation = {
-    zA: { mm: 0, sumMm: 0, percent: 0 },
-    zB: { mm: 0, sumMm: 0, percent: 0 },
-    zC: { mm: 0, sumMm: 0, percent: 0 },
-    zD: { mm: 0, sumMm: 0, percent: 0 },
-    cA: { mm: 0, sumMm: 0, percent: 0 },
-    cB: { mm: 0, sumMm: 0, percent: 0 },
-    cC: { mm: 0, sumMm: 0, percent: 0 },
-    cD: { mm: 0, sumMm: 0, percent: 0 },
+    zA: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    zB: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    zC: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    zD: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    cA: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    cB: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    cC: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
+    cD: { mm: 0, sumMm: 0, percent: 0, remm: 0 },
   };
   /** 单顶位移 */
   taskModeStr[data.mode].map(key => {
@@ -125,7 +136,16 @@ export function TensionMm(data: GroupItem): Elongation {
         - Number(data[key].wordMm)
       );
     }
+    if (re && data.record.state === 2 || data.record.state === 3) {
+      console.log(data.record[key].mm[data.record.tensionStage],
+        data.record[key].reData.mm, data.record[key].mpa[0], data.record[key].mpa[data.record.tensionStage]);
+      elongation[key].remm =
+       myToFixed((data.record[key].mm[data.record.tensionStage] - data.record[key].reData.mm)
+        - (1 - data.record[key].mpa[0] / data.record[key].mpa[data.record.tensionStage])
+        * data.cA.wordMm || 1);
+    }
   });
+  // 总位移 / 偏差率计算
   taskModeStr[data.mode].map(key => {
     if (key.indexOf('z') > -1) {
       const k = key[1];
