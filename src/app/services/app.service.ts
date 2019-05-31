@@ -56,7 +56,7 @@ export class AppService {
   /**
    * * 键盘s
    */
-  public onKeyboard(com: string) {
-    this.e.ipcRenderer.send(com);
+  public onKeyboard(data) {
+    this.e.ipcRenderer.send('showKeyboard', data);
   }
 }
