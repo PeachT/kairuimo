@@ -195,7 +195,16 @@ export class AppComponent implements OnInit {
       this.PLCS.PLCobservble.subscribe(() => {
         // console.log('123132');
       });
+      document.body.addEventListener('focus', (event: any) => {
+        const type = event.target.type;
+        console.log('0000111112222233333', event.target.classList);
+        if (type === 'number' || type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
+            // Do something
+            console.log('focusfocusfocusfocusfocusfocusfocus', type);
+        }
+      }, true);
     }
+
   }
 
   onClick() {

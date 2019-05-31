@@ -81,6 +81,7 @@ export class TaskComponent implements OnInit {
   };
   /** 自动完成component */
   componentOptions = {
+    menuNames: [],
     menu: [],
     holes: null
   };
@@ -173,12 +174,15 @@ export class TaskComponent implements OnInit {
     this.db.comp.toArray().then((d) => {
       console.log(d);
       this.componentOptions.menu = [];
+      this.componentOptions.menuNames = [];
       d.map((item: Comp) => {
         item.hole.map((h) => {
-          this.componentOptions.menu.push({ name: `${item.name}/${h.name}`, holes: h.holes });
+          const value = `${item.name}/${h.name}`;
+          this.componentOptions.menu.push({ name: value, holes: h.holes });
+          this.componentOptions.menuNames.push({ value, label: value, isLeaf: true});
         });
       });
-      console.log(this.componentOptions.menu);
+      console.log(this.componentOptions);
     }).catch(() => {
       this.message.error('获取构建数据错误!!');
     });
@@ -720,8 +724,10 @@ export class TaskComponent implements OnInit {
   }
   /** 构建选择 */
   componentChange() {
-    const e = this.validateForm.value.component;
-    this.componentOptions.holes = this.componentOptions.menu.filter(f => f.name === e)[0];
+    const value = this.validateForm.value.component;
+    // this.validateForm.controls.component.setValue(value);
+    console.log('选择component', value[0]);
+    this.componentOptions.holes = this.componentOptions.menu.filter(f => f.name === value[0])[0];
     this.autoGroup();
   }
   /** 选择设备 */
