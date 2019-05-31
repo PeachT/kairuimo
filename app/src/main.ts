@@ -230,3 +230,45 @@ ipcMain.on('selectTemplate', (event, data) => {
   }
   event.sender.send(data.channel, {msg: `获取成功`, outPath, templatePath, data});
 });
+
+
+/** 键盘控制 */
+const exec = require('child_process').exec;
+/**
+ * *键盘
+ */
+// let pid = null;
+ipcMain.on('numberKeyboard', (event, data) => {
+  console.log('onKdNumber');
+  const ps = exec(`
+   gsettings set org.onboard.window.landscape x 0 &
+   gsettings set org.onboard.window.landscape y 0 &
+   gsettings set org.onboard.window.landscape width 400 &
+   gsettings set org.onboard.window.landscape height 480 &
+   gsettings set org.onboard layout Number &
+   onboard &`,
+    { async: true }, (code, stdout, stderr) => {
+      console.log('Exit code:', code);
+      console.log('Program output:', stdout);
+      console.log('Program stderr:', stderr);
+      ps.kill();
+  });
+});
+/**
+ * *键盘
+ */
+// let pid = null;
+ipcMain.on('onKdString', (event, data) => {
+  console.log('onKdNumber');
+  exec('onboard');
+  // const np = exec('onboard -s 480x640 -l number -x 0 -y 0', { async: true }, (code, stdout, stderr) => {
+  //   console.log('Exit code:', code);
+  //   console.log('Program output:', stdout);
+  //   console.log('Program stderr:', stderr);
+  // });
+});
+
+ipcMain.on('offKdNumber', (event, data) => {
+  console.log('onKdNumber');
+
+});

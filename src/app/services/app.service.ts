@@ -52,4 +52,11 @@ export class AppService {
       }
     }, 1000);
   }
+
+  /**
+   * * 键盘s
+   */
+  public onKeyboard(com: string) {
+    this.e.ipcRenderer.send(com);
+  }
 }

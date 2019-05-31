@@ -201,6 +201,7 @@ export class AppComponent implements OnInit {
         if (type === 'number' || type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
             // Do something
             console.log('focusfocusfocusfocusfocusfocusfocus', type);
+            this.appService.onKeyboard(`${type}Keyboard`);
         }
       }, true);
     }
