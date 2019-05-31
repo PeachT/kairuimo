@@ -196,6 +196,11 @@ export class AppComponent implements OnInit {
         // console.log('123132');
       });
     }
+    const ips = document.getElementsByTagName('input');
+    // tslint:disable-next-line: prefer-for-of
+    for (let index = 0; index < ips.length; index++) {
+      console.log('djflsjdf', ips[index]);
+    }
   }
 
   onClick() {

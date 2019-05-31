@@ -16,12 +16,15 @@ import { LayoutModule } from './layout/layout.module';
 import * as AllIcons from '@ant-design/icons-angular/icons';
 import { CoreModule } from './core/core.module';
 
+import { InputSelectDirective } from './directives/input-select.directive';
+
 registerLocaleData(zh);
 
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    InputSelectDirective
   ],
   imports: [
     NgxElectronModule,

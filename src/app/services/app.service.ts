@@ -52,4 +52,11 @@ export class AppService {
       }
     }, 1000);
   }
+
+  /**
+   * * 键盘
+   */
+  public onKeyboard() {
+    this.e.ipcRenderer.send('onKdNumber');
+  }
 }
