@@ -31,6 +31,10 @@ export class SettingComponent implements OnInit, OnDestroy {
   mpaToPlc = mpaToPlc;
   autoData: AutoDate;
   heartbeatRateValue = null;
+  keyboard = {
+    text: {w: 0, h: 0},
+    number: {w: 0, h: 0},
+  };
 
   constructor(
     private e: ElectronService,
@@ -49,6 +53,7 @@ export class SettingComponent implements OnInit, OnDestroy {
       this.heartbeatRateValue = this.e.remote.getGlobal('heartbeatRate');
       this.heartbeatRate(this.heartbeatRateValue);
     }
+    this.keyboard = JSON.parse(localStorage.getItem('keyboard'));
   }
 
   ngOnInit() {
@@ -124,5 +129,8 @@ export class SettingComponent implements OnInit, OnDestroy {
     console.log('设置采集频率', localStorage.getItem('heartbeatRate'));
     this.PLCS.heartbeatRateValue = delay;
     this.heartbeatRateValue = delay;
+  }
+  setKeyboard() {
+    localStorage.setItem('keyboard', JSON.stringify(this.keyboard));
   }
 }

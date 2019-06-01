@@ -173,6 +173,21 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    let keyboard = JSON.parse(localStorage.getItem('keyboard'));
+    if (!keyboard) {
+      console.log('没有数据');
+      keyboard = {
+        number: {
+          w: 240,
+          h: 320
+        },
+        text: {
+          w: 660,
+          h: 320
+        },
+      };
+      localStorage.setItem('keyboard', JSON.stringify(keyboard));
+    }
     if (this.appService.Environment) {
       console.log('在 Electron 中运行');
       // 监听主进程
@@ -196,14 +211,54 @@ export class AppComponent implements OnInit {
         // console.log('123132');
       });
       document.body.addEventListener('focus', (event: any) => {
-        const type = event.target.type;
-        console.log('0000111112222233333', event.target.classList);
+        keyboard = JSON.parse(localStorage.getItem('keyboard'));
+        let type = event.target.type;
+        if (type === 'password') {
+          type = 'text';
+        }
+
+        console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
         if (type === 'number' || type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
-            // Do something
-            console.log('focusfocusfocusfocusfocusfocusfocus', type);
-            this.appService.onKeyboard({type, x: 0, y: 0, w: 400, h: 480});
+          let topmag = type === 'text' ? 130 : 30;
+          const kwh = keyboard[type];
+          // 获取元素绝对位置
+          const rect = event.target.getBoundingClientRect();
+          let x = Math.round(rect.x + window.screenLeft);
+          let y = Math.round(rect.y + rect.height + window.screenTop + topmag);
+
+          const drx = document.body.clientWidth + window.screenLeft;
+          const dry = document.body.clientHeight + window.screenTop;
+
+          const krx = x + kwh.w;
+          const kry = y + kwh.h;
+
+          x = krx - drx > 0 ? drx - kwh.w : x;
+          topmag = 0;
+          if (type === 'text') {
+            topmag = dry - rect.y - rect.height  > 150 ? 0 : 130;
+            console.log(dry - rect.y - rect.height);
+          }
+          y = kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y;
+
+          console.log('focusfocusfocusfocusfocusfocusfocus', type);
+          event.target.select();
+          this.appService.onKeyboard({type, x, y, w: kwh.w, h: kwh.h});
         }
       }, true);
+      // document.body.addEventListener('click', (event: any) => {
+      //   let type = event.target.type;
+      //   if (type === 'password') {
+      //     type = 'text';
+      //   }
+      //   console.log('0000111112222233333', event.target.classList, type);
+      //   if (type === 'number') {
+      //     console.log('focusfocusfocusfocusfocusfocusfocus', type);
+      //     this.appService.onKeyboard({type, x: 0, y: 0, w: 240, h: 320});
+      //   } else if (type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
+      //     console.log('focusfocusfocusfocusfocusfocusfocus', type);
+      //     this.appService.onKeyboard({type, x: 0, y: 0, w: 660, h: 320});
+      //   }
+      // }, true);
     }
 
   }
