@@ -16,6 +16,7 @@ const menus = [
   { jurisdiction: 1, url: '/component', icon: 'deployment-unit', name: '构建' },
   { jurisdiction: 1, url: '/user', icon: 'user', name: '用户' },
   { jurisdiction: 0, url: '/auto', icon: 'box-plot', name: '自动' },
+  { jurisdiction: 0, url: '/help', icon: 'question', name: '帮助'},
 ];
 @Component({
   selector: 'app-login',

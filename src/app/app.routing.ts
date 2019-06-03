@@ -77,6 +77,12 @@ const routes: Routes = [
         data: { title: '用户' },
         canDeactivate: [GlobalEditGuard]
       },
+      {
+        path: 'help',
+        loadChildren: './routes/help/help.module#HelpModule',
+        data: { title: '帮助' },
+        canDeactivate: [GlobalEditGuard]
+      },
       // {
       //   path: 'auto',
       //   loadChildren: './routes/auto/auto.module#AutoModule',

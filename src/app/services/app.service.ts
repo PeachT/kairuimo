@@ -49,6 +49,7 @@ export class AppService {
       if (this.powerDelay <= 0) {
         // this.e.ipcRenderer.send('power', mode);
         clearTimeout(this.powerDelayT);
+        this.e.ipcRenderer.send('power', mode);
       }
     }, 1000);
   }

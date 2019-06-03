@@ -9,16 +9,17 @@ import { ElectronService } from 'ngx-electron';
   styleUrls: ['./header.component.less']
 })
 export class HeaderComponent implements OnInit {
-  menus = [
-    {url: '/task', icon: 'form', name: '任务'},
-    {url: '/manual', icon: 'deployment-unit', name: '手动'},
-    {url: '/setting', icon: 'setting', name: '设置'},
-    {url: '/jack', icon: 'usb', name: '千斤顶'},
-    {url: '/project', icon: 'form', name: '项目'},
-    {url: '/component', icon: 'deployment-unit', name: '构建'},
-    {url: '/user', icon: 'user', name: '用户'},
-    {url: '/auto', icon: 'box-plot', name: '自动'},
-  ];
+  // menus = [
+  //   {url: '/task', icon: 'form', name: '任务'},
+  //   {url: '/manual', icon: 'deployment-unit', name: '手动'},
+  //   {url: '/setting', icon: 'setting', name: '设置'},
+  //   {url: '/jack', icon: 'usb', name: '千斤顶'},
+  //   {url: '/project', icon: 'form', name: '项目'},
+  //   {url: '/component', icon: 'deployment-unit', name: '构建'},
+  //   {url: '/user', icon: 'user', name: '用户'},
+  //   {url: '/auto', icon: 'box-plot', name: '自动'},
+  //   {url: '/hole', icon: 'question-circlet', name: '帮助'},
+  // ];
   powerState = false;
   constructor(
     private router: Router,
