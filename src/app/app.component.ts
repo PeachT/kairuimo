@@ -29,6 +29,8 @@ export class AppComponent implements OnInit {
     private router: Router,
     public PLCS: PLCService,
   ) {
+    // 采集频率
+    this.PLCS.heartbeatRate();
     // 判断运行环境适合是 Electron
     this.appService.Environment = navigator.userAgent.indexOf('Electron') !== -1;
     this.db = this.odb.db;
@@ -152,11 +154,7 @@ export class AppComponent implements OnInit {
     }).catch((error) => {
       console.log('数据库错误！！', error);
     });
-    // this.router.events.filter((event) => event instanceof NavigationEnd)
-    //   .subscribe((event: NavigationEnd) => {
-    //     // do something
-    //   console.log(event);
-    // });
+
     router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
         if (!this.appService.userInfo) {
@@ -167,9 +165,6 @@ export class AppComponent implements OnInit {
       }
     });
 
-    // this.e.ipcRenderer.on('PLCConnection', (event, data) => {
-    //   console.log(data);
-    // });
   }
 
   ngOnInit() {
@@ -245,20 +240,6 @@ export class AppComponent implements OnInit {
           this.appService.onKeyboard({type, x, y, w: kwh.w, h: kwh.h});
         }
       }, true);
-      // document.body.addEventListener('click', (event: any) => {
-      //   let type = event.target.type;
-      //   if (type === 'password') {
-      //     type = 'text';
-      //   }
-      //   console.log('0000111112222233333', event.target.classList, type);
-      //   if (type === 'number') {
-      //     console.log('focusfocusfocusfocusfocusfocusfocus', type);
-      //     this.appService.onKeyboard({type, x: 0, y: 0, w: 240, h: 320});
-      //   } else if (type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
-      //     console.log('focusfocusfocusfocusfocusfocusfocus', type);
-      //     this.appService.onKeyboard({type, x: 0, y: 0, w: 660, h: 320});
-      //   }
-      // }, true);
     }
 
   }

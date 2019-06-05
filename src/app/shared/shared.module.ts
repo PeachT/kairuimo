@@ -13,6 +13,7 @@ import { JackItemComponent } from './jack-item/jack-item.component';
 import { ProjectComponent } from './project/project.component';
 import { ValidatorErrorPipe } from '../pipes/error.pipe';
 import { ToFixedrPipe } from '../pipes/toFixed.pipe';
+import { GetPathNamePipe } from '../pipes/path.pipe';
 
 
 // pipe
@@ -36,6 +37,7 @@ const COMPONENTS = [
 const PIPE = [
   ToFixedrPipe,
   ValidatorErrorPipe,
+  GetPathNamePipe,
 ];
 
 @NgModule({

@@ -1,16 +1,62 @@
-<button nz-button nzSize="large" nzType="primary" (click)="onUpdate()">更 新</button>
+<div class="main">
+  <!-- <img [src]="appS.info.unit.logo" alt="没有图标" srcset=""> -->
+  <nz-avatar [nzSize]="164" nzShape="square" [nzSrc]="appS.info.unit.logo"></nz-avatar>
+  <h1>{{appS.info.unit.name}}智能张拉设备</h1>
+  <h3>联系方式： {{appS.info.unit.tel}}</h3>
+  <h3>软件版本： <span style="color: #40a9ff;"> {{appS.info.version}} </span>
+    <button nz-button  nzType="dashed" (click)="onUpdate()">更 新</button>
+  </h3>
+  <div>
+    <input type="text" #intext>
+    <button nz-button  nzType="dashed" (click)="test(intext.value)">测试</button>
+    <p>{{testMsg | json}}</p>
+  </div>
+</div>
 
 
-<nz-modal [nzVisible]="update.state" nzWidth="85%" nzMaskClosable="false" nzClosable="false" [nzFooter]="null"
+<nz-modal [nzVisible]="update.state" nzWidth="85%" nzMaskClosable="false" nzClosable="false" [nzFooter]="modalFooter"
   nzTitle="更新...">
-  {{update.sucess}}
-  <h1>更新用时： {{update.time}} s</h1>
-  <p *ngIf="update.time >= 500"> 500s未更新完成！更新失败！</p>
-  <h2>更新状态: <span [class]="'sp'+update.sucess">{{update.msg}}</span></h2>
-  <button class="restart" (click)="appS.powerState = true" *ngIf="update.sucess === 1 || update.sucess === 2">
-    <i nz-icon nzType="poweroff" style="color:lime" ></i>
-    电  源
-  </button>
-  <button nz-button nzType="primary" *ngIf="update.sucess === 3" class="restart" (click)="onCancel()">取消更新</button>
+  <h2 *ngIf="update.files?.length === 0">没有找到更新文件
+    <button nz-button nzType="primary" (click)="onUpdate()">
+      获取更新文件
+    </button>
+    <p>{{update.fileMsg | json}}</p>
+  </h2>
+  <nz-radio-group [(ngModel)]="update.selectFile" [nzDisabled]="update.start" >
+    <label nzSize="large" class="radio-item" nz-radio [nzValue]="item" *ngFor="let item of update.files">{{item | GetPathName}}</label>
+  </nz-radio-group>
+  <div>
+    <button nz-button nzType="primary" *ngIf="update.selectFile && !update.start" (click)="runUpdate()">
+      <i nz-icon nzType="file-sync" nzTheme="outline"></i>
+      更 新
+    </button>
+  </div>
+
+  <div *ngIf="update.start">
+    <h1>更新用时： {{update.time}} s</h1>
+    <p *ngIf="update.time >= 500"> 500s未更新完成！更新失败！</p>
+    <h2>
+      <button nz-button nzLoading nzType="primary" nzShape="circle" *ngIf="update.sucess === 0"></button>
+      更新状态:
+      <span [class]="'sp'+update.sucess">{{update.msg}}</span>
+    </h2>
+    <div class="power-btn" *ngIf="update.sucess === 1 || update.sucess === 2">
+      <ng-container *ngIf="!appS.powerDelayT">
+        <button class="restart" (click)="power(false)"> <i nz-icon nzType="reload" style="color:lime"></i> 重 启 </button>
+        <button class="shutdown" (click)="power(true)"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button>
+      </ng-container>
+      <ng-container *ngIf="appS.powerDelayT && appS.powerDelay">
+        <h1 >{{appS.powerDelay}}s后{{appS.powerText}}！</h1>
+        <button class="shutdown" (click)="cancle()"> <i nz-icon nzType="poweroff" style="color:brown"></i> 取 消</button>
+      </ng-container>
+      <h1 *ngIf="!appS.powerDelay">正在{{appS.powerText}}...</h1>
+    </div>
+    <div class="power-btn" *ngIf="update.sucess === 3">
+      <button class="login-out" (click)="loginOut()"> <i nz-icon nzType="logout" style="color:dodgerblue"></i> 登 出 </button>
+    </div>
+  </div>
+  <ng-template #modalFooter>
+      <button nz-button nzType="primary" *ngIf="!update.start" (click)="onCancel()">取 消</button>
+  </ng-template>
 
 </nz-modal>

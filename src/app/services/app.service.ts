@@ -4,9 +4,19 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
 import { Subject } from 'rxjs';
 import { LoginUser } from '../models/user.models';
 import { ElectronService } from 'ngx-electron';
+import { NzMessageService } from 'ng-zorro-antd';
 
 @Injectable({ providedIn: 'root' })
 export class AppService {
+  /** 软件信息 */
+  public info = {
+    version: '0.0.10',
+    unit: {
+      name: '柳州市凯瑞姆',
+      tel: '888-8888888',
+      logo: '/assets/img/logo.jpeg'
+    }
+  };
   /** 运行环境是否是Electron */
   public Environment: boolean;
   /** 登录的用户信息 */
@@ -28,7 +38,14 @@ export class AppService {
   constructor(
     private router: Router,
     private e: ElectronService,
-    ) {
+    private message: NzMessageService,
+  ) {
+    const info = JSON.parse(localStorage.getItem('unitInfo'));
+    if (!info) {
+      localStorage.setItem('unitInfo', JSON.stringify(this.info.unit));
+    } else {
+      this.info.unit = info;
+    }
   }
   // 获得一个Observable;
   sharch = this.sharchSub.asObservable();
@@ -59,5 +76,15 @@ export class AppService {
    */
   public onKeyboard(data) {
     this.e.ipcRenderer.send('showKeyboard', data);
+  }
+  public usb() {
+    this.e.ipcRenderer.send('usb-umount');
+    this.e.ipcRenderer.once('usb-umount', (event, data) => {
+      if (data) {
+        this.message.error('U盘正在使用中!!');
+      } else {
+        this.message.success('U盘已卸载');
+      }
+    });
   }
 }

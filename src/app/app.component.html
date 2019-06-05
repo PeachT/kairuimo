@@ -10,6 +10,7 @@
       <button class="login-out" (click)="loginOut()"> <i nz-icon nzType="logout" style="color:dodgerblue"></i> 登 出 </button>
       <button class="restart" (click)="power(false)"> <i nz-icon nzType="reload" style="color:lime"></i> 重 启 </button>
       <button class="shutdown" (click)="power(true)"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button>
+      <button class="login-out" (click)="appService.usb()"> <i nz-icon nzType="usb" style="color:beige"></i> 卸载U盘 </button>
     </ng-container>
     <ng-container *ngIf="appService.powerDelayT && appService.powerDelay">
       <h1 >{{appService.powerDelay}}s后{{appService.powerText}}！</h1>

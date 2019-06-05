@@ -51,9 +51,9 @@ function createWindow() {
   // IPC 监听
   IPCOn('z', ztcp);
   IPCOn('c', ctcp);
-  win.webContents.openDevTools();
-  // if(dev) {
-  // }
+  if (dev) {
+    win.webContents.openDevTools();
+  }
 
   win.on('closed', () => {
     win = null;
@@ -73,7 +73,6 @@ app.on('activate', () => {
   if (win === null) {
     createWindow();
   }
-
 });
 
 
@@ -219,7 +218,10 @@ ipcMain.on('selectTemplate', (event, data) => {
   if (data) {
     try {
       outPath = dialog.showOpenDialog(win, {properties: ['openDirectory']})[0];
-      templatePath = dialog.showOpenDialog(win, {properties: ['openFile']})[0];
+      templatePath = dialog.showOpenDialog(win, {properties: ['openFile'], filters: [
+        { name: 'template', extensions: ['xlsx'] },
+      ]
+    })[0];
       console.log(outPath, templatePath);
     } catch (error) {
     }
@@ -259,52 +261,85 @@ ipcMain.on('offKdNumber', (event, data) => {
   console.log('onKdNumber');
 
 });
-
+/** 重启|关机 */
 ipcMain.on('power', (event, data) => {
   console.log('power');
   if (data) {
     exec(`poweroff`);
   } else {
-    exec(`shutdown -r now`);
+    exec(`reboot`);
   }
 });
+
+/** 获取更新文件 */
+ipcMain.on('select-file', (event, data) => {
+  console.log('select-file');
+  let updatepath = '/media/kvm';
+  if (dev) {
+    updatepath = '/media/peach';
+  }
+  const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
+    usb.kill();
+    console.log('usb', stdout);
+    if (stdout) {
+      const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`,  { async : true }, (code, stdout, stderr) => {
+        up.kill();
+        console.log('mount code:', code);
+        console.log('mount output:', stdout);
+        console.log('mount stderr:', stderr);
+        if (stderr.indexOf('不存在') !== -1) {
+          event.sender.send('select-file-out', {stdout, stderr: '加载U盘失败！'});
+          return;
+        } else {
+          const upps = exec(`find ${updatepath} -name "*kvm-device*.kvm"`, { async : true }, (code, stdout, stderr) => {
+            stdout = stdout.split('\n').filter(t => t !== '');
+            console.log('Exit code:', code);
+            console.log('Program output:', stdout);
+            console.log('Program stderr:', stderr);
+            event.sender.send('select-file-out', {stdout, stderr});
+            upps.kill();
+          });
+        }
+      });
+    } else {
+      event.sender.send('select-file-out', {stdout, stderr: '未检测到U盘！！'});
+    }
+  });
+});
+
 ipcMain.on('local-update', (event, data) => {
   console.log('local-update');
   // const updatepath = '/media/kvm/kvm/kvm/update/update.sh';
-  const updatepath = '/home/peach/KVM/update/update.sh';
-  const upps = exec(updatepath, { async : true}, (code, stdout, stderr) => {
+  // const updatepath = '/home/peach/KVM/update/update.sh';
+  const upps = exec(`sudo dpkg -i ${data}`, { async : true}, (code, stdout, stderr) => {
     console.log('Exit code:', code);
     console.log('Program output:', stdout);
     console.log('Program stderr:', stderr);
     event.sender.send('onUpdate', {stdout, stderr});
     upps.kill();
-    //     Program stderr: dpkg: 依赖关系问题使得 kvm-device 的配置工作不能继续：
-    //  kvm-device 依赖于 gconf2；然而：
-    //   未安装软件包 gconf2。
-    //  kvm-device 依赖于 gconf-service；然而：
-    //   未安装软件包 gconf-service。
-    //  kvm-device 依赖于 libappindicator1；然而：
-    //   未安装软件包 libappindicator1。
+  });
+});
 
-    // dpkg: 处理软件包 kvm-device (--install)时出错：
-    //  依赖关系问题 - 仍未被配置
-    // 在处理时有错误发生：
-//  kvm-device
+ipcMain.on('usb-umount', (event, data) => {
+  const upps = exec(`sudo umount /dev/sd[b-z]`, { async : true}, (code, stdout, stderr) => {
+    console.log('Exit code:', code);
+    console.log('Program output:', stdout);
+    console.log('Program stderr:', stderr);
+    let state = false;
+    if (stderr.indexOf('busy') !== -1) {
+      state = true;
+    }
+    event.sender.send('usb-umount', state);
+    upps.kill();
+  });
+});
 
-// Exit code: null
-// Program output: 安装kvm设备端软件...
-// 开始安装/home/peach/KVM/update/kvm-device_0.0.2_amd64.deb
-// (正在读取数据库 ... 系统当前共安装有 157627 个文件和目录。)
-// 正准备解包 .../kvm-device_0.0.2_amd64.deb  ...
-// 正在将 kvm-device (0.0.2) 解包到 (0.0.2) 上 ...
-// 正在设置 kvm-device (0.0.2) ...
-// 正在处理用于 gnome-menus (3.13.3-11ubuntu1.1) 的触发器 ...
-// 正在处理用于 desktop-file-utils (0.23-1ubuntu3.18.04.2) 的触发器 ...
-// 正在处理用于 mime-support (3.60ubuntu1) 的触发器 ...
-// 正在处理用于 hicolor-icon-theme (0.17-2) 的触发器 ...
-
-// Program stderr:
-
-
+ipcMain.on('test', (event, data) => {
+  const upps = exec(`${data.data}`, { async : true}, (code, stdout, stderr) => {
+    console.log('Exit code:', code);
+    console.log('Program output:', stdout);
+    console.log('Program stderr:', stderr);
+    event.sender.send(data.out, {stdout, stderr});
+    upps.kill();
   });
 });

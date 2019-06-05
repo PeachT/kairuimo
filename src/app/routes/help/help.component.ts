@@ -19,8 +19,13 @@ export class HelpComponent implements OnInit {
     msg: '正在更新',
     sucess: 0,
     cancel: false,
-    time: 0
+    time: 0,
+    files: null,
+    selectFile: null,
+    start: false,
+    fileMsg: null,
   };
+  testMsg: null;
 
   constructor(
     public appS: AppService,
@@ -39,7 +44,19 @@ export class HelpComponent implements OnInit {
 
   onUpdate() {
     this.update.state = true;
-    this.e.ipcRenderer.send('local-update', 'onUpdate');
+    this.e.ipcRenderer.send('select-file', 'select-file-out');
+
+    this.e.ipcRenderer.once('select-file-out', (event, data) => {
+      console.log(data);
+      this.update.files = data.stdout;
+      this.update.fileMsg = data;
+    });
+
+  }
+  runUpdate() {
+    console.log(this.update.selectFile);
+    this.update.start = true;
+    this.e.ipcRenderer.send('local-update', this.update.selectFile);
     const it = setInterval(() => {
       this.update.time ++;
       if (this.update.time > 500) {
@@ -73,10 +90,36 @@ export class HelpComponent implements OnInit {
   onCancel() {
     this.update = {
       state: false,
-      msg: '正在更新',
+      msg: '正在更新...',
       sucess: 0,
       cancel: false,
-      time: 0
+      time: 0,
+      files: null,
+      selectFile: null,
+      start: false,
+      fileMsg: null,
     };
+  }
+  power(mode) {
+    // this.appService.powerState = false;
+    this.appS.power(mode);
+
+  }
+  loginOut() {
+    this.appS.powerState = false;
+    this.router.navigate(['/login']);
+  }
+  cancle() {
+    console.log('取消');
+    clearTimeout(this.appS.powerDelayT);
+    this.appS.powerDelayT = null;
+  }
+
+  test(value) {
+    this.e.ipcRenderer.send('test', { data: value, out: 'test'});
+
+    this.e.ipcRenderer.once('test', (event, data) => {
+      this.testMsg = data;
+    });
   }
 }

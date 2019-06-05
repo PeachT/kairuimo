@@ -112,7 +112,7 @@ export class PLCService {
   // 0压力确认 1回程 2卸荷 3 卸荷完成 4回顶 5回顶完成 6超工作位移上限
   /** 搜索事件 */
   private plcSub = new Subject();
-
+  /** 设置采集频率 */
   heartbeatRateValue = 0;
 
   constructor(
@@ -312,5 +312,22 @@ export class PLCService {
       this.selectJack(1);
     }
     return JSON.parse(localStorage.getItem('jackId'));
+  }
+
+  /**
+   * *设置采集频率
+   */
+  heartbeatRate(delay = null) {
+    if (!delay) {
+      delay = localStorage.getItem('heartbeatRate');
+    }
+    if (!delay) {
+      delay = 500;
+    }
+
+    localStorage.setItem('heartbeatRate', delay);
+    this.e.ipcRenderer.send('heartbeatRate', delay);
+    console.log('设置采集频率', localStorage.getItem('heartbeatRate'));
+    this.heartbeatRateValue = delay;
   }
 }
