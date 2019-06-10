@@ -16,10 +16,22 @@ import { map, catchError, every, first } from 'rxjs/operators';
 })
 export class ProjectComponent implements OnInit {
   validateForm: FormGroup;
-  data = null;
+  data: Project = null;
+  projcetOtherKey = [
+    '分布工程',
+    '施工单位',
+    '分项工程',
+    '单位工程',
+    '工程部位',
+    '合同段',
+    '桩号范围',
+  ];
 
   get formArr(): FormArray {
     return this.validateForm.get('supervisions') as FormArray;
+  }
+  get otherInforFormArr(): FormArray {
+    return this.validateForm.get('otherInfo') as FormArray;
   }
 
   constructor(
@@ -43,34 +55,36 @@ export class ProjectComponent implements OnInit {
         // [this.projectAsyncReperitionValidator.validate.bind(this.projectAsyncReperitionValidator)]
         [this.projectNameRepetition()]
       ],
-      /** 分布工程 */
-      divisionProject: [],
-      /** 施工单位 */
-      constructionUnit: [],
-      /** 分项工程 */
-      subProject: [],
-      /** 单位工程 */
-      unitProject: [],
-      /** 工程部位 */
-      engineeringSite: [],
-      /** 合同段 */
-      contractSection: [],
-      /** 桩号范围 */
-      stationRange: [],
+      // /** 分布工程 */
+      // divisionProject: [],
+      // /** 施工单位 */
+      // constructionUnit: [],
+      // /** 分项工程 */
+      // subProject: [],
+      // /** 单位工程 */
+      // unitProject: [],
+      // /** 工程部位 */
+      // engineeringSite: [],
+      // /** 合同段 */
+      // contractSection: [],
+      // /** 桩号范围 */
+      // stationRange: [],
       /** 监理 */
-      supervisions: this.fb.array(this.supervisionsForm())
+      supervisions: this.fb.array(this.supervisionsForm()),
+      /** 其他信息 */
+      otherInfo: this.fb.array(this.otherInfoForm())
     });
   }
   supervisionsForm() {
     if (this.data) {
       return this.data.supervisions.map(() => {
-        return this.createSupervisionsForm();
+        return this.createSuperVisionsForm();
       });
     }
-    return [this.createSupervisionsForm()];
+    return [this.createSuperVisionsForm()];
   }
   /** 监理form */
-  createSupervisionsForm() {
+  createSuperVisionsForm() {
     return this.fb.group({
       /** 名字 */
       name: [null, [Validators.required, reperitionValidator('supervisions')]],
@@ -80,6 +94,25 @@ export class ProjectComponent implements OnInit {
       phone: [],
       /** 头像 */
       ImgBase64: [],
+    });
+  }
+  /** 其他信息 */
+  otherInfoForm() {
+    if (this.data && this.data.otherInfo && this.data.otherInfo.length > 0) {
+      return this.data.otherInfo.map(() => {
+        return this.otherInfoVisionsForm();
+      });
+    } else {
+      return [this.otherInfoVisionsForm()];
+    }
+  }
+  /** 其他form */
+  otherInfoVisionsForm() {
+    return this.fb.group({
+      /** 名字 */
+      key: [null, [Validators.required, reperitionValidator('otherInfo', 'key')]],
+      /** 内容 */
+      value: [null, [Validators.required]],
     });
   }
   /** 项目名称重复验证 */
@@ -114,7 +147,7 @@ export class ProjectComponent implements OnInit {
   add() {
     // tslint:disable-next-line:no-angle-bracket-type-assertion
     const control = <FormArray> this.validateForm.controls.supervisions;
-    control.push(this.createSupervisionsForm());
+    control.push(this.createSuperVisionsForm());
     this.data = this.validateForm.value;
   }
   sub(index) {
@@ -123,8 +156,25 @@ export class ProjectComponent implements OnInit {
     control.removeAt(index);
     this.data = this.validateForm.value;
   }
+  otherInfoAdd() {
+    // tslint:disable-next-line:no-angle-bracket-type-assertion
+    const control = <FormArray> this.validateForm.controls.otherInfo;
+    control.push(this.otherInfoVisionsForm());
+    this.data = this.validateForm.value;
+  }
+  otherInfoSub(index) {
+    // tslint:disable-next-line:no-angle-bracket-type-assertion
+    const control = <FormArray> this.validateForm.controls.otherInfo;
+    control.removeAt(index);
+    this.data = this.validateForm.value;
+  }
   ccc() {
     this.validateForm.clearAsyncValidators();
     this.validateForm.clearValidators();
+  }
+
+  projcetOtherKeySelect() {
+    const arr = this.otherInforFormArr.value.map(v => v.key);
+    return this.projcetOtherKey.filter(v =>  arr.indexOf(v) === -1 );
   }
 }

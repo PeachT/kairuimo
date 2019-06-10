@@ -138,7 +138,30 @@
     }
   }
 }
-
+/** 添加属性样式 */
+.other-info {
+  .divider{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    button {
+      margin-right: 15px;
+    }
+    nz-divider {
+      span{
+        &.ant-divider-inner-text {
+          font-size: 1em;
+        }
+      }
+    }
+  }
+  .other-edit {
+    display: flex;
+    width: 100%;
+  }
+}
+/** 校正每一项样式*/
 .revise-btn {
   display: flex;
   justify-content: center;

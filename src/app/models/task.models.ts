@@ -1,10 +1,13 @@
+import { OtherInfo } from './common';
+
 export interface TensionTask {
   id?: any;
   name: string;
   project: number;
   device: string;
-  component: string;
+  component: any;
   steelStrand: string;
+  otherInfo: Array<OtherInfo>;
   holeRadio: string;
   groups: Array<GroupItem>;
 }

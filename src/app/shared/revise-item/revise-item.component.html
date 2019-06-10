@@ -3,17 +3,22 @@
   <div style="width: 30%; margin-left: 30px;">
     <h1 style="text-align: center;">{{reviseName === 'mpa' ? '压力' : '位移'}}校正·{{setStage[setIndex]}}</h1>
     <nz-input-group nzSize="large" [nzAddOnBefore]="'设备' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')">
-      <input type="number" nz-input [(ngModel)]="revise.devValue" (input)="countRevise()">
+      <input type="number" style="background-color: #fff; color: rgba(0, 0, 0, 0.65);" readonly disabled nz-input [(ngModel)]="revise.devValue" (input)="countRevise()">
     </nz-input-group>
-    <nz-input-group>
+    <!-- <nz-input-group>
       <button nz-button nzType="primary" nzSize="large" style="width: 100%;" (click)="getDevValue()">获取设备值</button>
-    </nz-input-group>
+    </nz-input-group> -->
     <br>
-    <nz-input-group nzSize="large" [nzAddOnBefore]="'测量' + (reviseName === 'mpa' ? '压力Mpa' : '位移mm')">
+    <br>
+    <nz-input-group nzSize="large" nzAddOnBefore="差值" [nzAddOnAfter]="opt">
       <input type="number" nz-input [(ngModel)]="revise.measureValue" (input)="countRevise()">
+      <ng-template #opt>
+        <button nz-button (click)="setMeasureValue(0.1)">+</button>
+        <button nz-button (click)="setMeasureValue(-0.1)">-</button>
+      </ng-template>
     </nz-input-group>
     <br> <br>
-    <nz-input-group nzSize="large" nzAddOnBefore="校正值">
+    <nz-input-group nzSize="large" nzAddOnBefore="校正值" >
       <input type="number" nz-input [(ngModel)]="revise.value" (input)="countRevise()">
     </nz-input-group>
     <br><br>
@@ -29,8 +34,8 @@
       <div *ngFor="let item of setStage; index as i">
         <!-- <nz-form-label [nzSm]="1" >{{item}}</nz-form-label> -->
         <nz-form-control [nzSm]="4">
-          <div style="display: flex; align-items: center; margin-right: 8px;">
-            {{item}}：<input type="number" style="border: 1px solid #d9d9d9;" readonly nz-input [formControlName]="i" (click)="setMm(i)">
+          <div style="display: flex; align-items: center; margin-right: 8px;"  (click)="setMm(i)">
+            {{item}}：<input readonly disabled type="number" style="border: 1px solid #d9d9d9;" nz-input [formControlName]="i">
           </div>
         </nz-form-control>
       </div>

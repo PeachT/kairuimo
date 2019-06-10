@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn, AbstractControl, ValidationErrors, FormArray } from '@angular/forms';
 import { DB, DbService, tableName } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
@@ -18,6 +18,7 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { mpaToPlc, TensionMm } from 'src/app/Function/device.date.processing';
 import { ElectronService } from 'ngx-electron';
 import { Elongation } from 'src/app/models/live';
+import { reperitionValidator } from 'src/app/Validator/repetition.validator';
 
 @Component({
   selector: 'app-task',
@@ -31,6 +32,12 @@ export class TaskComponent implements OnInit {
   taskDataDom: TaskDataComponent;
 
   validateForm: FormGroup;
+  get otherInforFormArr(): FormArray {
+    return this.validateForm.get('otherInfo') as FormArray;
+  }
+  bridgeOtherKey = [
+    '设计强度',
+  ];
 
   db: DB;
   data: TensionTask;
@@ -163,7 +170,8 @@ export class TaskComponent implements OnInit {
       name: [null, [Validators.required], [this.nameRepetition()]],
       device: [null, [Validators.required]],
       component: [null, [Validators.required]],
-      steelStrand: [null, [Validators.required]],
+      steelStrand: [null],
+      otherInfo: this.fb.array(this.otherInfoForm()),
       holeRadio: [null, [Validators.required]],
       project: []
     });
@@ -201,6 +209,53 @@ export class TaskComponent implements OnInit {
             }),
           );
     };
+  }
+  /** 其他信息 */
+  otherInfoForm() {
+    const rarr = [
+      this.fb.group({
+        /** 名字 */
+        key: ['浇筑日期'],
+        /** 内容 */
+        value: [null, [Validators.required]],
+      })
+    ];
+    if (this.data && this.data.otherInfo && this.data.otherInfo.length > 1) {
+      for (let index = 0; index < this.data.otherInfo.length - 1; index++) {
+        rarr.push( this.otherInfoVisionsForm() );
+      }
+    }
+    return rarr;
+  }
+  /** 其他form */
+  otherInfoVisionsForm() {
+    return this.fb.group({
+      /** 名字 */
+      key: [null, [Validators.required]],
+      /** 内容 */
+      value: [null, [Validators.required]],
+    });
+  }
+  bridgeOtherKeySelect() {
+    const arr = this.otherInforFormArr.value.map(v => v.key);
+    return this.bridgeOtherKey.filter(v =>  arr.indexOf(v) === -1 );
+  }
+  /** 从新赋值 */
+  reset() {
+    this.validateForm.setControl('otherInfo', this.fb.array(this.otherInfoForm()));
+    this.validateForm.reset(this.data);
+  }
+  /** 添加其他数据 */
+  otherInfoAdd() {
+    // tslint:disable-next-line:no-angle-bracket-type-assertion
+    const control = <FormArray> this.validateForm.controls.otherInfo;
+    control.push(this.otherInfoVisionsForm());
+    this.data = this.validateForm.value;
+  }
+  otherInfoSub(index) {
+    // tslint:disable-next-line:no-angle-bracket-type-assertion
+    const control = <FormArray> this.validateForm.controls.otherInfo;
+    control.removeAt(index);
   }
   /** 跳转到路由数据孔号 */
   async goRouteHole() {
@@ -287,7 +342,8 @@ export class TaskComponent implements OnInit {
     if (id) {
       this.data = await this.db.task.filter(t => t.id === id).first();
       console.log('选择梁', this.data);
-      this.validateForm.reset(this.data);
+      // this.validateForm.reset(this.data);
+      this.reset();
       this.groupData = JSON.parse(JSON.stringify(this.data.groups));
       await this.getJackDel(this.data.device[0]);
       this.editGroupIndex = null;
@@ -325,11 +381,13 @@ export class TaskComponent implements OnInit {
           device: null,
           component: null,
           steelStrand: null,
+          otherInfo: [{key: '浇筑日期', value: null}],
           holeRadio: null,
           groups: [],
         };
       }
-      this.validateForm.reset(this.data);
+      // this.validateForm.reset(this.data);
+      this.reset();
       this.groupData = JSON.parse(JSON.stringify(this.data.groups));
       this.startBaseSub();
       this.appS.edit = true;
@@ -560,6 +618,9 @@ export class TaskComponent implements OnInit {
     }
 
     console.log('保存数据', this.data, this.groupData);
+    if (this.data.component instanceof Array ) {
+      this.data.component = this.data.component[0];
+    }
     // 添加
     if (!this.data.id) {
       delete this.data.id;
@@ -637,7 +698,7 @@ export class TaskComponent implements OnInit {
   }
   /** 复制 */
   copy() {
-    const copy: TensionTask = Object.assign(JSON.parse(JSON.stringify(this.data)), { id: null, name: null });
+    const copy: TensionTask = Object.assign(JSON.parse(JSON.stringify(this.data)), { id: null });
     for (const c of copy.groups) {
       delete c.record;
     }
@@ -724,10 +785,11 @@ export class TaskComponent implements OnInit {
   }
   /** 构建选择 */
   componentChange() {
-    const value = this.validateForm.value.component;
+    // this.validateForm.controls.component.setValue()
+    const value = this.validateForm.value.component[0];
     // this.validateForm.controls.component.setValue(value);
-    console.log('选择component', value[0]);
-    this.componentOptions.holes = this.componentOptions.menu.filter(f => f.name === value[0])[0];
+    console.log('选择component', value);
+    this.componentOptions.holes = this.componentOptions.menu.filter(f => f.name === value)[0];
     this.autoGroup();
   }
   /** 选择设备 */

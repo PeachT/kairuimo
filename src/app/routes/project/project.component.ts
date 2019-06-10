@@ -66,7 +66,7 @@ export class ProjectComponent implements OnInit {
   onMneu(id, copy = null) {
     console.log('选项目', id);
     console.log(this.menu);
-    if ((id !== null && this.menu.select === id) || this.ifEdit()) { return; }
+    if (!id || this.ifEdit()) { return; }
     if (id !== null) {
       this.menu.select = id;
       this.db.project.filter(a => a.id === id).first().then((p: Project) => {
@@ -82,13 +82,7 @@ export class ProjectComponent implements OnInit {
       } else {
         this.data = {
           projectName: null,
-          divisionProject: null,
-          constructionUnit: null,
-          subProject: null,
-          unitProject: null,
-          engineeringSite: null,
-          contractSection: null,
-          stationRange: null,
+          otherInfo: [],
           supervisions: [
             {
               name: null,

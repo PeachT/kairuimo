@@ -70,7 +70,7 @@
                 <nz-form-explain *ngIf="validateForm.get('device').dirty && validateForm.get('device').errors">请入选择设备！
                 </nz-form-explain>
               </nz-form-control>
-              <nz-form-label [nzSm]="3" nzRequired>钢绞线</nz-form-label>
+              <!-- <nz-form-label [nzSm]="3" nzRequired>钢绞线</nz-form-label>
               <nz-form-control [nzSm]="4">
                 <nz-cascader [nzOptions]="steelStrandOptions" formControlName="steelStrand"
                   (ngModelChange)="steelStrandOnChanges($event)">
@@ -78,8 +78,50 @@
                 <nz-form-explain
                   *ngIf="validateForm.get('steelStrand').dirty && validateForm.get('steelStrand').errors">
                   请入选择钢绞线！</nz-form-explain>
-              </nz-form-control>
+              </nz-form-control> -->
             </nz-form-item>
+
+            <div formArrayName="otherInfo" class="other-info">
+                <nz-form-item *ngIf="appS.edit" class="divider">
+                  <nz-divider style="min-width: auto;" nzText="其他信息" nzOrientation="left"></nz-divider>
+                  <button nz-button nzType="primary" nzSearch (click)="otherInfoAdd()" type="button" >添 加</button>
+                </nz-form-item>
+                <nz-form-item >
+                  <ng-container *ngFor="let item of otherInforFormArr.controls; index as i" [formGroupName]="i">
+                      <ng-container *ngIf="i === 0">
+                        <nz-form-label [nzSm]="3" >浇筑日期</nz-form-label>
+                        <nz-form-control [nzSm]="appS.edit ? 21 : 5" [ngClass]="{'in-error': item.get('value').errors}">
+                          <nz-date-picker readonly  class="revise-date" nzFormat="yyyy-MM-dd" formControlName="value"></nz-date-picker>
+                          <nz-form-explain *ngIf="appS.edit">{{item.get('value').errors | ValidatorError}}</nz-form-explain>
+                        </nz-form-control>
+                      </ng-container>
+                    <div class="other-edit" *ngIf="appS.edit && i > 0">
+                      <div style="flex: 1;">
+                        <nz-form-control [ngClass]="{'in-error': item.get('key').errors}">
+                          <input placeholder="显示名称" nz-input formControlName="key" [nzAutocomplete]="auto" />
+                          <nz-autocomplete [nzDataSource]="bridgeOtherKeySelect()" #auto> </nz-autocomplete>
+                          <nz-form-explain *ngIf="appS.edit">{{item.get('key').errors | ValidatorError}}</nz-form-explain>
+                        </nz-form-control>
+                      </div>
+                      <div style="flex: 1;">
+                          <nz-form-control>
+                            <input type="text" nz-input placeholder="实际内容" formControlName="value">
+                          </nz-form-control>
+                      </div>
+                      <div>
+                        <button nz-button nzType="default" nzShape="circle" (click)="otherInfoSub(i)"><i nz-icon type="close"></i></button>
+                      </div>
+                    </div>
+                    <ng-container *ngIf="!appS.edit && i > 0">
+                      <nz-form-label [nzSm]="3" >{{item.value.key || '显示名称'}}</nz-form-label>
+                      <nz-form-control [nzSm]="5">
+                        <input type="text" nz-input placeholder="实际内容" formControlName="value">
+                      </nz-form-control>
+                    </ng-container>
+                  </ng-container>
+                </nz-form-item>
+            </div>
+
             <nz-form-item *ngIf="data" style="z-index: 2;">
               <nz-form-control>
                 <nz-radio-group [nzButtonStyle]="'solid'" [nzDisabled]="edit">

@@ -7,7 +7,7 @@
     </nz-form-control>
   </nz-form-item>
 
-  <nz-form-item>
+  <!-- <nz-form-item>
     <nz-form-label [nzSm]="3" >分布工程</nz-form-label>
     <nz-form-control [nzSm]="5">
       <nz-input-group>
@@ -56,12 +56,48 @@
         <input type="text" nz-input placeholder="桩号范围" formControlName="stationRange">
       </nz-input-group>
     </nz-form-control>
-  </nz-form-item>
+  </nz-form-item> -->
+
+  <div formArrayName="otherInfo" class="other-info">
+    <nz-form-item *ngIf="appS.edit" class="divider">
+      <nz-divider style="min-width: auto;" nzText="其他信息" nzOrientation="left"></nz-divider>
+      <button nz-button nzType="primary" nzSearch (click)="otherInfoAdd()" type="button" >添 加</button>
+    </nz-form-item>
+    <nz-form-item >
+      <ng-container *ngFor="let item of otherInforFormArr.controls; index as i" [formGroupName]="i">
+        <div class="other-edit" *ngIf="appS.edit">
+          <div style="flex: 1;">
+            <nz-form-control [ngClass]="{'in-error': item.get('key').errors}">
+              <input placeholder="显示名称" nz-input formControlName="key" [nzAutocomplete]="auto" />
+              <nz-autocomplete [nzDataSource]="projcetOtherKeySelect()" #auto> </nz-autocomplete>
+              <nz-form-explain *ngIf="appS.edit">{{item.get('key').errors | ValidatorError}}</nz-form-explain>
+            </nz-form-control>
+          </div>
+          <div style="flex: 1;">
+              <nz-form-control>
+                <input type="text" nz-input placeholder="实际内容" formControlName="value">
+              </nz-form-control>
+          </div>
+          <div>
+            <button nz-button nzType="default" nzShape="circle" (click)="otherInfoSub(i)"><i nz-icon type="close"></i></button>
+          </div>
+        </div>
+        <ng-container *ngIf="!appS.edit">
+          <nz-form-label [nzSm]="3" >{{item.value.key || '显示名称'}}</nz-form-label>
+          <nz-form-control [nzSm]="5">
+            <input type="text" nz-input placeholder="实际内容" formControlName="value">
+          </nz-form-control>
+        </ng-container>
+      </ng-container>
+    </nz-form-item>
+  </div>
+
+
   <div class="supervisions">
-    <div>
-      <h3>监理</h3>
-      <button nz-button nzType="primary" nzSearch (click)="add()" type="button">添 加</button>
-    </div>
+    <nz-form-item class="revise-btn">
+      <nz-divider style="min-width: auto;" nzText="监理" nzOrientation="left"></nz-divider>
+      <button nz-button nzType="primary" nzSearch (click)="add()" type="button" *ngIf="appS.edit">添 加</button>
+    </nz-form-item>
     <div nz-row nzGutter="25" formArrayName="supervisions">
       <div nz-col nzSm="24" nzLg="12" *ngFor="let item of formArr.controls; index as i"
         [formGroupName]="i">
@@ -73,31 +109,31 @@
           </div>
           <div class="content">
             <nz-form-item>
-              <nz-form-label [nzSm]="4" nzRequired>监理姓名</nz-form-label>
-              <nz-form-control [nzSm]="20" [ngClass]="{'in-error': item.get('name').errors}">
+              <nz-form-label [nzSm]="6" nzRequired>监理姓名</nz-form-label>
+              <nz-form-control [nzSm]="18" [ngClass]="{'in-error': item.get('name').errors}">
                   <input type="text" nz-input placeholder="监理姓名" formControlName="name">
                 <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain>
               </nz-form-control>
             </nz-form-item>
 
             <nz-form-item>
-              <nz-form-label [nzSm]="4" nzRequired>监理单位</nz-form-label>
-              <nz-form-control [nzSm]="20" [ngClass]="{'in-error': item.get('unit').errors}">
+              <nz-form-label [nzSm]="6" nzRequired>监理单位</nz-form-label>
+              <nz-form-control [nzSm]="18" [ngClass]="{'in-error': item.get('unit').errors}">
                   <input type="text" nz-input placeholder="监理单位" formControlName="unit">
                   <nz-form-explain *ngIf="appS.edit">{{item.get('unit').errors | ValidatorError}}</nz-form-explain>
               </nz-form-control>
             </nz-form-item>
 
             <nz-form-item>
-              <nz-form-label [nzSm]="4">联系方式</nz-form-label>
-              <nz-form-control [nzSm]="20">
+              <nz-form-label [nzSm]="6">联系方式</nz-form-label>
+              <nz-form-control [nzSm]="18">
                   <input type="text" nz-input placeholder="联系方式" formControlName="phone">
               </nz-form-control>
             </nz-form-item>
 
             <nz-form-item>
-              <nz-form-label [nzSm]="4">图片</nz-form-label>
-              <nz-form-control [nzSm]="20">
+              <nz-form-label [nzSm]="6">图片</nz-form-label>
+              <nz-form-control [nzSm]="18">
                   <input type="text" nz-input placeholder="图片" formControlName="ImgBase64">
               </nz-form-control>
             </nz-form-item>

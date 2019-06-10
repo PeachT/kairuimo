@@ -306,7 +306,7 @@ ipcMain.on('select-file', (event, data) => {
     }
   });
 });
-
+/** 本地文件更新 */
 ipcMain.on('local-update', (event, data) => {
   console.log('local-update');
   // const updatepath = '/media/kvm/kvm/kvm/update/update.sh';
@@ -319,7 +319,7 @@ ipcMain.on('local-update', (event, data) => {
     upps.kill();
   });
 });
-
+/** 卸载U盘 */
 ipcMain.on('usb-umount', (event, data) => {
   const upps = exec(`sudo umount /dev/sd[b-z]`, { async : true}, (code, stdout, stderr) => {
     console.log('Exit code:', code);
@@ -333,7 +333,7 @@ ipcMain.on('usb-umount', (event, data) => {
     upps.kill();
   });
 });
-
+/** 输入linux-shell命令 */
 ipcMain.on('test', (event, data) => {
   const upps = exec(`${data.data}`, { async : true}, (code, stdout, stderr) => {
     console.log('Exit code:', code);
