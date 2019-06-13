@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ChangeDetectorRef } from '@angular/core';
 
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, RoutesRecognized } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -34,6 +34,8 @@ export class AppService {
   public powerDelayT = null;
   public powerText = null;
   public menus = [];
+  public leftMenu = [];
+  public editId = null;
 
   constructor(
     private router: Router,
@@ -86,5 +88,9 @@ export class AppService {
         this.message.success('U盘已卸载');
       }
     });
+  }
+
+  sss(v) {
+    console.log(v);
   }
 }

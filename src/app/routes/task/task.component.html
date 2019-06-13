@@ -1,12 +1,12 @@
 <app-left>
-
+  {{appS.sss('任务变更')}}
   <div class="sider sider-menu">
     <div class="project">
       <nz-select nzSize="large" nzPlaceHolder="请选择项目" [(ngModel)]="project" (ngModelChange)="projectChanges();"
         (nzOpenChange)="piState = !piState">
         <nz-option [nzValue]="item" [nzLabel]="item.name" *ngFor="let item of projectMneu"></nz-option>
       </nz-select>
-      <h2 class="text">{{project !== null ? project.name : '请选择项目'}}</h2>
+      <h2 class="text">{{project?.name || '请选择项目'}}</h2>
       <div style="display: flex; flex-direction: column;">
         <i nz-icon nzType="up" nzTheme="outline" [ngClass]="{'active': piState}"></i>
       </div>

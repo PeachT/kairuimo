@@ -9,6 +9,7 @@ import { filter, map, every } from 'rxjs/operators';
 import { ValidationErrors } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd';
 import { Comp, compIndex } from '../models/component';
+import { Menu } from '../models/menu';
 
 @Injectable({ providedIn: 'root' })
 export class DbService {
@@ -16,7 +17,7 @@ export class DbService {
   constructor(
     private message: NzMessageService,
   ) {
-// tslint:disable-next-line: no-use-before-declare
+    // tslint:disable-next-line: no-use-before-declare
     this.db = new DB();
     // this.db.open();
     console.log(this.db);
@@ -24,12 +25,12 @@ export class DbService {
 
   /** 判断数据是否重复 */
   // tslint:disable-next-line:max-line-length
-  public async repetitionAsync(tName: string, filterFunction: (obj: Project | TensionTask | Comp | User) => boolean) {
+  public async repetitionAsync<T>(tName: string, filterFunction: (o1: T) => boolean) {
     const count = await this.db[tName].filter(filterFunction).count();
     return count;
   }
 
-  public async addAsync(tName: string, data: Project | TensionTask | Comp | User, filterFunction: (obj: any) => boolean) {
+  public async addAsync<T>(tName: string, data: T, filterFunction: (o1: T) => boolean) {
     if (await this.repetitionAsync(tName, filterFunction) > 0) {
       return {success: false, msg: '已存在'};
     }
@@ -50,7 +51,7 @@ export class DbService {
     try {
       const r = await this.db[tName].update(data.id, data);
       console.log('保存结果', r);
-      return {success: true, id: r};
+      return {success: true, id: data.id};
     } catch (error) {
       console.log('错误', error);
       return {success: false, msg: error};
@@ -89,6 +90,45 @@ export class DbService {
         return item ?  Observable.create(_ => null) : from(this.db[tName].update(data.id, data));
       })
     );
+  }
+
+  public getAllAsync(name: string): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      const r = [];
+      const s = await this.db.task.each(v => {
+        r.push({ label: v.name, value: v.id, checked: false });
+      });
+      console.log(r, s);
+      resolve(r);
+    });
+    // const ss = await this.db[name].toArray();
+    // console.log(ss);
+  }
+  /**
+   * 获取菜单数据
+   *
+   * @param {string} name 数据库名称
+   * @returns {Promise<any>}
+   * @memberof DbService
+   */
+  public async getMenuData(name: string): Promise<Array<Menu>> {
+    const r = [];
+    const s = await this.db[name].each(v => {
+      r.push({ name: v.name, id: v.id });
+    });
+    return r;
+  }
+  /**
+   * *通过ID获取一点一个数据
+   *
+   * @template T 类型
+   * @param {string} name 数据库名称
+   * @param {*} id id
+   * @returns {Promise<T>}
+   * @memberof DbService
+   */
+  public async getFirstId<T>(name: string, id: any): Promise<T> {
+    return await this.db[name].filter(a => a.id === id).first();
   }
 }
 

@@ -5,7 +5,7 @@
  * @param {string} fmt 格式化格式
  * @returns 格式化时间
  */
-export function DateFormat(date: Date, fmt: string) { // author: meizz
+export function DateFormat(date: Date, fmt: string): string { // author: meizz
   const o = {
     'M+': date.getMonth() + 1, // 月份
     'd+': date.getDate(), // 日

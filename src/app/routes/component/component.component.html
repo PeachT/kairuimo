@@ -1,22 +1,25 @@
 <app-left>
   <div class="sider sider-menu">
-    <ul class="menu-2">
+    <!-- <ul class="menu-2">
       <li *ngFor="let item of menu.datas; index as i" [ngClass]="{'active': menu.select === item.id}"
         (click)="onMneu(item.id)">{{item.name}}</li>
-    </ul>
+    </ul> -->
+    {{appS.sss('变更')}}
+    <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
-    <div class="operation">
+      <app-operat [dbName]="dbName" [formData]="formGroup" (outEdit)="edit($event)" (outEditOk)="editOk($event)"></app-operat>
+
+    <!-- <div class="operation">
       <div *ngIf="!appS.edit; else elseBlock">
         <button nz-button nzType="primary" nzSearch (click)="add()" type="button">添 加</button>
         <button nz-button nzType="primary" nzSearch (click)="modification()" type="button" *ngIf="data">修 改</button>
-        <!-- <button nz-button nzType="danger" nzSearch (click)="copy()" type="button" *ngIf="data">复 制</button> -->
       </div>
       <ng-template #elseBlock>
         <button nz-button nzType="primary" nzSearch (click)="save()" type="button" *ngIf="appS.edit">保 存</button>
         <button nz-button nzType="danger" nzSearch (click)="cancelEdit()" type="button" *ngIf="appS.edit">取 消</button>
       </ng-template>
-    </div>
+    </div> -->
     <div class="scroll-content">
       <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formGroup">
         <nz-form-item>

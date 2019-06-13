@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn, AbstractControl, ValidationErrors, FormArray } from '@angular/forms';
 import { DB, DbService, tableName } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
@@ -19,11 +19,13 @@ import { mpaToPlc, TensionMm } from 'src/app/Function/device.date.processing';
 import { ElectronService } from 'ngx-electron';
 import { Elongation } from 'src/app/models/live';
 import { reperitionValidator } from 'src/app/Validator/repetition.validator';
+import { RepetitionARV } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-task',
   templateUrl: './task.component.html',
-  styleUrls: ['./task.component.less']
+  styleUrls: ['./task.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskComponent implements OnInit {
   @ViewChild('groupDom')
@@ -139,6 +141,7 @@ export class TaskComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     public PLCS: PLCService,
     private e: ElectronService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.db = this.odb.db;
     activatedRoute.queryParams.subscribe(queryParams => {
@@ -164,10 +167,26 @@ export class TaskComponent implements OnInit {
     });
   }
 
+  sss(v) {
+    console.log(v);
+  }
+  /** 手动更新 */
+  markForCheck() {
+    this.changeDetectorRef.markForCheck();
+  }
   ngOnInit() {
     this.validateForm = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [this.nameRepetition()]],
+      name: [null, [Validators.required],
+      // [this.nameRepetition()]
+        [new RepetitionARV(this.odb, 'task',
+          (o1: TensionTask, o2: TensionTask) =>
+          o1.name === o2.name &&
+          o1.component === o2.component &&
+          o1.project === o2.project &&
+          o1.id !== o2.id)
+        ]
+      ],
       device: [null, [Validators.required]],
       component: [null, [Validators.required]],
       steelStrand: [null],
@@ -263,7 +282,16 @@ export class TaskComponent implements OnInit {
     if (this.routeData.project) {
       console.log(this.routeData, this.projectMneu);
       this.project = this.projectMneu.filter(item => item.id === Number(this.routeData.project))[0];
-      await this.getMenuOne();
+      if (this.project) {
+        await this.getMenuOne();
+      } else {
+        this.routeData = {
+          project: null,
+          component: null,
+          selectBridge: null,
+          editGroupName: null
+        };
+      }
     }
     if (this.routeData.component) {
       await this.onMenuOne(this.routeData.component);
@@ -279,14 +307,17 @@ export class TaskComponent implements OnInit {
   async getProjectMenu() {
     const ps = await this.db.project.toArray();
     this.projectMneu = ps.map(item => {
-      return { name: item.projectName, id: item.id };
+      return { name: item.name, id: item.id };
     });
+    console.log(this.projectMneu, this.project);
+    this.markForCheck();
   }
   /** 获取一级菜单 */
   async getMenuOne(project = this.project.id) {
-    const ps = await this.db.task.filter(t => t.project === project).toArray();
-    console.log(project, ps);
-    this.menu.component = this.groupBy(ps);
+      const ps = await this.db.task.filter(t => t.project === project).toArray();
+      console.log(project, ps);
+      this.menu.component = this.groupBy(ps);
+      this.markForCheck();
   }
   /** 获取二级菜单 */
   async onMenuOne(component = null) {
@@ -328,6 +359,7 @@ export class TaskComponent implements OnInit {
         }
         return { name: f.name, id: f.id, cls };
       });
+      this.markForCheck();
       console.log('梁数据', ps, this.menu.bridge);
     }
   }
@@ -392,6 +424,7 @@ export class TaskComponent implements OnInit {
       this.startBaseSub();
       this.appS.edit = true;
     }
+    this.markForCheck();
   }
   /**
    * *切换张拉组
@@ -625,7 +658,7 @@ export class TaskComponent implements OnInit {
     if (!this.data.id) {
       delete this.data.id;
       const r = await this.odb.addAsync(tableName.task, this.data,
-        (t: TensionTask) => t.project === this.data.project && t.component === this.data.component && t.name === this.data.name);
+        (o1: TensionTask) => o1.project === this.data.project && o1.component === this.data.component && o1.name === this.data.name);
       if (r.success) {
         this.message.success('添加成功🙂');
         this.edit = false;

@@ -6,16 +6,21 @@
         <nz-avatar [nzSize]="56" nzShape="square" [nzSrc]="appS.info.unit.logo"></nz-avatar>
         <!-- <span>KVM</span> -->
       </div>
-      <div class="user" >
+      <div class="user">
         <p>
-            {{appS.userInfo?.name || '非法登录'}}
-          </p>
+          {{appS.userInfo?.name || '非法登录'}}
+        </p>
       </div>
     </div>
     <div class="main">
-      <div class="icon" *ngFor="let item of appS.menus" [ngClass]="{'active': ifUrl(item.url)}" (click)="goUrl(item.url)">
+      <div class="icon" *ngFor="let item of appS.menus" [ngClass]="{'active': ifUrl(item.url)}"
+        (click)="goUrl(item.url)">
         <i nz-icon [type]="item.icon" theme="outline"></i>
         <div class="text">{{item.name}}</div>
+      </div>
+      <div class="icon" (click)="onDataProcessing()">
+        <i nz-icon type="file-sync" theme="outline"></i>
+        <div class="text">数据</div>
       </div>
     </div>
 
@@ -26,3 +31,50 @@
     </div>
   </div>
 </nz-layout>
+
+
+
+
+<nz-modal [nzVisible]="dataProcessing.state" nzTitle="数据处理" (nzOnCancel)="dataHandleCancel()" (nzOnOk)="dataHandleOk()"
+  nzWidth="85%">
+  <nz-radio-group [(ngModel)]="dataProcessing.radioValue">
+    <label nz-radio [nzValue]="false">导出</label>
+    <label nz-radio [nzValue]="true">导入</label>
+  </nz-radio-group>
+
+  <nz-divider nzText="选择"></nz-divider>
+  <nz-checkbox-wrapper style="width: 100%;">
+    <label nz-checkbox [(ngModel)]="dataProcessing.task" (ngModelChange)="onSelectClass($event, 'task')">任 务</label>
+    <label nz-checkbox [(ngModel)]="dataProcessing.project"
+      (ngModelChange)="onSelectClass($event, 'project')">项目</label>
+    <label nz-checkbox [(ngModel)]="dataProcessing.component"
+      (ngModelChange)="onSelectClass($event, 'component')">构建</label>
+    <label nz-checkbox [(ngModel)]="dataProcessing.jack" (ngModelChange)="onSelectClass($event, 'jack')">顶</label>
+  </nz-checkbox-wrapper>
+  <br>
+  <br>
+  <div class="data-processing-content">
+    <nz-card nzTitle="任务" *ngIf="dataProcessing.task" style="flex: 2.2;">
+      <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskCheckbox($event)">
+        <label nz-checkbox nzValue="0">已导出</label>
+        <label nz-checkbox nzValue="1">未导出</label>
+        <label nz-checkbox nzValue="2">已张拉</label>
+        <label nz-checkbox nzValue="3">未张拉</label>
+      </nz-checkbox-wrapper>
+      <hr>
+      <div>
+        <label nz-checkbox [(ngModel)]="dataProcessing.taskAll" [nzIndeterminate]="dataProcessing.taskindeterminate" (ngModelChange)="select('task', $event)">全选</label>
+        <nz-checkbox-group [(ngModel)]="dataProcessing.taskData$" (ngModelChange)="itemSelect('task')"></nz-checkbox-group>
+      </div>
+    </nz-card>
+    <nz-card nzTitle="项目" *ngIf="dataProcessing.project">
+
+    </nz-card>
+    <nz-card nzTitle="构建" *ngIf="dataProcessing.component">
+      {{dataProcessing.componentData$ | async}}
+    </nz-card>
+    <nz-card nzTitle="顶" *ngIf="dataProcessing.jack">
+      {{dataProcessing.jackData$ | async}}
+    </nz-card>
+  </div>
+</nz-modal>

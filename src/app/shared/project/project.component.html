@@ -1,62 +1,11 @@
 <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="validateForm" (ngSubmit)="ngSubmit()">
   <nz-form-item>
-    <nz-form-label [nzSm]="3" nzRequired nzFor="projectName">项目名称</nz-form-label>
-    <nz-form-control [nzSm]="21" [ngClass]="{'in-error': validateForm.get('projectName').errors}">
-      <input type="text" nz-input placeholder="项目名称" formControlName="projectName">
-      <nz-form-explain *ngIf="appS.edit">{{validateForm.get('projectName').errors | ValidatorError}}</nz-form-explain>
+    <nz-form-label [nzSm]="3" nzRequired nzFor="name">项目名称</nz-form-label>
+    <nz-form-control [nzSm]="21" [ngClass]="{'in-error': validateForm.get('name').errors}">
+      <input type="text" nz-input placeholder="项目名称" formControlName="name">
+      <nz-form-explain *ngIf="appS.edit">{{validateForm.get('name').errors | ValidatorError}}</nz-form-explain>
     </nz-form-control>
   </nz-form-item>
-
-  <!-- <nz-form-item>
-    <nz-form-label [nzSm]="3" >分布工程</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="分布工程" formControlName="divisionProject">
-      </nz-input-group>
-    </nz-form-control>
-    <nz-form-label [nzSm]="3" >施工单位</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="施工单位" formControlName="constructionUnit">
-      </nz-input-group>
-    </nz-form-control>
-    <nz-form-label [nzSm]="3" >分项工程</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="分项工程" formControlName="subProject">
-      </nz-input-group>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label [nzSm]="3" >单位工程</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="单位工程" formControlName="unitProject">
-      </nz-input-group>
-    </nz-form-control>
-    <nz-form-label [nzSm]="3" >工程部位</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="工程部位" formControlName="engineeringSite">
-      </nz-input-group>
-    </nz-form-control>
-    <nz-form-label [nzSm]="3" >合同段</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="合同段" formControlName="contractSection">
-      </nz-input-group>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label [nzSm]="3" >桩号范围</nz-form-label>
-    <nz-form-control [nzSm]="5">
-      <nz-input-group>
-        <input type="text" nz-input placeholder="桩号范围" formControlName="stationRange">
-      </nz-input-group>
-    </nz-form-control>
-  </nz-form-item> -->
 
   <div formArrayName="otherInfo" class="other-info">
     <nz-form-item *ngIf="appS.edit" class="divider">

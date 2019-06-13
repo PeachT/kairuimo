@@ -9,12 +9,13 @@ import { randomWord } from 'src/app/Function/randomWord';
 
 const menus = [
   { jurisdiction: 0, url: '/task', icon: 'form', name: '任务' },
-  { jurisdiction: 0, url: '/manual', icon: 'deployment-unit', name: '手动' },
-  { jurisdiction: 1, url: '/setting', icon: 'setting', name: '设置' },
   { jurisdiction: 1, url: '/jack', icon: 'usb', name: '千斤顶' },
   { jurisdiction: 1, url: '/project', icon: 'form', name: '项目' },
   { jurisdiction: 1, url: '/component', icon: 'deployment-unit', name: '构建' },
   { jurisdiction: 1, url: '/user', icon: 'user', name: '用户' },
+  { jurisdiction: 0, url: '/manual', icon: 'deployment-unit', name: '手动' },
+  { jurisdiction: 1, url: '/setting', icon: 'setting', name: '设置' },
+  // { jurisdiction: 0, url: '/data', icon: 'file-sync', name: 'data'},
   { jurisdiction: 0, url: '/auto', icon: 'box-plot', name: '自动' },
   { jurisdiction: 0, url: '/help', icon: 'question', name: '帮助'},
 ];

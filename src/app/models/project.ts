@@ -10,7 +10,7 @@ import { OtherInfo } from './common';
 export interface Project {
   id?: number;
   /** 项目名称 */
-  projectName: string;
+  name: string;
   // /** 分布工程 */
   // divisionProject: string;
   // /** 施工单位 */
@@ -32,7 +32,7 @@ export interface Project {
 }
 
 /** 项目索引 */
-export const projectIndex = '++id,projectName';
+export const projectIndex = '++id,&name';
 
 export interface Supervision {
   /** 名字 */

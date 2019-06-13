@@ -1,46 +1,29 @@
 import { Directive, forwardRef, Injectable } from '@angular/core';
-import {
-  AsyncValidator,
-  AbstractControl,
-  NG_ASYNC_VALIDATORS,
-  ValidationErrors
-} from '@angular/forms';
-import { catchError, map, filter } from 'rxjs/operators';
-import { Observable, from } from 'rxjs';
+import { AsyncValidator, AbstractControl } from '@angular/forms';
 import { DbService } from '../services/db.service';
 
 @Injectable({ providedIn: 'root' })
-export class ProjectAsyncReperitionValidator implements AsyncValidator {
-  constructor(private db: DbService) {}
+export class RepetitionARV implements AsyncValidator {
+  private db: DbService;
+  private dbName: string;
+  private filter: (o1: any, o2: any) => boolean;
+  private nowKey: string;
 
-  validate(control: AbstractControl): Observable<ValidationErrors | null> {
-    console.log('159789', control.root.value);
-    return from(this.db.db.project.where({projectName: control.value}).toArray()).pipe(
-      map(item => {
-        console.log(item);
-        const count = item.filter(p => p.id !== control.root.value.id).length;
-        return count > 0 ? {reperition : `${control.value} 已存在!!`} : null;
-      }),
-      catchError(() => null)
-    );
+  constructor(db: DbService, name: string,
+              f: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name && o1.id !== o2.id,
+              nowkey: string = 'name') {
+    this.db = db;
+    this.dbName = name;
+    this.filter = f;
+    this.nowKey = nowkey;
+  }
+
+  async validate(control: AbstractControl) {
+    console.log('1597899999999999999999999', control.root.value, control.value);
+    const value = control.root.value;
+    value[this.nowKey] = control.value;
+
+    const count = await this.db.repetitionAsync(this.dbName, (o: any) => this.filter(o, value));
+    return count > 0 ? {reperition : `${control.value} 已存在!!`} : null;
   }
 }
-
-// @Directive({
-//   selector: '[appUniqueAlterEgo]',
-//   providers: [
-//     {
-//       provide: NG_ASYNC_VALIDATORS,
-//       useExisting: forwardRef(() => UniqueAlterEgoValidator),
-//       multi: true
-//     }
-//   ]
-// })
-// export class UniqueAlterEgoValidatorDirective {
-//   constructor(private validator: UniqueAlterEgoValidator) {}
-
-//   validate(control: AbstractControl) {
-//     this.validator.validate(control);
-//   }
-// }
-

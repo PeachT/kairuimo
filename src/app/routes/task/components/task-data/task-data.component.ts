@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { taskModeStr, Jack, tableDev, modeName } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
@@ -9,7 +9,8 @@ import { getStageString } from 'src/app/Function/stageString';
 @Component({
   selector: 'app-task-data',
   templateUrl: './task-data.component.html',
-  styleUrls: ['./task-data.component.less']
+  styleUrls: ['./task-data.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskDataComponent implements OnInit {
   @Input()

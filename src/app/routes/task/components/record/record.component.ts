@@ -5,6 +5,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { Elongation } from 'src/app/models/live';
 import { TensionMm } from 'src/app/Function/device.date.processing';
 import { getStageString } from 'src/app/Function/stageString';
+import { AppService } from 'src/app/services/app.service';
 
 @Component({
   selector: 'app-record',
@@ -29,7 +30,10 @@ export class RecordComponent implements OnInit, OnChanges {
   holeNames = null;
   stageStr = ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉'];
 
-  constructor(private fb: FormBuilder) { }
+  constructor(
+    private fb: FormBuilder,
+    public appS: AppService,
+  ) { }
 
   ngOnInit() {
     const data = this.GroupData;

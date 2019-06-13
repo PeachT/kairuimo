@@ -12,16 +12,9 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D } from 'src/app/models/IPCChannel';
 import { ManualComponent } from '../manual/manual.component';
 import { JackItemComponent } from 'src/app/shared/jack-item/jack-item.component';
-
-// const jackFromBase = {
-//   jackNumber: [],
-//   pumpNumber: [],
-//   a: [],
-//   b: [],
-//   date: ['2019/03/17'],
-//   mpa: this.fb.array([0, 1, 2, 3, 4, 5]),
-//   mm: this.fb.array([0, 1, 2, 3, 4, 5]),
-// };
+import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
+import { copyAny } from 'src/app/models/base';
+import { RepetitionARV } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-jack',
@@ -29,41 +22,30 @@ import { JackItemComponent } from 'src/app/shared/jack-item/jack-item.component'
   styleUrls: ['./jack.component.less']
 })
 export class JackComponent implements OnInit {
+  dbName = 'jack';
+  @ViewChild('leftMenu') leftMenu: LeftMenuComponent;
   @ViewChild('device', { read: ViewContainerRef })
     deviceDom: ViewContainerRef;
 
   jackForm: FormGroup;
   data: Jack;
-  db: DB;
-
-  menu = {
-    datas: [],
-    select: null,
-  };
 
   constructor(
     private fb: FormBuilder,
-    private odb: DbService,
-    private message: NzMessageService,
+    private db: DbService,
     public appS: AppService,
-    private router: Router,
-    private modalService: NzModalService,
     public PLCS: PLCService,
     private cfr: ComponentFactoryResolver,
   ) {
-    this.db = this.odb.db;
   }
 
   ngOnInit() {
-    this.getMneu();
-    // this.getMenuOne();
     this.createJackForm();
-    // this.startBaseSub();
-
   }
   createJackForm() {
     this.jackForm = this.fb.group({
-      name: ['1'],
+      id: [],
+      name: [null, [Validators.required], [new RepetitionARV(this.db, 'jack')]],
       jackMode: [8],
       equation: [1],
       jackModel: [],
@@ -92,33 +74,36 @@ export class JackComponent implements OnInit {
       mm: this.fb.array([0, 1, 2, 3, 4, 5]),
     });
   }
-
-  getMneu() {
-    this.db.jack.toArray().then((d) => {
-      console.log(d);
-      this.menu.datas = d.map(item => {
-        return { name: item.name, id: item.id };
-      });
-    });
+  onMneu(data: Jack) {
+    console.log('一条数据', data);
+    this.data = data;
+    this.jackForm.reset(this.data);
+    this.f5();
   }
-  onMneu(id) {
+
+  /**
+   * *编辑
+   */
+  edit(data) {
+    if (!data) {
+      data = copyAny(this.data);
+      delete data.id;
+    }
+    this.data = data;
+    console.log(this.data, data);
+    this.jackForm.reset(this.data);
+    this.f5();
+    this.leftMenu.markForCheck();
+  }
+  /**
+   * *编辑完成
+   */
+  editOk(id) {
     console.log(id);
-    if (this.ifEdit()) { return; }
-    if (this.menu.select !== id) {
-      this.menu.select = id;
-      this.db.jack.filter(a => a.id === id).first().then((jack: Jack) => {
-        console.log(jack);
-        if (jack) {
-          this.data = jack;
-          this.jackForm.reset(this.data);
-          this.f5();
-          // this.getPLCData('z', (id - 1) * 100);
-          // this.getPLCData('c', (id - 1) * 100);
-        } else {
-          this.message.error('获取数据失败😔');
-        }
-      }).catch(() => {
-      });
+    if (id) {
+      this.leftMenu.getMenuData(id);
+    } else {
+      this.leftMenu.onClick();
     }
   }
 
@@ -157,57 +142,7 @@ export class JackComponent implements OnInit {
   savePLC(dev: string = 'z', address: number, value) {
     this.PLCS.ipcSend(`${dev}F016_float`, address, value);
   }
-  /** 修改 */
-  modification() {
-    this.appS.edit = true;
-  }
-  /** 取消编辑 */
-  cancelEdit() {
-    const m = this.modalService.warning({
-      nzTitle: '确定取消编辑吗？',
-      nzContent: '放弃本次数据编辑，数据不会更改！',
-      nzCancelText: '继续编辑',
-      nzOnOk: () => {
-        this.appS.edit = false;
-        // this.data = null;
-        this.jackForm.reset(this.data);
-        this.f5();
-        // this.createJackForm();
-        if (this.menu.select) {
-          this.onMneu(this.menu.select);
-        }
-        // m.close();
-      },
-      nzOnCancel: () => { console.log('取消'); }
-    });
-  }
-  /** 保存数据 */
-  save() {
-    // tslint:disable-next-line:forin
-    for (const i in this.jackForm.controls) {
-      this.jackForm.controls[i].markAsDirty();
-      this.jackForm.controls[i].updateValueAndValidity();
-    }
-    console.log(this.jackForm.valid);
-    if (!this.jackForm.valid) {
-      this.message.error('数据填写有误！！');
-      return;
-    }
 
-    const data: Jack = this.jackForm.value;
-
-    data.id = this.menu.select;
-    console.log(data);
-
-    this.db.jack.update(data.id, data).then((updata) => {
-      this.message.success('修改成功🙂');
-      this.PLCS.selectJack(data.id);
-      this.getMneu();
-      this.appS.edit = false;
-    }).catch((err) => {
-      this.message.error(`修改失败😔${err}`);
-    });
-  }
   /** 数字时间转时间 */
   nd(data) {
     const d = data.toString();
@@ -248,14 +183,4 @@ export class JackComponent implements OnInit {
     });
   }
 
-  /**
-   * *判断编辑状态
-   */
-  ifEdit(): boolean {
-    if (this.appS.edit) {
-      this.message.warning('请完成编辑！');
-      return true;
-    }
-    return false;
-  }
 }

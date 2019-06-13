@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { AppService } from './services/app.service';
 import { DbService, DB } from './services/db.service';
@@ -12,7 +12,8 @@ import { Jack } from './models/jack';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.less']
+  styleUrls: ['./app.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
   title = 'kvm-zl';
@@ -212,7 +213,7 @@ export class AppComponent implements OnInit {
           type = 'text';
         }
 
-        console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
+        // console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
         if (type === 'number' || type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
           let topmag = type === 'text' ? 130 : 30;
           const kwh = keyboard[type];

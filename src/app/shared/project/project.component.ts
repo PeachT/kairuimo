@@ -1,9 +1,9 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectionStrategy, Input, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormArray, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Project } from 'src/app/models/project';
 import { NzMessageService } from 'ng-zorro-antd';
 import { reperitionValidator } from 'src/app/Validator/repetition.validator';
-import { ProjectAsyncReperitionValidator } from 'src/app/Validator/async.validator';
+import { RepetitionARV } from 'src/app/Validator/async.validator';
 import { DbService } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { from, Observable } from 'rxjs';
@@ -12,10 +12,12 @@ import { map, catchError, every, first } from 'rxjs/operators';
 @Component({
   selector: 'app-project',
   templateUrl: './project.component.html',
-  styleUrls: ['./project.component.less']
+  styleUrls: ['./project.component.less'],
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectComponent implements OnInit {
   validateForm: FormGroup;
+  @Input()
   data: Project = null;
   projcetOtherKey = [
     '分布工程',
@@ -37,38 +39,25 @@ export class ProjectComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private message: NzMessageService,
-    private projectAsyncReperitionValidator: ProjectAsyncReperitionValidator,
     private db: DbService,
-    public appS: AppService
+    public appS: AppService,
+    private changeDetectorRef: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.createForm();
     console.log(this.formArr.controls);
   }
+  /** 手动更新 */
+  markForCheck() {
+    this.changeDetectorRef.markForCheck();
+  }
+
   createForm() {
     console.log('000000');
     this.validateForm = this.fb.group({
       id: [],
-      // projectName: [null, [Validators.required]],
-      projectName: [null, [Validators.required],
-        // [this.projectAsyncReperitionValidator.validate.bind(this.projectAsyncReperitionValidator)]
-        [this.projectNameRepetition()]
-      ],
-      // /** 分布工程 */
-      // divisionProject: [],
-      // /** 施工单位 */
-      // constructionUnit: [],
-      // /** 分项工程 */
-      // subProject: [],
-      // /** 单位工程 */
-      // unitProject: [],
-      // /** 工程部位 */
-      // engineeringSite: [],
-      // /** 合同段 */
-      // contractSection: [],
-      // /** 桩号范围 */
-      // stationRange: [],
+      name: [null, [Validators.required], [new RepetitionARV(this.db, 'project')]],
       /** 监理 */
       supervisions: this.fb.array(this.supervisionsForm()),
       /** 其他信息 */
@@ -115,17 +104,7 @@ export class ProjectComponent implements OnInit {
       value: [null, [Validators.required]],
     });
   }
-  /** 项目名称重复验证 */
-  projectNameRepetition(): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      return from(this.db.repetition('project',
-                 (item: Project) => item.projectName === control.value && item.id !== control.root.value.id)).pipe(
-        map(item => {
-          return item ? { reperition: `${control.value} 已存在!!` } : null;
-        }),
-      );
-    };
-  }
+
   ngSubmit() {
     console.log('13123123123');
   }
@@ -139,10 +118,11 @@ export class ProjectComponent implements OnInit {
     callpack(this.validateForm.value);
   }
   /** 重置数据 */
-  public reset(data: Project) {
+  reset(data: Project) {
     this.data = data;
     this.createForm();
     this.validateForm.reset(data);
+    this.markForCheck();
   }
   add() {
     // tslint:disable-next-line:no-angle-bracket-type-assertion

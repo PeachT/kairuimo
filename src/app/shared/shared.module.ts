@@ -14,6 +14,8 @@ import { ProjectComponent } from './project/project.component';
 import { ValidatorErrorPipe } from '../pipes/error.pipe';
 import { ToFixedrPipe } from '../pipes/toFixed.pipe';
 import { GetPathNamePipe } from '../pipes/path.pipe';
+import { LeftMenuComponent } from './left-menu/left-menu.component';
+import { OperatComponent } from './operat/operat.component';
 
 
 // pipe
@@ -32,7 +34,9 @@ const COMPONENTS = [
   ReviseItemComponent,
   DynamicLineComponent,
   JackItemComponent,
-  ProjectComponent
+  ProjectComponent,
+  LeftMenuComponent,
+  OperatComponent,
 ];
 const PIPE = [
   ToFixedrPipe,
@@ -44,7 +48,6 @@ const PIPE = [
   declarations: [
     ...COMPONENTS,
     ...PIPE,
-    ProjectComponent,
   ],
   imports: [
     ...MODULES,
