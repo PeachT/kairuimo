@@ -114,7 +114,17 @@ const base = {
     name: null,
     password: null,
     jurisdiction: 0
-  }
+  },
+  task: {
+    name: null,
+    project: null,
+    device: null,
+    component: null,
+    steelStrand: null,
+    otherInfo: [{key: '浇筑日期', value: null}],
+    holeRadio: null,
+    groups: [],
+  },
 };
 
 export function getModelBase(name: string) {

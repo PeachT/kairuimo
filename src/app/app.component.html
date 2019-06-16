@@ -1,5 +1,6 @@
 <div class="plc-state">
-  <div class="item" style="background-color: cornflowerblue;">{{time}}</div>
+  <!-- <div class="item" style="background-color: cornflowerblue;">{{time}}</div> -->
+  <app-time-sec class="item"></app-time-sec>
   <div class="item" [ngClass]="{'active': PLCS.plcState.z}">Z:{{PLCS.plcState.zLT}}</div>
   <div class="item" [ngClass]="{'active': PLCS.plcState.c}">C:{{PLCS.plcState.cLT}}</div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ChangeDetectionStrategy, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectionStrategy, Input, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormArray, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Project } from 'src/app/models/project';
 import { NzMessageService } from 'ng-zorro-antd';
@@ -8,6 +8,7 @@ import { DbService } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { from, Observable } from 'rxjs';
 import { map, catchError, every, first } from 'rxjs/operators';
+import { AddOtherComponent } from '../add-other/add-other.component';
 
 @Component({
   selector: 'app-project',
@@ -16,10 +17,10 @@ import { map, catchError, every, first } from 'rxjs/operators';
   // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectComponent implements OnInit {
+  @Input() data: Project = null;
+  @ViewChild('otherInfo') otherIngoDom: AddOtherComponent;
   validateForm: FormGroup;
-  @Input()
-  data: Project = null;
-  projcetOtherKey = [
+  otherKeys = [
     '分布工程',
     '施工单位',
     '分项工程',
@@ -61,7 +62,8 @@ export class ProjectComponent implements OnInit {
       /** 监理 */
       supervisions: this.fb.array(this.supervisionsForm()),
       /** 其他信息 */
-      otherInfo: this.fb.array(this.otherInfoForm())
+      // otherInfo: this.fb.array(this.otherInfoForm())
+      otherInfo: this.fb.array(this.otherIngoDom.createForm([{key: null, value: null}]))
     });
   }
   supervisionsForm() {
@@ -85,25 +87,6 @@ export class ProjectComponent implements OnInit {
       ImgBase64: [],
     });
   }
-  /** 其他信息 */
-  otherInfoForm() {
-    if (this.data && this.data.otherInfo && this.data.otherInfo.length > 0) {
-      return this.data.otherInfo.map(() => {
-        return this.otherInfoVisionsForm();
-      });
-    } else {
-      return [this.otherInfoVisionsForm()];
-    }
-  }
-  /** 其他form */
-  otherInfoVisionsForm() {
-    return this.fb.group({
-      /** 名字 */
-      key: [null, [Validators.required, reperitionValidator('otherInfo', 'key')]],
-      /** 内容 */
-      value: [null, [Validators.required]],
-    });
-  }
 
   ngSubmit() {
     console.log('13123123123');
@@ -120,7 +103,10 @@ export class ProjectComponent implements OnInit {
   /** 重置数据 */
   reset(data: Project) {
     this.data = data;
-    this.createForm();
+    // this.createForm();
+    this.validateForm.setControl('supervisions', this.fb.array(this.supervisionsForm()));
+    this.validateForm.setControl('otherInfo', this.fb.array(this.otherIngoDom.createForm(this.data.otherInfo)));
+
     this.validateForm.reset(data);
     this.markForCheck();
   }
@@ -136,25 +122,10 @@ export class ProjectComponent implements OnInit {
     control.removeAt(index);
     this.data = this.validateForm.value;
   }
-  otherInfoAdd() {
-    // tslint:disable-next-line:no-angle-bracket-type-assertion
-    const control = <FormArray> this.validateForm.controls.otherInfo;
-    control.push(this.otherInfoVisionsForm());
-    this.data = this.validateForm.value;
-  }
-  otherInfoSub(index) {
-    // tslint:disable-next-line:no-angle-bracket-type-assertion
-    const control = <FormArray> this.validateForm.controls.otherInfo;
-    control.removeAt(index);
-    this.data = this.validateForm.value;
-  }
+
   ccc() {
     this.validateForm.clearAsyncValidators();
     this.validateForm.clearValidators();
   }
 
-  projcetOtherKeySelect() {
-    const arr = this.otherInforFormArr.value.map(v => v.key);
-    return this.projcetOtherKey.filter(v =>  arr.indexOf(v) === -1 );
-  }
 }

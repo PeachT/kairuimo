@@ -1,0 +1,42 @@
+<form nz-form [formGroup]="validateForm">
+  <div formArrayName="otherInfo" class="other-info">
+    <nz-form-item *ngIf="appS.edit" class="divider">
+      <nz-divider style="min-width: auto;" nzText="其他信息" nzOrientation="left"></nz-divider>
+      <button nz-button nzType="primary" nzSearch (click)="otherInfoAdd()" type="button" >添 加</button>
+    </nz-form-item>
+    <nz-form-item >
+      <ng-container *ngFor="let item of otherInforFormArr.controls; index as i" [formGroupName]="i">
+        <ng-container *ngIf="i === iselect">
+          <nz-form-label [nzSm]="3" >浇筑日期</nz-form-label>
+          <nz-form-control [nzSm]="appS.edit ? 21 : 5" [ngClass]="{'in-error': item.get('value').errors}">
+            <nz-date-picker readonly  class="revise-date" nzFormat="yyyy-MM-dd" formControlName="value"></nz-date-picker>
+            <nz-form-explain *ngIf="appS.edit">{{item.get('value').errors | ValidatorError}}</nz-form-explain>
+          </nz-form-control>
+        </ng-container>
+        <div class="other-edit" *ngIf="appS.edit && i !== iselect">
+          <div style="flex: 1;">
+            <nz-form-control [ngClass]="{'in-error': item.get('key').errors}">
+              <input placeholder="显示名称" nz-input formControlName="key" [nzAutocomplete]="auto" />
+              <nz-autocomplete [nzDataSource]="bridgeOtherKeySelect()" #auto> </nz-autocomplete>
+              <nz-form-explain *ngIf="appS.edit">{{item.get('key').errors | ValidatorError}}</nz-form-explain>
+            </nz-form-control>
+          </div>
+          <div style="flex: 1;">
+            <nz-form-control>
+              <input type="text" nz-input placeholder="内容" formControlName="value">
+            </nz-form-control>
+          </div>
+          <div class="btn-close">
+            <button nz-button nzType="default" nzShape="circle" (click)="otherInfoSub(i)"><i nz-icon type="close"></i></button>
+          </div>
+        </div>
+        <ng-container *ngIf="!appS.edit && i !== iselect">
+          <nz-form-label [nzSm]="3" >{{item.value.key || '显示名称'}}</nz-form-label>
+          <nz-form-control [nzSm]="5">
+            <input type="text" nz-input placeholder="实际内容" formControlName="value">
+          </nz-form-control>
+        </ng-container>
+      </ng-container>
+    </nz-form-item>
+  </div>
+</form>

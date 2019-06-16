@@ -6,8 +6,8 @@
       <nz-form-explain *ngIf="appS.edit">{{validateForm.get('name').errors | ValidatorError}}</nz-form-explain>
     </nz-form-control>
   </nz-form-item>
-
-  <div formArrayName="otherInfo" class="other-info">
+  <app-add-other [validateForm]="validateForm" [keys]="otherKeys" #otherInfo></app-add-other>
+  <!-- <div formArrayName="otherInfo" class="other-info">
     <nz-form-item *ngIf="appS.edit" class="divider">
       <nz-divider style="min-width: auto;" nzText="其他信息" nzOrientation="left"></nz-divider>
       <button nz-button nzType="primary" nzSearch (click)="otherInfoAdd()" type="button" >添 加</button>
@@ -39,7 +39,7 @@
         </ng-container>
       </ng-container>
     </nz-form-item>
-  </div>
+  </div> -->
 
 
   <div class="supervisions">

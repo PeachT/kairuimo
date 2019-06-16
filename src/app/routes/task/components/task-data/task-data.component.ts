@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Component, OnInit, OnChanges, Input, ChangeDetectionStrategy, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { taskModeStr, Jack, tableDev, modeName } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { AppService } from 'src/app/services/app.service';
@@ -13,10 +13,8 @@ import { getStageString } from 'src/app/Function/stageString';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskDataComponent implements OnInit {
-  @Input()
-    editGroupIndex = null;
-  @Input()
-    jackData: Jack;
+  @Input() jackData: Jack;
+  show = null;
 
   tensionStageArr = [];
   devModeStr = [];
@@ -31,7 +29,7 @@ export class TaskDataComponent implements OnInit {
     cC: 0,
     cD: 0,
   };
-  holeForm: FormGroup;
+  holeForm: FormGroup = this.fb.group([]);
   modeName = modeName;
   stageStr = ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉'];
   stageStrs = [
@@ -43,9 +41,12 @@ export class TaskDataComponent implements OnInit {
   ];
   revamp = false;
 
+  @Output() updateHole = new EventEmitter();
+
   constructor(
     private fb: FormBuilder,
-    public appS: AppService
+    public appS: AppService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -53,13 +54,16 @@ export class TaskDataComponent implements OnInit {
   }
   /** 创建form */
   createHoleform(data: GroupItem = null, jack: Jack = null) {
+    if (!data) {
+      return;
+    }
     this.jackData = jack;
     console.log(data);
-    const group =  {
-      name: ['1'],
-      mode: null,
+    const group = {
+      name: [data.name],
+      mode: [data.mode],
       length: [20],
-      tensionKn: [2000],
+      tensionKn: [0, [Validators.required]],
       steelStrandNumber: [6],
       tensionStage: [3],
       stage: this.fb.array([
@@ -72,17 +76,21 @@ export class TaskDataComponent implements OnInit {
       twice: [false],
       super: [false],
     };
-    const names = !data ? taskModeStr.AB8 : taskModeStr[data.mode];
+    const names = data ?  taskModeStr[data.mode] : taskModeStr.AB8;
+    this.devModeStr = names;
+    console.log(data, names, group, this.devModeStr);
     names.map(name =>  {
       group[name] = this.createDevFrom();
     });
     this.holeForm = this.fb.group(group);
+    console.log(this.holeForm.value);
     if (data) {
       this.holeForm.reset(data);
       this.stageStr = getStageString(data);
+      this.holeForm.reset(data);
     }
-    console.log(this.holeForm.value);
     this.tensionStageArrF(true);
+    this.cdr.markForCheck();
   }
   /** 创建设备from */
   createDevFrom() {
@@ -236,9 +244,10 @@ export class TaskDataComponent implements OnInit {
     // console.log(this.tensionStageArr);
     const mode = this.holeForm.controls.mode.value;
     this.theoryIf = tableDev(mode);
-    this.devModeStr = taskModeStr[mode];
+    // this.devModeStr = taskModeStr[mode];
     this.holeNames = this.holeForm.value.name.split('/');
     console.log('011445445456456456456', this.theoryIf, mode);
+    this.show = true;
     this.inputKn();
   }
 }

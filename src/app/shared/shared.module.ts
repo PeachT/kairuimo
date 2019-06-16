@@ -16,6 +16,8 @@ import { ToFixedrPipe } from '../pipes/toFixed.pipe';
 import { GetPathNamePipe } from '../pipes/path.pipe';
 import { LeftMenuComponent } from './left-menu/left-menu.component';
 import { OperatComponent } from './operat/operat.component';
+import { AddOtherComponent } from './add-other/add-other.component';
+import { TimeSecComponent } from './time-sec/time-sec.component';
 
 
 // pipe
@@ -37,6 +39,8 @@ const COMPONENTS = [
   ProjectComponent,
   LeftMenuComponent,
   OperatComponent,
+  AddOtherComponent,
+  TimeSecComponent,
 ];
 const PIPE = [
   ToFixedrPipe,

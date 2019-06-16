@@ -10,6 +10,7 @@ import { ValidationErrors } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd';
 import { Comp, compIndex } from '../models/component';
 import { Menu } from '../models/menu';
+import { keyGroupBy } from '../Function/groupBy';
 
 @Injectable({ providedIn: 'root' })
 export class DbService {
@@ -111,10 +112,54 @@ export class DbService {
    * @returns {Promise<any>}
    * @memberof DbService
    */
-  public async getMenuData(name: string): Promise<Array<Menu>> {
+  public async getMenuData(name: string, f: (o1: any) => boolean = null): Promise<Array<Menu>> {
     const r = [];
-    const s = await this.db[name].each(v => {
-      r.push({ name: v.name, id: v.id });
+    if (!f) {
+      await this.db[name].each(v => {
+        r.push({ name: v.name, id: v.id });
+      });
+    } else {
+      await this.db[name].filter(f).each(v => {
+        r.push({ name: v.name, id: v.id });
+      });
+    }
+    return r;
+  }
+  public async getTaskComponentMenuData(project): Promise<Array<Menu>> {
+    const r = [];
+    await this.db.task.filter(f => f.project === project).each(v => {
+      r.push({ name: v.component, id: null });
+    });
+    const ar = keyGroupBy(r, 'name');
+    console.log(ar);
+    return ar;
+  }
+  public async getTaskBridgeMenuData(project, component): Promise<Array<Menu>> {
+    const r = [];
+    await this.db.task.filter(f => f.project === project && f.component === component).each(v => {
+      const cls = {
+        a: false,
+        b: false,
+        c: false,
+        d: false,
+        e: false,
+      };
+      for (const g of v.groups) {
+        if (g.record) {
+          if (g.record.state === 2) {
+            cls.a = true;
+          } else if (g.record.state === 1) {
+            cls.b = true;
+          } else if (g.record.state === 3) {
+            cls.c = true;
+          } else if (g.record.state === 4) {
+            cls.d = true;
+          }
+        } else {
+          cls.e = true;
+        }
+      }
+      r.push({ name: v.name, id: v.id, cls });
     });
     return r;
   }

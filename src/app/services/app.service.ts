@@ -34,7 +34,7 @@ export class AppService {
   public powerDelayT = null;
   public powerText = null;
   public menus = [];
-  public leftMenu = [];
+  public leftMenu = null;
   public editId = null;
 
   constructor(

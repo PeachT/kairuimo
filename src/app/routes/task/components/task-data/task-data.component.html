@@ -1,5 +1,5 @@
-{{appS.sss('任务数据改变')}}
-<form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="holeForm" *ngIf="editGroupIndex !== null">
+<form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="holeForm" *ngIf="show !== null">
+  {{updateHole.emit(holeForm.value)}}
   <nz-form-item>
     <nz-form-label [nzSm]="3" nzRequired>孔名称</nz-form-label>
     <nz-form-control [nzSm]="5">
@@ -16,7 +16,7 @@
     </nz-form-control>
     <!--  -->
     <nz-form-label [nzSm]="3" nzRequired>张拉应力</nz-form-label>
-    <nz-form-control [nzSm]="5">
+    <nz-form-control [nzSm]="5" [ngClass]="{'in-error': holeForm.get('tensionKn').errors}">
       <input type="number" nz-input formControlName="tensionKn" (input)="inputKn()">
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>钢绞线数量</nz-form-label>

@@ -28,12 +28,12 @@ export class LeftMenuComponent implements OnInit {
     this.getMenuData();
   }
 
-  async onClick(id = this.appS.leftMenu[0]) {
+  async onClick(id = this.appS.leftMenu) {
     if (this.appS.edit) {
       this.message.warning('请完成编辑！');
       return true;
     }
-    this.appS.leftMenu[0] = id;
+    this.appS.leftMenu = id;
     this.menuChange.emit(await this.db.getFirstId(this.dbName, id));
     this.markForCheck();
   }

@@ -1,0 +1,35 @@
+<div class="sider sider-menu">
+  <div class="project">
+    <nz-select nzSize="large" nzPlaceHolder="请选择项目" [(ngModel)]="project.select" (ngModelChange)="onProject()" [nzDisabled]="appS.edit">
+      <nz-option [nzValue]="item" [nzLabel]="item.name" *ngFor="let item of project.menu"></nz-option>
+    </nz-select>
+    <h2 class="text">{{project.select?.name || '请选择项目'}}</h2>
+    <div style="display: flex; flex-direction: column;">
+      <i nz-icon nzType="up" nzTheme="outline" [ngClass]="{'active': piState}"></i>
+    </div>
+  </div>
+  <ul>
+    <ng-container *ngFor="let item of component.menu; index as i">
+      <li class="item" (click)="onComponent(item)"
+        *ngIf="component.select === null || component.select === item"
+        [ngClass]="{'active': component.select === item}">
+        {{item}}
+        <i nz-icon nzType="up" nzTheme="outline"></i>
+      </li>
+    </ng-container>
+  </ul>
+  <ul class="menu-2" *ngIf="component.select !== null">
+    <li *ngFor="let item of bridge.menu; index as i"
+      [ngClass]="{'active': bridge.select === item.id && (!appS.edit || appS.editId === item.id)}"
+      (click)="onBridge(item.id)">
+      <div class="state">
+        <div *ngIf="item.cls.e" style="background-color: #d9d9d9"></div>
+        <div *ngIf="item.cls.a" style="background-color: #45b787"></div>
+        <div *ngIf="item.cls.d" style="background-color: #51c4d3"></div>
+        <div *ngIf="item.cls.b" style="background-color: #fcd337"></div>
+        <div *ngIf="item.cls.c" style="background-color: #f34718"></div>
+      </div>
+      {{item.name}}
+    </li>
+  </ul>
+</div>

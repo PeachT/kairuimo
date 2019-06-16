@@ -1,108 +1,152 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd';
+import { groupModeStr, taskModeStr } from 'src/app/models/jack';
+import { GroupItem } from 'src/app/models/task.models';
 
 @Component({
-  selector: 'app-group',
+  // tslint:disable-next-line:component-selector
+  selector: 'task-group',
   templateUrl: './group.component.html',
   styleUrls: ['./group.component.less']
 })
 export class GroupComponent implements OnInit {
-  holes: any;
-  sholes = [];
-  group = {
-    g: [],
-    garr: [],
-    mode: null,
-  };
-  gmStr = [];
-  groupDevValue = {
-    A: '',
-    B: '',
-    C: '',
-    D: '',
-  };
-  err = {
-    msg: null,
-    state: false
-  };
+  deviceMode: any  = null;
+  holes: Array<string> = [];
+
+  show = false;
+  modeGroup: Array<string> = [];
+  holeGroup: Array<any> = [];
+  residueHole: Array<string> = [];
+  selectMde = {};
+
+  err: Array<string> = [];
+
+  @Output() outGroup = new EventEmitter();
 
   constructor(
     private message: NzMessageService,
   ) { }
 
-  ngOnInit() {
-    console.log(this.group, this.gmStr);
-  }
+  ngOnInit() {}
 
-  /** 保存单个分组 */
-  onGroupSave() {
-    let str = '';
-    this.gmStr.map((name, index) => {
-      if (index === 0) {
-        str = this.groupDevValue[name];
-      } else {
-        str = `${str}/${this.groupDevValue[name]}`;
-      }
-      this.groupDevValue[name] = null;
-    });
-    this.group.g.push(str);
-    this.group.g = this.group.g.sort((x, y) => x < y ? 0 : 1);
-    console.log(this.group.g);
-    this.err.state = false;
-  }
-  /** 判断空名称是否存在 */
-  protected ifHoleName() {
-    const g = `/${this.group.g.join('/')}/`;
-    this.err.state = true;
-    this.err.msg = false;
-
-    for (const name of this.gmStr) {
-      const nowValue = this.groupDevValue[name];
-      if (nowValue === null) {
-        // this.message.warning(`${name}组名称不能为空！！`);
-        this.err.msg = `${name}组名称不能为空！！`;
-        this.err.state = false;
-        return;
-      } else if (g.indexOf(`/${nowValue}/`) !== -1) {
-        // this.message.warning(`${name}组名称已经存在！！`);
-        this.err.msg = `${name}组名称已经存在！！`;
-        this.err.state = false;
-        return;
-      }
-      console.log(name, nowValue);
-
-      for (const name2 of this.gmStr) {
-        if (name !== name2 && nowValue === this.groupDevValue[name2]) {
-          this.err.msg = `${name}组名称与${name2}组名称重复！！`;
-          this.err.state = false;
-          return;
-        }
-      }
+  onShow() {
+    if (!this.deviceMode) {
+      this.message.error('请选择设备😔！');
+    }
+    if (!this.holes) {
+      this.message.error('请选择构建😔！');
+    }
+    if (this.deviceMode && this.holes) {
+      this.show = true;
+      this.modeGroup = groupModeStr(this.deviceMode);
     }
   }
-  /** 删除tag */
-  protected delTag(index) {
-    this.group.g.splice(index, 1);
-    console.log(this.group.g);
+  /** 初始化选择值 */
+  selectModeInit() {
+    this.modeGroup.map(key => {
+      this.selectMde[key] = null;
+    });
   }
-  /** 空数据 */
+  /** 下拉框打开 */
   open() {
-    this.sholes = this.holes.holes;
-    const b = [];
-    const a = this.holes.holes;
-    this.group.g.map((item) => {
-      b.push(...item.split('/'));
+    const modeHole = [];
+    this.modeGroup.map(key => {
+      modeHole.push(this.selectMde[key]);
     });
-    this.gmStr.map((name, index) => {
-      if (this.groupDevValue[name]) {
-        b.push(this.groupDevValue[name]);
-      }
+    this.holeGroup.map(arr => {
+      modeHole.push(...arr);
     });
-    this.sholes = a.concat(b).filter(v => !a.includes(v) || !b.includes(v));
-    console.log(this.sholes, this.holes, this.group, this.sholes);
+    this.residueHole = this.holes.filter(v =>  modeHole.indexOf(v) === -1 );
   }
-  /** 选择孔 */
-  holesChange(e) {
-    this.ifHoleName();
+  /** 保存单个分组 */
+  itemGroupSave() {
+    const modeHole = [];
+    const err = [];
+    this.modeGroup.map(key => {
+      if (!this.selectMde[key]) {
+        err.push(key);
+      }
+      modeHole.push(this.selectMde[key]);
+    });
+    if (err.length === 0) {
+      this.holeGroup.push(modeHole);
+      this.selectModeInit();
+    }
+    this.err = err;
+  }
+  /** 删除单个分组 */
+  delHoleGroup(i) {
+    this.holeGroup.splice(i, 1);
+  }
+  /** 取消分组 */
+  onCancel() {
+    this.show = false;
+  }
+  /** 保存分组 */
+  onSave() {
+    const modeHole = [];
+    this.holeGroup.map(arr => {
+      modeHole.push(...arr);
+    });
+    if (this.holes.length === modeHole.length) {
+      const group = [];
+      this.holeGroup.map(arr => {
+        group.push(arr.join('/'));
+      });
+      console.log(group);
+      this.creategroupData(group);
+    } else {
+      this.message.warning('请完成分组');
+    }
+
+  }
+
+  /** 自动分组 */
+  autoGroup() {
+    if (this.deviceMode && this.holes.length > 0) {
+      this.modeGroup = groupModeStr(this.deviceMode);
+      console.log(this.deviceMode, this.holes, this.modeGroup.length);
+      const group = [];
+      for (let index = 0; index < this.holes.length; index += this.modeGroup.length) {
+        group.push(this.holes.slice(index, index + this.modeGroup.length).join('/'));
+      }
+      this.creategroupData(group);
+    }
+  }
+  /** 创建分组数据 */
+  creategroupData(group) {
+    if (!group.length) {
+      this.message.error('至少需要一个分组');
+      return;
+    }
+    const groupData = [];
+    group.map(item => {
+      const taskBase: GroupItem = {
+        name: item,
+        mode: this.deviceMode,
+        length: 0,
+        tensionKn: 0,
+        steelStrandNumber: 0,
+        tensionStage: 3,
+        stage: [10, 20, 50, 100, 0, 0, 0],
+        time: [30, 30, 30, 300, 0, 0, 0],
+        returnMm: 6,
+        twice: false,
+        super: false,
+      };
+      taskModeStr[taskBase.mode].map(d => {
+        taskBase[d] = {
+          kn: [0, 0, 0, 0, 0, 0, 0],
+          wordMm: 4,
+        };
+        if (d.indexOf('zA') > -1 || d.indexOf('zB') > -1 || d.indexOf('zC') > -1 || d.indexOf('zD') > -1) {
+          taskBase[d].theoryMm = 0;
+        }
+      });
+      groupData.push(taskBase);
+    });
+    console.log(group, groupData);
+    this.show = false;
+    this.outGroup.emit({names: group, data: groupData});
   }
 }

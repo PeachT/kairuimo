@@ -15,6 +15,7 @@ import { LayoutModule } from './layout/layout.module';
 
 import * as AllIcons from '@ant-design/icons-angular/icons';
 import { CoreModule } from './core/core.module';
+import { SharedModule } from './shared/shared.module';
 
 registerLocaleData(zh);
 
@@ -32,7 +33,8 @@ registerLocaleData(zh);
     FormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    LayoutModule
+    LayoutModule,
+    SharedModule
   ],
   providers: [
     { provide: NZ_I18N, useValue: zh_CN },

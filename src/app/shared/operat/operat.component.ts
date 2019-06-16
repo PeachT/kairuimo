@@ -14,6 +14,7 @@ import { getModelBase } from 'src/app/models/base';
 export class OperatComponent implements OnInit {
   @Input() dbName: string;
   @Input() formData: FormGroup;
+  @Input() saveState = true;
 
   @Output() outEditOk = new EventEmitter();
   @Output() outEdit = new EventEmitter();
@@ -34,8 +35,8 @@ export class OperatComponent implements OnInit {
   }
   /** 保存数据 */
   async save() {
-    if (!this.formData.valid) {
-      console.log(this.formData.valid);
+    console.log(this.formData.valid, this.saveState);
+    if (!this.formData.valid || !this.saveState) {
       this.message.error('数据填写有误！！');
       return;
     }

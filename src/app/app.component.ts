@@ -20,7 +20,6 @@ export class AppComponent implements OnInit {
   s1 = null;
   s2 = null;
   db: DB;
-  time = (DateFormat(new Date(), 'MM-dd hh:mm:ss'));
 
   constructor(
     private e: ElectronService,
@@ -200,9 +199,6 @@ export class AppComponent implements OnInit {
       });
       // 更新请求
       // this.e.ipcRenderer.send('update');
-      setInterval(() => {
-        this.time = (DateFormat(new Date(), 'MM-dd hh:mm:ss'));
-      }, 1000);
       this.PLCS.PLCobservble.subscribe(() => {
         // console.log('123132');
       });

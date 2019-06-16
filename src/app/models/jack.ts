@@ -85,46 +85,6 @@ export function groupModeStr(mode: string) {
 
 /** 顶选择菜单 */
 export function carterJaskMenu(mode: number) {
-  // const c = [
-  //   {
-  //     value: 0,
-  //     label: 'A单顶',
-  //     isLeaf: true
-  //   },
-  //   {
-  //     value: 1,
-  //     label: 'A两顶',
-  //     isLeaf: true
-  //   },
-  // ];
-  // if (mode > 1) {
-  //   c.push(...[
-  //     {
-  //       value: 2,
-  //       label: 'B单顶',
-  //       isLeaf: true
-  //     },
-  //     {
-  //       value: 3,
-  //       label: 'B两顶',
-  //       isLeaf: true
-  //     },
-  //     {
-  //       value: 4,
-  //       label: '四顶',
-  //       isLeaf: true
-  //     },
-  //   ]);
-  // }
-  // if (mode > 2) {
-  //   c.push(...[
-  //     {
-  //       value: 5,
-  //       label: '八顶',
-  //       isLeaf: true
-  //     }
-  //   ]);
-  // }
   const c: any = [
     {
       value: 'A1',
