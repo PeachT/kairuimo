@@ -1,25 +1,23 @@
 <app-left>
   <div class="sider sider-menu">
-    <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
+    <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" [menuFilter]="menuFilter" #leftMenu></app-left-menu>
   </div>
   <div class="main">
-    <app-operat [dbName]="dbName" [formData]="formGroup" (outEdit)="edit($event)" (outEditOk)="editOk($event)"></app-operat>
-
-
-    <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formGroup">
+    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"></app-operat>
+    <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">
       <nz-form-item>
         <nz-form-label [nzSm]="3" nzRequired nzFor="name">用户姓名</nz-form-label>
-        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formGroup.get('name').errors}">
+        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}">
           <input type="text" nz-input placeholder="输入姓名" formControlName="name">
-          <nz-form-explain *ngIf="appS.edit">{{formGroup.get('name').errors | ValidatorError}}</nz-form-explain>
+          <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain>
         </nz-form-control>
       </nz-form-item>
 
       <nz-form-item>
         <nz-form-label [nzSm]="3" nzRequired nzFor="name">密码</nz-form-label>
-        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formGroup.get('password').errors}">
+        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('password').errors}">
           <input type="text" nz-input placeholder="输入姓名" formControlName="password">
-          <nz-form-explain *ngIf="appS.edit">{{formGroup.get('password').errors | ValidatorError}}</nz-form-explain>
+          <nz-form-explain *ngIf="appS.edit">{{formData.get('password').errors | ValidatorError}}</nz-form-explain>
         </nz-form-control>
       </nz-form-item>
 
@@ -36,7 +34,5 @@
 
       <div class="edit" [ngClass]="{'edit-on': appS.edit}"></div>
     </form>
-    <!-- <button (click)="ss()">++++</button> -->
-
   </div>
 </app-left>

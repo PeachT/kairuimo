@@ -11,8 +11,8 @@ import { NzMessageService } from 'ng-zorro-antd';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LeftMenuComponent implements OnInit {
-  @Input()
-    dbName: string;
+  @Input() dbName: string;
+  @Input() menuFilter: (o1) => boolean;
   menus: Array<Menu> = [];
 
   @Output() menuChange = new EventEmitter();
@@ -27,7 +27,7 @@ export class LeftMenuComponent implements OnInit {
   ngOnInit() {
     this.getMenuData();
   }
-
+  /** 点击菜单项 */
   async onClick(id = this.appS.leftMenu) {
     if (this.appS.edit) {
       this.message.warning('请完成编辑！');
@@ -37,8 +37,18 @@ export class LeftMenuComponent implements OnInit {
     this.menuChange.emit(await this.db.getFirstId(this.dbName, id));
     this.markForCheck();
   }
+  /**
+   * * 获取菜单数据
+   *
+   * @param {*} [id=null] 有ID直接跳转
+   * @memberof LeftMenuComponent
+   */
   async getMenuData(id = null) {
-    this.menus = await this.db.getMenuData(this.dbName);
+    if (this.menuFilter) {
+      this.menus = await this.db.getMenuData(this.dbName, this.menuFilter);
+    } else {
+      this.menus = await this.db.getMenuData(this.dbName);
+    }
     if (id) {
       this.onClick(id);
     }

@@ -27,8 +27,9 @@ export class UserComponent implements OnInit {
   dbName = 'users';
   @ViewChild('leftMenu')
   leftMenu: LeftMenuComponent;
-  formGroup: FormGroup;
+  formData: FormGroup;
   data: User;
+  menuFilter = (f) => f.jurisdiction < 9;
 
   constructor(
     private fb: FormBuilder,
@@ -42,11 +43,19 @@ export class UserComponent implements OnInit {
   }
 
   ngOnInit() {
-
     this.carterFormGroup();
   }
+  reset() {
+    this.carterFormGroup();
+    this.formData.setValue(this.data);
+    // tslint:disable-next-line:forin
+    for (const i in this.formData.controls) {
+      this.formData.controls[i].markAsDirty();
+      this.formData.controls[i].updateValueAndValidity();
+    }
+  }
   carterFormGroup() {
-    this.formGroup = this.fb.group({
+    this.formData = this.fb.group({
       id: [],
       name: [null, [Validators.required], [new RepetitionARV(this.db, 'jack')]],
       password: [null, [Validators.required]],
@@ -57,8 +66,7 @@ export class UserComponent implements OnInit {
   onMneu(data: User) {
     console.log('一条数据', data);
     this.data = data;
-    this.carterFormGroup();
-    this.formGroup.setValue(this.data);
+    this.reset();
   }
 
   /**
@@ -67,12 +75,11 @@ export class UserComponent implements OnInit {
   edit(data) {
     if (!data) {
       data = copyAny(this.data);
-      delete data.id;
+      data.id = null;
     }
     this.data = data;
     console.log(this.data, data);
-    this.carterFormGroup();
-    this.formGroup.setValue(this.data);
+    this.reset();
     this.leftMenu.markForCheck();
   }
   /**

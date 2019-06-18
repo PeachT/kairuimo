@@ -5,6 +5,7 @@ import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
 import { FormGroup } from '@angular/forms';
 import { getModelBase } from 'src/app/models/base';
+import { EditShow } from 'src/app/class/edit-show';
 
 @Component({
   selector: 'app-operat',
@@ -15,14 +16,13 @@ export class OperatComponent implements OnInit {
   @Input() dbName: string;
   @Input() formData: FormGroup;
   @Input() saveState = true;
+  @Input() inEdit: (data) => void;
 
   @Output() outEditOk = new EventEmitter();
   @Output() outEdit = new EventEmitter();
 
   @Input() addFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name;
   @Input() updateFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name && o1.id !== o2.id;
-
-
 
   constructor(
     private message: NzMessageService,
@@ -35,11 +35,6 @@ export class OperatComponent implements OnInit {
   }
   /** 保存数据 */
   async save() {
-    console.log(this.formData.valid, this.saveState);
-    if (!this.formData.valid || !this.saveState) {
-      this.message.error('数据填写有误！！');
-      return;
-    }
     const data = this.formData.value;
     console.log('保存数据', data);
     let r = null;
@@ -83,7 +78,8 @@ export class OperatComponent implements OnInit {
   edit(state: boolean) {
     this.appS.editId = null;
     const data = state ? getModelBase(this.dbName) : null;
-    this.outEdit.emit(data);
+    // this.outEdit.emit(data);
+    this.inEdit(data);
     this.appS.edit = true;
   }
 

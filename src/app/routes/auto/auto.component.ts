@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { taskModeStr, tableDev, groupModeStr } from 'src/app/models/jack';
 import { DB, DbService } from 'src/app/services/db.service';
 import { FormBuilder } from '@angular/forms';
@@ -17,7 +17,8 @@ import { getStageString } from 'src/app/Function/stageString';
 @Component({
   selector: 'app-auto',
   templateUrl: './auto.component.html',
-  styleUrls: ['./auto.component.less']
+  styleUrls: ['./auto.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mainContent')
@@ -206,7 +207,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private modalService: NzModalService,
     public PLCS: PLCService,
-    public autoS: AutoService
+    public autoS: AutoService,
+    private cdr: ChangeDetectorRef
   ) {
     this.autoData = this.PLCS.getAutoDate();
     const autoTask = JSON.parse(localStorage.getItem('autoTask'));
@@ -223,6 +225,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
+    this.PLCS.plcSubject.subscribe((data) => {
+      this.cdr.markForCheck();
+    });
     this.stageStr = getStageString(this.task);
     this.stepStageStr = this.stageStr;
     if (this.task.twice && (!this.task.record || (this.task.record && !this.task.record.twice))) {
@@ -852,6 +857,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.balance();
         }
       }
+      this.cdr.checkNoChanges();
       // console.log('曲线数据', this.svgData);
     }, 1000);
   }

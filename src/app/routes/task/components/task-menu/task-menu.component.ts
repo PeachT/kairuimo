@@ -50,14 +50,14 @@ export class TaskMenuComponent implements OnInit {
       }
       data = Object.assign({project: null, component: null, selectBridge: null}, data);
       this.project.select = this.project.menu.filter(f => f.id === Number(data.project))[0];
-      this.component.select = data.component;
-      this.bridge.select = Number(data.selectBridge);
-      console.log('路由菜单', data, this.project, this.component, this.bridge);
-      this.res();
+      this.res(data);
     });
   }
 
-  res() {
+  res(data) {
+    this.component.select = data.component;
+    this.bridge.select = Number(data.selectBridge);
+    console.log('路由菜单', this.project, this.component, this.bridge);
     if (this.project.select) {
       this.getProject();
     }

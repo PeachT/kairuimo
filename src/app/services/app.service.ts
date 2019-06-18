@@ -27,8 +27,7 @@ export class AppService {
   public nowRoute = null;
   /** 编辑状态 */
   public edit = false;
-  /** 搜索事件 */
-  private sharchSub = new Subject();
+
   public powerState = false;
   public powerDelay = 5;
   public powerDelayT = null;
@@ -49,14 +48,15 @@ export class AppService {
       this.info.unit = info;
     }
   }
-  // 获得一个Observable;
-  sharch = this.sharchSub.asObservable();
-
-  // 发射数据，当调用这个方法的时候，Subject就会发射这个数据，所有订阅了这个Subject的Subscription都会接受到结果
-  // loading true为启用loading,false为关闭loading
-  public onSharch(name: string) {
-    this.sharchSub.next(name);
-  }
+  // /** 搜索事件 */
+  // private plcSub = new Subject();
+  // // 获得一个Observable;
+  // plcSubject = this.plcSub.asObservable();
+  // // 发射数据，当调用这个方法的时候，Subject就会发射这个数据，所有订阅了这个Subject的Subscription都会接受到结果
+  // // loading true为启用loading,false为关闭loading
+  // public onPlcSub(data) {
+  //   this.plcSub.next(data);
+  // }
 
   public power(mode: boolean) {
     this.powerText = mode ? '关机' : '重启';

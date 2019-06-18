@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DbService, DB } from 'src/app/services/db.service';
@@ -11,7 +11,8 @@ import { ManualItemComponent } from 'src/app/shared/manual-item/manual-item.comp
 @Component({
   selector: 'app-manual',
   templateUrl: './manual.component.html',
-  styleUrls: ['./manual.component.less']
+  styleUrls: ['./manual.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('domz', { read: ViewContainerRef })
@@ -97,16 +98,20 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     public appService: AppService,
     public PLCS: PLCService,
     private message: NzMessageService,
-    private cfr: ComponentFactoryResolver
+    private cfr: ComponentFactoryResolver,
+    private cdr: ChangeDetectorRef
   ) {
     this.db = this.odb.db;
   }
 
   async ngOnInit() {
-    this.it = setInterval(() => {
-      // this.da = this.da++;
-      // console.log('manual');
-    }, 500);
+    this.PLCS.plcSubject.subscribe((data) => {
+      this.cdr.markForCheck();
+    });
+    // this.it = setInterval(() => {
+    //   // this.da = this.da++;
+    //   // console.log('manual');
+    // }, 500);
     // 获取顶
     await this.db.jack.toArray().then((d) => {
       this.jacks = d.map(item => {
@@ -199,6 +204,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
       // name
       comp.instance.dev = this.setDev[name];
       comp.instance.name = name;
+      this.cdr.markForCheck();
     });
     this.devModeStr.c.map(name => {
       console.log('添加', name);
@@ -208,6 +214,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
       // name
       comp.instance.dev = this.setDev[name];
       comp.instance.name = name;
+      this.cdr.markForCheck();
     });
   }
   /**

@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators, FormArray, AsyncValidatorFn, Abstra
 import { Project } from 'src/app/models/project';
 import { NzMessageService } from 'ng-zorro-antd';
 import { reperitionValidator } from 'src/app/Validator/repetition.validator';
-import { RepetitionARV } from 'src/app/Validator/async.validator';
+import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
 import { DbService } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { from, Observable } from 'rxjs';
@@ -19,7 +19,7 @@ import { AddOtherComponent } from '../add-other/add-other.component';
 export class ProjectComponent implements OnInit {
   @Input() data: Project = null;
   @ViewChild('otherInfo') otherIngoDom: AddOtherComponent;
-  validateForm: FormGroup;
+  validateForm: FormGroup = this.fb.group({});
   otherKeys = [
     '分布工程',
     '施工单位',
@@ -58,7 +58,7 @@ export class ProjectComponent implements OnInit {
     console.log('000000');
     this.validateForm = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [new RepetitionARV(this.db, 'project')]],
+      name: [null, [Validators.required], [nameRepetition(this.db, 'project')]],
       /** 监理 */
       supervisions: this.fb.array(this.supervisionsForm()),
       /** 其他信息 */

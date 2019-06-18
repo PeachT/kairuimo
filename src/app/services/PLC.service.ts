@@ -4,23 +4,24 @@ import { NzMessageService } from 'ng-zorro-antd';
 
 import { Subject, Observable, interval } from 'rxjs';
 import { PLC_D } from '../models/IPCChannel';
-import { PLCLiveData } from '../models/live';
+import { PLCLiveData, GetPLCLiveData } from '../models/live';
 import { plcToMpa, plcToMm, mmToPlc } from '../Function/device.date.processing';
-import { MpaRevise, AutoDate } from '../models/device';
-import { Jack } from '../models/jack';
+import { MpaRevise, AutoDate, GetMpaRevise } from '../models/device';
+import { Jack, taskModeStr } from '../models/jack';
 import { DbService } from './db.service';
 
 
-const mpaRevise: MpaRevise = {
-  zA: [1, 1, 1, 1, 1, 1],
-  zB: [1, 1, 1, 1, 1, 1],
-  zC: [1, 1, 1, 1, 1, 1],
-  zD: [1, 1, 1, 1, 1, 1],
-  cA: [1, 1, 1, 1, 1, 1],
-  cB: [1, 1, 1, 1, 1, 1],
-  cC: [1, 1, 1, 1, 1, 1],
-  cD: [1, 1, 1, 1, 1, 1],
-};
+const mpaRevise: MpaRevise = GetMpaRevise();
+// {
+//   zA: [1, 1, 1, 1, 1, 1],
+//   zB: [1, 1, 1, 1, 1, 1],
+//   zC: [1, 1, 1, 1, 1, 1],
+//   zD: [1, 1, 1, 1, 1, 1],
+//   cA: [1, 1, 1, 1, 1, 1],
+//   cB: [1, 1, 1, 1, 1, 1],
+//   cC: [1, 1, 1, 1, 1, 1],
+//   cD: [1, 1, 1, 1, 1, 1],
+// };
 const autoDate: AutoDate = {
   pressureDifference: 2,
   superElongation: 10,
@@ -49,71 +50,80 @@ export class PLCService {
     cLT: 0,
   };
 
-  public PD: PLCLiveData = {
-    zA: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    zB: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    zC: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    zD: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    cA: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    cB: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    cC: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-    cD: {
-      showMpa: 0,
-      showMm: 0,
-      state: '设备未连接',
-      alarm: [],
-      autoState: [],
-    },
-  };
+  public PD: PLCLiveData = GetPLCLiveData();
+  // {
+  //   zA: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   zB: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   zC: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   zD: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   cA: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   cB: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   cC: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  //   cD: {
+  //     showMpa: 0,
+  //     showMm: 0,
+  //     state: '设备未连接',
+  //     alarm: [],
+  //     autoState: [],
+  //   },
+  // };
   private stateStr = ['张拉', '回程', '卸荷', '压力上限', '压力未连接', '位移上限', '位移下限', '位移未连接', '超设置压力', '超设置位移', '模块错误', '急停', '自动暂停', '通信错误'];
   private stateAutoStr = ['等待保压', '卸荷完成', '回顶完成', '超工作位移上限', '平衡暂停', '压力差报警', '伸长量偏差报警', '张拉完成'];
   // 0压力确认 1回程 2卸荷 3 卸荷完成 4回顶 5回顶完成 6超工作位移上限
-  /** 搜索事件 */
-  private plcSub = new Subject();
   /** 设置采集频率 */
   heartbeatRateValue = 0;
+
+  /** PLC sub */
+  private plcSub = new Subject();
+  // 获得一个Observable;
+  plcSubject = this.plcSub.asObservable();
+  // 发射数据，当调用这个方法的时候，Subject就会发射这个数据，所有订阅了这个Subject的Subscription都会接受到结果
+  // loading true为启用loading,false为关闭loading
+  // public onPlcSub(data) {
+  //   this.plcSub.next(data);
+  // }
 
   constructor(
     private e: ElectronService,
@@ -135,13 +145,7 @@ export class PLCService {
     this.selectJack(this.getJackId());
   }
 
-  // 获得一个Observable;
-  public PLCobservble = this.plcSub.asObservable();
 
-  // 发射数据，当调用这个方法的时候，Subject就会发射这个数据，所有订阅了这个Subject的Subscription都会接受到结果
-  public onSharch() {
-
-  }
   /** 获取实时数据 */
   private ipcOn(dev: string = 'z') {
     this.e.ipcRenderer.on(`${dev}connection`, (event, data) => {
@@ -154,36 +158,48 @@ export class PLCService {
       clearTimeout(this.plcState[`${dev}T`]);
       this.plcState[dev] = true;
       if (this.mpaRevise && this.jack) {
+        let i = 0;
+        ['A', 'B', 'C', 'D'].forEach(k => {
+          const key = `${dev}${k}`;
+          this.PD[key].showMpa = plcToMpa(data.int16[i], this.mpaRevise[key]);
+          this.PD[key].showMm = plcToMm(data.int16[i + 1], this.jack[key].mm);
+          const state = this.getState(data.int16[i + 2]);
+          this.PD[key].state = state.state.join('·');
+          this.PD[key].alarm = state.alarm;
+          this.PD[key].autoState = this.getState(data.int16[i + 3], true, this.stateAutoStr).alarm;
+          i += 5;
+        });
         // console.log(data);
-        this.PD[`${dev}A`].showMpa = plcToMpa(data.int16[0], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}A`].showMm = plcToMm(data.int16[1], this.jack[`${dev}A`].mm);
-        const astate = this.getState(data.int16[2]);
-        this.PD[`${dev}A`].state = astate.state.join('·');
-        this.PD[`${dev}A`].alarm = astate.alarm;
-        this.PD[`${dev}A`].autoState = this.getState(data.int16[3], true, this.stateAutoStr).alarm;
+        // this.PD[`${dev}A`].showMpa = plcToMpa(data.int16[0], this.mpaRevise[`${dev}A`]);
+        // this.PD[`${dev}A`].showMm = plcToMm(data.int16[1], this.jack[`${dev}A`].mm);
+        // const astate = this.getState(data.int16[2]);
+        // this.PD[`${dev}A`].state = astate.state.join('·');
+        // this.PD[`${dev}A`].alarm = astate.alarm;
+        // this.PD[`${dev}A`].autoState = this.getState(data.int16[3], true, this.stateAutoStr).alarm;
 
-        this.PD[`${dev}B`].showMpa = plcToMpa(data.int16[5], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}B`].showMm = plcToMm(data.int16[6], this.jack[`${dev}A`].mm);
-        const bstate = this.getState(data.int16[7]);
-        this.PD[`${dev}B`].state = bstate.state.join('·');
-        this.PD[`${dev}B`].alarm = bstate.alarm;
-        this.PD[`${dev}B`].autoState = this.getState(data.int16[8], true, this.stateAutoStr).alarm;
+        // this.PD[`${dev}B`].showMpa = plcToMpa(data.int16[5], this.mpaRevise[`${dev}B`]);
+        // this.PD[`${dev}B`].showMm = plcToMm(data.int16[6], this.jack[`${dev}B`].mm);
+        // const bstate = this.getState(data.int16[7]);
+        // this.PD[`${dev}B`].state = bstate.state.join('·');
+        // this.PD[`${dev}B`].alarm = bstate.alarm;
+        // this.PD[`${dev}B`].autoState = this.getState(data.int16[8], true, this.stateAutoStr).alarm;
 
-        this.PD[`${dev}C`].showMpa = plcToMpa(data.int16[10], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}C`].showMm = plcToMm(data.int16[11], this.jack[`${dev}A`].mm);
-        const cstate = this.getState(data.int16[12]);
-        this.PD[`${dev}C`].state = cstate.state.join('·');
-        this.PD[`${dev}C`].alarm = cstate.alarm;
-        this.PD[`${dev}C`].autoState = this.getState(data.int16[13], true, this.stateAutoStr).alarm;
+        // this.PD[`${dev}C`].showMpa = plcToMpa(data.int16[10], this.mpaRevise[`${dev}C`]);
+        // this.PD[`${dev}C`].showMm = plcToMm(data.int16[11], this.jack[`${dev}C`].mm);
+        // const cstate = this.getState(data.int16[12]);
+        // this.PD[`${dev}C`].state = cstate.state.join('·');
+        // this.PD[`${dev}C`].alarm = cstate.alarm;
+        // this.PD[`${dev}C`].autoState = this.getState(data.int16[13], true, this.stateAutoStr).alarm;
 
-        this.PD[`${dev}D`].showMpa = plcToMpa(data.int16[15], this.mpaRevise[`${dev}A`]);
-        this.PD[`${dev}D`].showMm = plcToMm(data.int16[16], this.jack[`${dev}A`].mm);
-        const dstate = this.getState(data.int16[17]);
-        this.PD[`${dev}D`].state = dstate.state.join('·');
-        this.PD[`${dev}D`].alarm = dstate.alarm;
-        this.PD[`${dev}D`].autoState = this.getState(data.int16[18], true, this.stateAutoStr).alarm;
+        // this.PD[`${dev}D`].showMpa = plcToMpa(data.int16[15], this.mpaRevise[`${dev}D`]);
+        // this.PD[`${dev}D`].showMm = plcToMm(data.int16[16], this.jack[`${dev}D`].mm);
+        // const dstate = this.getState(data.int16[17]);
+        // this.PD[`${dev}D`].state = dstate.state.join('·');
+        // this.PD[`${dev}D`].alarm = dstate.alarm;
+        // this.PD[`${dev}D`].autoState = this.getState(data.int16[18], true, this.stateAutoStr).alarm;
       }
-      this.plcSub.next();
+      // this.onPlcSub(data);
+      this.plcSub.next(data);
 
       this.plcState[`${dev}T`] = setTimeout(() => {
         this.plcState[dev] = false;

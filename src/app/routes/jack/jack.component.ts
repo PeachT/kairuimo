@@ -14,7 +14,7 @@ import { ManualComponent } from '../manual/manual.component';
 import { JackItemComponent } from 'src/app/shared/jack-item/jack-item.component';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { copyAny } from 'src/app/models/base';
-import { RepetitionARV } from 'src/app/Validator/async.validator';
+import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-jack',
@@ -27,7 +27,7 @@ export class JackComponent implements OnInit {
   @ViewChild('device', { read: ViewContainerRef })
     deviceDom: ViewContainerRef;
 
-  jackForm: FormGroup;
+  formData: FormGroup;
   data: Jack;
 
   constructor(
@@ -43,9 +43,9 @@ export class JackComponent implements OnInit {
     this.createJackForm();
   }
   createJackForm() {
-    this.jackForm = this.fb.group({
+    this.formData = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [new RepetitionARV(this.db, 'jack')]],
+      name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
       jackMode: [8],
       equation: [1],
       jackModel: [],
@@ -59,6 +59,15 @@ export class JackComponent implements OnInit {
       cC: this.createDevGroup(),
       cD: this.createDevGroup(),
     });
+  }
+  reset() {
+    this.formData.reset(this.data);
+    this.f5();
+    // tslint:disable-next-line:forin
+    for (const i in this.formData.controls) {
+      this.formData.controls[i].markAsDirty();
+      this.formData.controls[i].updateValueAndValidity();
+    }
   }
   /** 创建设备标定from */
   createDevGroup() {
@@ -77,8 +86,7 @@ export class JackComponent implements OnInit {
   onMneu(data: Jack) {
     console.log('一条数据', data);
     this.data = data;
-    this.jackForm.reset(this.data);
-    this.f5();
+    this.reset();
   }
 
   /**
@@ -87,12 +95,11 @@ export class JackComponent implements OnInit {
   edit(data) {
     if (!data) {
       data = copyAny(this.data);
-      delete data.id;
+      data.id = null;
     }
     this.data = data;
     console.log(this.data, data);
-    this.jackForm.reset(this.data);
-    this.f5();
+    this.reset();
     this.leftMenu.markForCheck();
   }
   /**
@@ -135,7 +142,7 @@ export class JackComponent implements OnInit {
       this.data[`${dev}D`].date = this.nd(data.float[43]);
 
       console.log(this.data);
-      this.jackForm.reset(this.data);
+      this.formData.reset(this.data);
     });
   }
   /** 获取手动数据 */
@@ -174,10 +181,10 @@ export class JackComponent implements OnInit {
       ['zA', 'zB', 'zC', 'zD', 'cA', 'cB', 'cC', 'cD']
     ];
     this.deviceDom.clear();
-    devModeStr[this.jackForm.value.jackMode].map(name => {
+    devModeStr[this.formData.value.jackMode].map(name => {
       const com = this.cfr.resolveComponentFactory(JackItemComponent);
       const comp = this.deviceDom.createComponent(com);
-      comp.instance.formGroup = this.jackForm;
+      comp.instance.formGroup = this.formData;
       comp.instance.name = name;
       console.log('添加', name);
     });

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
@@ -14,7 +14,7 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { TensionMm } from 'src/app/Function/device.date.processing';
 import { ElectronService } from 'ngx-electron';
 import { Elongation } from 'src/app/models/live';
-import { RepetitionARV } from 'src/app/Validator/async.validator';
+import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
 import { TaskMenuComponent } from './components/task-menu/task-menu.component';
 import { copyAny } from 'src/app/models/base';
 import { AddOtherComponent } from 'src/app/shared/add-other/add-other.component';
@@ -34,7 +34,7 @@ export class TaskComponent implements OnInit {
   @ViewChild('otherInfo') otherIngoDom: AddOtherComponent;
   @ViewChild('tension') tensionDom: TensionComponent;
 
-  validateForm: FormGroup;
+  formData: FormGroup;
   bridgeOtherKey = [
     '设计强度',
   ];
@@ -96,10 +96,9 @@ export class TaskComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private odb: DbService,
+    public odb: DbService,
     private message: NzMessageService,
     public appS: AppService,
-    private router: Router,
     public PLCS: PLCService,
     private e: ElectronService,
     private cdr: ChangeDetectorRef
@@ -115,16 +114,17 @@ export class TaskComponent implements OnInit {
     this.cdr.markForCheck();
   }
   ngOnInit() {
-    this.validateForm = this.fb.group({
+    this.formData = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [new RepetitionARV(this.odb, 'task', this.updateFilterFun)]],
+      name: [null, [Validators.required], [nameRepetition(this.odb, 'task', this.updateFilterFun)]],
+      // name: [null, [Validators.required], [new RepetitionARV(this.odb, 'task', this.updateFilterFun)]],
       device: [null, [Validators.required]],
       component: [null, [Validators.required]],
       steelStrand: [null],
       // otherInfo: this.fb.array(this.otherInfoForm()),
       otherInfo: this.fb.array(this.otherIngoDom.createForm([{key: '浇筑日期', value: null}])),
-      holeRadio: [null, [Validators.required]],
-      groups: [],
+      holeRadio: [null],
+      groups: [null, [Validators.required]],
       project: []
     });
     this.getJacks();
@@ -142,6 +142,7 @@ export class TaskComponent implements OnInit {
       this.message.error('获取构建数据错误!!');
     });
   }
+
   /** 获取顶数据 */
   getJacks() {
     console.log('获取jack');
@@ -160,10 +161,15 @@ export class TaskComponent implements OnInit {
   /** 重新赋值 */
   reset() {
     // this.validateForm.setControl('otherInfo', this.fb.array(this.otherInfoForm()));
-    this.validateForm.setControl('otherInfo', this.fb.array(this.otherIngoDom.createForm(this.data.otherInfo)));
+    this.formData.setControl('otherInfo', this.fb.array(this.otherIngoDom.createForm(this.data.otherInfo)));
     // 不刷新两次异步验证有问题
-    this.validateForm.reset(this.data);
-    this.validateForm.reset(this.data);
+    this.formData.reset(this.data);
+    // tslint:disable-next-line:forin
+    for (const i in this.formData.controls) {
+      this.formData.controls[i].markAsDirty();
+      this.formData.controls[i].updateValueAndValidity();
+    }
+    // this.validateForm.reset(this.data);
   }
 
   /** 选择梁 */
@@ -201,7 +207,7 @@ export class TaskComponent implements OnInit {
   onEdit(data: TensionTask) {
     if (!data) {
       data = copyAny(this.data);
-      delete data.id;
+      data.id = null;
       for (const c of data.groups) {
         delete c.record;
       }
@@ -226,8 +232,8 @@ export class TaskComponent implements OnInit {
     console.log();
     if (id) {
       // this.leftMenu.getMenuData(id);
-      this.taskMneu.getBridge(id);
-      console.log('保存数据', this.holeMneuData.index, this.validateForm.value);
+      this.taskMneu.res({component: this.data.component, selectBridge: id});
+      console.log('保存数据', this.holeMneuData.index, this.formData.value);
     } else {
       // this.leftMenu.onClick();
       this.taskMneu.onMneu();
@@ -237,7 +243,7 @@ export class TaskComponent implements OnInit {
   updateGroupItem() {
     const g = this.taskDataDom.holeForm.value;
     this.data.groups[this.holeMneuData.index] = g;
-    this.validateForm.controls.groups.setValue(this.data.groups);
+    this.formData.controls.groups.setValue(this.data.groups);
   }
 
   /**
@@ -288,12 +294,14 @@ export class TaskComponent implements OnInit {
     }
   }
 
-  /** 分组完成 */
+  /**
+   * *分组完成
+   */
   okGroup(g) {
-    this.validateForm.controls.groups.setValue(g.data);
-    this.data = this.validateForm.value;
+    this.formData.controls.groups.setValue(g.data);
+    this.data = this.formData.value;
     this.holeMneu();
-    console.log('分组完成', g, this.validateForm.value);
+    console.log('分组完成', g, this.formData.value);
   }
 
   /** 选择导出模板 */
@@ -362,6 +370,16 @@ export class TaskComponent implements OnInit {
       }
       console.log('导出', data);
     });
+  }
+  onTension() {
+    const localData = {
+      project: this.taskMneu.project.select.id,
+      component: this.taskMneu.component.select,
+      id: this.data.id,
+      jackId: this.jackData.id,
+      groupData: this.holeMneuData.data
+    };
+    this.tensionDom.tension(this.holeMneuData, localData);
   }
 
 }

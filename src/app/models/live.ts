@@ -1,3 +1,5 @@
+import { taskModeStr } from './jack';
+
 export interface PLCLiveData {
   zA: PLCItem;
   zB: PLCItem;
@@ -15,6 +17,19 @@ export interface PLCItem {
   state: string;
   alarm: Array<string>;
   autoState: Array<string>;
+}
+export function GetPLCLiveData(): PLCLiveData {
+  const r: any = {};
+  taskModeStr.AB8.map(key => {
+    r[key] = {
+      showMpa: 0,
+      showMm: 0,
+      state: '设备未连接',
+      alarm: [],
+      autoState: [],
+    };
+  });
+  return r as PLCLiveData;
 }
 
 /** 伸长量与偏差率 */

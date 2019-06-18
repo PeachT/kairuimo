@@ -1,3 +1,5 @@
+import { taskModeStr } from './jack';
+
 export interface MpaRevise {
   zA: Array<number>;
   zB: Array<number>;
@@ -7,6 +9,13 @@ export interface MpaRevise {
   cB: Array<number>;
   cC: Array<number>;
   cD: Array<number>;
+}
+export function GetMpaRevise(): MpaRevise {
+  const r: any = {};
+  taskModeStr.AB8.map(key => {
+    r[key] =  [1, 1, 1, 1, 1, 1];
+  });
+  return r as MpaRevise;
 }
 
 export interface AutoDate {

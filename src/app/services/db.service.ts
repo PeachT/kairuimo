@@ -26,7 +26,7 @@ export class DbService {
 
   /** 判断数据是否重复 */
   // tslint:disable-next-line:max-line-length
-  public async repetitionAsync<T>(tName: string, filterFunction: (o1: T) => boolean) {
+  public async repetitionAsync<T>(tName: string, filterFunction: (o1: T) => boolean): Promise<number> {
     const count = await this.db[tName].filter(filterFunction).count();
     return count;
   }

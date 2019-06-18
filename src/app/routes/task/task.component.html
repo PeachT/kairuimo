@@ -7,12 +7,12 @@
     <nz-tabset class="task-tabset" (nzSelectChange)="changeTabst($event)">
       <nz-tab nzTitle="基础信息">
         <div class="form-edit">
-          <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="validateForm">
+          <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">
             <nz-form-item>
               <nz-form-label [nzSm]="3" nzRequired>梁号</nz-form-label>
-              <nz-form-control [nzSm]="21" [ngClass]="{'in-error': validateForm.get('name').errors}">
+              <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}">
                 <input type="text" nz-input placeholder="梁号" formControlName="name">
-                <nz-form-explain *ngIf="appS.edit">{{validateForm.get('name').errors | ValidatorError}}
+                <nz-form-explain >{{formData.get('name').errors | ValidatorError}}
                 </nz-form-explain>
               </nz-form-control>
             </nz-form-item>
@@ -26,7 +26,7 @@
                   <button nz-button nzType="primary" nzSearch (click)="groupDom.onShow()"
                     type="button" *ngIf="!data?.id" style="z-index: 1">分组</button>
                 </div>
-                <nz-form-explain *ngIf="validateForm.get('component').dirty && validateForm.get('component').errors">
+                <nz-form-explain *ngIf="formData.get('component').dirty && formData.get('component').errors">
                   请入选择构建！</nz-form-explain>
               </nz-form-control>
 
@@ -35,7 +35,7 @@
                 <nz-cascader nzMenuClassName="task-cascader" [nzOptions]="jacks" formControlName="device"
                   (ngModelChange)="deviceOnChanges($event)">
                 </nz-cascader>
-                <nz-form-explain *ngIf="validateForm.get('device').dirty && validateForm.get('device').errors">请入选择设备！
+                <nz-form-explain *ngIf="formData.get('device').dirty && formData.get('device').errors">请入选择设备！
                 </nz-form-explain>
               </nz-form-control>
               <!-- <nz-form-label [nzSm]="3" nzRequired>钢绞线</nz-form-label>
@@ -44,12 +44,12 @@
                   (ngModelChange)="steelStrandOnChanges($event)">
                 </nz-cascader>
                 <nz-form-explain
-                  *ngIf="validateForm.get('steelStrand').dirty && validateForm.get('steelStrand').errors">
+                  *ngIf="formData.get('steelStrand').dirty && formData.get('steelStrand').errors">
                   请入选择钢绞线！</nz-form-explain>
               </nz-form-control> -->
             </nz-form-item>
 
-            <app-add-other [validateForm]="validateForm" [keys]="bridgeOtherKey" [iselect]="0" #otherInfo></app-add-other>
+            <app-add-other [validateForm]="formData" [keys]="bridgeOtherKey" [iselect]="0" #otherInfo></app-add-other>
 
             <nz-form-item *ngIf="data" style="z-index: 2;">
               <nz-form-control>
@@ -63,7 +63,7 @@
                     >{{item.name}}-{{item.cls}}</label>
                 </nz-radio-group>
                 <nz-form-explain style="color: #f5222d;"
-                  *ngIf="validateForm.get('holeRadio').dirty && validateForm.get('holeRadio').errors">
+                  *ngIf="formData.get('groups').dirty && formData.get('groups').errors">
                   至少需要一组张拉数据！</nz-form-explain>
               </nz-form-control>
             </nz-form-item>
@@ -82,11 +82,11 @@
     </nz-tabset>
 
     <div class="operation" *ngIf="taskMneu.project.select">
-      <app-operat [dbName]="dbName" [formData]="validateForm" (outEdit)="onEdit($event)"
+      <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="onEdit($event)"
         (outEditOk)="editOk($event)"
         [addFilterFun] = "addFilterFun"
         [updateFilterFun] = "updateFilterFun"
-        [saveState]="taskDataDom?.holeForm?.valid || validateForm.valid">
+        [saveState]="taskDataDom?.holeForm?.valid && formData.valid">
         <button nz-button nzType="primary" nzGhost nzSearch (click)="selectTemplate()" type="button" >选择导出</button>
         <button nz-button nzType="primary" nzGhost nzSearch (click)="derivedExcel()" type="button" >导 出</button>
         <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button" *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3))">张 拉</button>

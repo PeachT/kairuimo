@@ -12,7 +12,7 @@ import { reperitionValidator } from 'src/app/Validator/repetition.validator';
 import { Comp } from 'src/app/models/component';
 import { copyAny } from 'src/app/models/base';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
-import { RepetitionARV } from 'src/app/Validator/async.validator';
+import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-component',
@@ -25,11 +25,11 @@ export class ComponentComponent implements OnInit {
   @ViewChild('leftMenu')
   leftMenu: LeftMenuComponent;
 
-  formGroup: FormGroup;
+  formData: FormGroup;
   data: Comp;
 
   get formArr(): FormArray {
-    return this.formGroup.get('hole') as FormArray;
+    return this.formData.get('hole') as FormArray;
   }
 
   tags = ['Unremovable', 'Tag 2', 'Tag 3'];
@@ -49,15 +49,24 @@ export class ComponentComponent implements OnInit {
     this.createFormGroup();
   }
   createFormGroup() {
-    this.formGroup = this.fb.group({
+    this.formData = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [new RepetitionARV(this.db, 'comp')]],
+      name: [null, [Validators.required], [nameRepetition(this.db, 'comp')]],
       hole: this.fb.array(
         this.holeForm()
       )
     });
   }
-
+  reset() {
+    // this.createFormGroup();
+    this.formData.setControl('hole', this.fb.array(this.holeForm()));
+    this.formData.setValue(this.data);
+    // tslint:disable-next-line:forin
+    for (const i in this.formData.controls) {
+      this.formData.controls[i].markAsDirty();
+      this.formData.controls[i].updateValueAndValidity();
+    }
+  }
   /** 孔form */
   holeForm() {
     console.log(!this.data);
@@ -82,21 +91,19 @@ export class ComponentComponent implements OnInit {
   onMneu(data: Comp) {
     console.log('一条数据', data);
     this.data = data;
-    this.createFormGroup();
-    this.formGroup.setValue(this.data);
+    this.reset();
   }
   /**
-   * *编辑
+   * * 编辑
    */
   edit(data) {
     if (!data) {
       data = copyAny(this.data);
-      delete data.id;
+      data.id = null;
     }
     this.data = data;
     console.log(this.data, data);
-    this.createFormGroup();
-    this.formGroup.setValue(this.data);
+    this.reset();
   }
   /**
    * *编辑完成
@@ -113,9 +120,9 @@ export class ComponentComponent implements OnInit {
 
   addHole() {
     // tslint:disable-next-line:no-angle-bracket-type-assertion
-    const control = <FormArray> this.formGroup.controls.hole;
+    const control = <FormArray> this.formData.controls.hole;
     control.push(this.createHoleForm());
-    this.data = this.formGroup.value;
+    this.data = this.formData.value;
   }
   /**
    * *删除梁型
@@ -127,9 +134,9 @@ export class ComponentComponent implements OnInit {
       return;
     }
     // tslint:disable-next-line:no-angle-bracket-type-assertion
-    const control = <FormArray> this.formGroup.controls.hole;
+    const control = <FormArray> this.formData.controls.hole;
     control.removeAt(index);
-    this.data = this.formGroup.value;
+    this.data = this.formData.value;
   }
 
   handleClose(form: FormControl, tag): void {
@@ -171,6 +178,6 @@ export class ComponentComponent implements OnInit {
   }
   ss() {
     console.log(this.data);
-    this.formGroup.setValue(this.data);
+    this.formData.setValue(this.data);
   }
 }

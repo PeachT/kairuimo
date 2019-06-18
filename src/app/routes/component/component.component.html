@@ -8,25 +8,16 @@
     <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
-      <app-operat [dbName]="dbName" [formData]="formGroup" (outEdit)="edit($event)" (outEditOk)="editOk($event)"></app-operat>
+      <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"
+      [saveState]="formData.valid"></app-operat>
 
-    <!-- <div class="operation">
-      <div *ngIf="!appS.edit; else elseBlock">
-        <button nz-button nzType="primary" nzSearch (click)="add()" type="button">添 加</button>
-        <button nz-button nzType="primary" nzSearch (click)="modification()" type="button" *ngIf="data">修 改</button>
-      </div>
-      <ng-template #elseBlock>
-        <button nz-button nzType="primary" nzSearch (click)="save()" type="button" *ngIf="appS.edit">保 存</button>
-        <button nz-button nzType="danger" nzSearch (click)="cancelEdit()" type="button" *ngIf="appS.edit">取 消</button>
-      </ng-template>
-    </div> -->
     <div class="scroll-content">
-      <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formGroup">
+      <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">
         <nz-form-item>
           <nz-form-label [nzSm]="3" nzRequired nzFor="name">构建名称：</nz-form-label>
-          <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formGroup.get('name').errors}">
+          <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}">
             <input type="text" nz-input placeholder="构建名称" formControlName="name">
-            <nz-form-explain *ngIf="appS.edit">{{formGroup.get('name').errors | ValidatorError}}</nz-form-explain>
+            <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain>
           </nz-form-control>
         </nz-form-item>
 

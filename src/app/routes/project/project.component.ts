@@ -49,7 +49,7 @@ export class ProjectComponent implements OnInit {
   edit(data) {
     if (!data) {
       data = copyAny(this.data);
-      delete data.id;
+      data.id = null;
     }
     this.data = data;
     console.log(this.data, data);
