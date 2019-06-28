@@ -5,7 +5,6 @@ import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
 import { FormGroup } from '@angular/forms';
 import { getModelBase } from 'src/app/models/base';
-import { EditShow } from 'src/app/class/edit-show';
 
 @Component({
   selector: 'app-operat',
@@ -16,10 +15,10 @@ export class OperatComponent implements OnInit {
   @Input() dbName: string;
   @Input() formData: FormGroup;
   @Input() saveState = true;
-  @Input() inEdit: (data) => void;
 
   @Output() outEditOk = new EventEmitter();
   @Output() outEdit = new EventEmitter();
+  @Output() outDelete = new EventEmitter();
 
   @Input() addFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name;
   @Input() updateFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name && o1.id !== o2.id;
@@ -78,9 +77,20 @@ export class OperatComponent implements OnInit {
   edit(state: boolean) {
     this.appS.editId = null;
     const data = state ? getModelBase(this.dbName) : null;
-    // this.outEdit.emit(data);
-    this.inEdit(data);
+    this.outEdit.emit(data);
     this.appS.edit = true;
   }
-
+  /** 删除 */
+  delete() {
+    this.outDelete.emit();
+  }
+  op(event) {
+    if (this.appS.userInfo) {
+      if (this.appS.userInfo.jurisdiction > 0) {
+        return true;
+      }
+      return this.appS.userInfo.operation.indexOf(event) > - 1;
+    }
+    return false;
+  }
 }

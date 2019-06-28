@@ -108,6 +108,11 @@ export class ProjectComponent implements OnInit {
     this.validateForm.setControl('otherInfo', this.fb.array(this.otherIngoDom.createForm(this.data.otherInfo)));
 
     this.validateForm.reset(data);
+    // tslint:disable-next-line:forin
+    for (const i in this.validateForm.controls) {
+      this.validateForm.controls[i].markAsDirty();
+      this.validateForm.controls[i].updateValueAndValidity();
+    }
     this.markForCheck();
   }
   add() {

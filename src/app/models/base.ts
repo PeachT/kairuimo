@@ -1,3 +1,16 @@
+export interface IBase {
+  /** Id */
+  id?: any;
+  /** 名称 */
+  name: string;
+  /** 创建日期 */
+  createdDate?: any;
+  /** 修改日期 */
+  modificationDate?: any;
+  /** 创建用户 */
+  user?: any;
+}
+
 const base = {
   project: {
     name: null,
@@ -113,7 +126,8 @@ const base = {
     id: null,
     name: null,
     password: null,
-    jurisdiction: 0
+    jurisdiction: 0,
+    operation: ['see']
   },
   task: {
     name: null,

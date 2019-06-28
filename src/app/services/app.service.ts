@@ -27,6 +27,8 @@ export class AppService {
   public nowRoute = null;
   /** 编辑状态 */
   public edit = false;
+  /** 数据导入导出 */
+  dataTreatingShow = false;
 
   public powerState = false;
   public powerDelay = 5;

@@ -15,6 +15,7 @@ import { Project } from 'src/app/models/project';
 import { ProjectComponent as appProjectComponent } from 'src/app/shared/project/project.component';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { copyAny } from 'src/app/models/base';
+import { DeleteModalComponent } from 'src/app/shared/delete-modal/delete-modal.component';
 
 
 @Component({
@@ -25,17 +26,22 @@ import { copyAny } from 'src/app/models/base';
 })
 export class ProjectComponent implements OnInit {
   dbName = 'project';
-  @ViewChild('prjDom')
-  prjDom: appProjectComponent;
-  @ViewChild('leftMenu')
-  leftMenu: LeftMenuComponent;
+  @ViewChild('prjDom') prjDom: appProjectComponent;
+  @ViewChild('leftMenu') leftMenu: LeftMenuComponent;
+  @ViewChild('del') deleteDom: DeleteModalComponent;
 
   data: Project;
+  deleteShow = false;
 
-  constructor() {}
+  constructor(
+    private message: NzMessageService,
+    private db: DbService,
+    public appS: AppService,
+    private modalService: NzModalService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   onMneu(data: Project) {
     console.log('一条数据', data);
@@ -66,5 +72,27 @@ export class ProjectComponent implements OnInit {
     } else {
       this.leftMenu.onClick();
     }
+  }
+  /** 删除 */
+  async delete() {
+    const id = this.appS.leftMenu;
+
+    const count = await this.db.db.task.filter(t => t.project === id).count();
+    if (count === 0) {
+      this.deleteShow = true;
+      this.cdr.markForCheck();
+      console.log('删除', id, '任务', count, this.deleteShow);
+    } else {
+      this.message.error(`有 ${count} 条任务在该项目下，不允许删除！`);
+    }
+  }
+  async deleteOk(state = false) {
+    if (state) {
+      const msg = await this.db.db.project.delete(this.appS.leftMenu);
+      console.log('删除了', msg);
+      this.appS.leftMenu = null;
+      this.leftMenu.getMenuData();
+    }
+    this.deleteShow = false;
   }
 }

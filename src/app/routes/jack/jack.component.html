@@ -4,7 +4,7 @@
   </div>
   <div class="main scroll-y">
     <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"
-    [saveState]="formData.valid"></app-operat>
+    [saveState]="formData.valid" (outDelete)="delete()"></app-operat>
     <div class="scroll-content" >
       <form [ngClass]="{'form-edit': !appS.edit}" nz-form [formGroup]="formData">
         <nz-form-item>
@@ -56,3 +56,5 @@
   </div>
 
 </app-left>
+
+<app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>

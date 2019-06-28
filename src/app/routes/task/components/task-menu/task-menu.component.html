@@ -13,7 +13,9 @@
       <li class="item" (click)="onComponent(item)"
         *ngIf="component.select === null || component.select === item"
         [ngClass]="{'active': component.select === item}">
-        {{item}}
+        <p>
+          {{item}}
+        </p>
         <i nz-icon nzType="up" nzTheme="outline"></i>
       </li>
     </ng-container>
@@ -22,14 +24,18 @@
     <li *ngFor="let item of bridge.menu; index as i"
       [ngClass]="{'active': bridge.select === item.id && (!appS.edit || appS.editId === item.id)}"
       (click)="onBridge(item.id)">
-      <div class="state">
-        <div *ngIf="item.cls.e" style="background-color: #d9d9d9"></div>
-        <div *ngIf="item.cls.a" style="background-color: #45b787"></div>
-        <div *ngIf="item.cls.d" style="background-color: #51c4d3"></div>
-        <div *ngIf="item.cls.b" style="background-color: #fcd337"></div>
-        <div *ngIf="item.cls.c" style="background-color: #f34718"></div>
+      <div class="state-content">
+        <div class="state">
+          <div *ngIf="item.cls.e" style="background-color: #d9d9d9"></div>
+          <div *ngIf="item.cls.a" style="background-color: #45b787"></div>
+          <div *ngIf="item.cls.d" style="background-color: #51c4d3"></div>
+          <div *ngIf="item.cls.b" style="background-color: #fcd337"></div>
+          <div *ngIf="item.cls.c" style="background-color: #f34718"></div>
+        </div>
       </div>
-      {{item.name}}
+      <p>
+        {{item.name}}
+      </p>
     </li>
   </ul>
 </div>

@@ -20,7 +20,7 @@
               <nz-form-label [nzSm]="3" nzRequired>构建</nz-form-label>
               <nz-form-control [nzSm]="6">
                 <div style="display: flex;">
-                  <nz-select style="width: 120px;" formControlName="component" nzPlaceHolder="选择构建" (ngModelChange)="componentChange($event)">
+                  <nz-select style="width: 100%;" formControlName="component" nzPlaceHolder="选择构建" (ngModelChange)="componentChange($event)" [nzDisabled]="selectJackState">
                     <nz-option [nzValue]="item.name" [nzLabel]="item.name" *ngFor="let item of componentOptions.menu"></nz-option>
                   </nz-select>
                   <button nz-button nzType="primary" nzSearch (click)="groupDom.onShow()"
@@ -32,8 +32,8 @@
 
               <nz-form-label [nzSm]="3" nzRequired>设备</nz-form-label>
               <nz-form-control [nzSm]="5">
-                <nz-cascader nzMenuClassName="task-cascader" [nzOptions]="jacks" formControlName="device"
-                  (ngModelChange)="deviceOnChanges($event)">
+                <nz-cascader nzMenuClassName="task-cascader" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
+                  (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="selectJackState">
                 </nz-cascader>
                 <nz-form-explain *ngIf="formData.get('device').dirty && formData.get('device').errors">请入选择设备！
                 </nz-form-explain>
@@ -60,7 +60,7 @@
                     [ngClass]="{'hole-active': holeMneuData.index === i}"
                     [class]="'hole' + item.cls"
                     class="hole"
-                    >{{item.name}}-{{item.cls}}</label>
+                    >{{item.name}}</label>
                 </nz-radio-group>
                 <nz-form-explain style="color: #f5222d;"
                   *ngIf="formData.get('groups').dirty && formData.get('groups').errors">
@@ -77,7 +77,9 @@
         <task-jack [data]="jackData" *ngIf="tabsetShow === 1"></task-jack>
       </nz-tab>
       <nz-tab nzTitle="其他">
-        其他
+        <p>创建者：{{data?.user}}</p>
+        <p>创建日期：{{data?.createdDate | date: "yyyy.MM.dd HH:mm"}}</p>
+        <p>修改日期：{{data?.modificationDate | date: "yyyy.MM.dd HH:mm"}}</p>
       </nz-tab>
     </nz-tabset>
 
@@ -86,7 +88,8 @@
         (outEditOk)="editOk($event)"
         [addFilterFun] = "addFilterFun"
         [updateFilterFun] = "updateFilterFun"
-        [saveState]="taskDataDom?.holeForm?.valid && formData.valid">
+        [saveState]="taskDataDom?.holeForm?.valid && formData.valid"
+        (outDelete)="delete()">
         <button nz-button nzType="primary" nzGhost nzSearch (click)="selectTemplate()" type="button" >选择导出</button>
         <button nz-button nzType="primary" nzGhost nzSearch (click)="derivedExcel()" type="button" >导 出</button>
         <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button" *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3))">张 拉</button>
@@ -111,3 +114,4 @@
     </div>
   </div>
 </nz-modal> -->
+<app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>

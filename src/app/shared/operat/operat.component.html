@@ -1,8 +1,9 @@
 <div class="operation">
   <div *ngIf="!appS.edit; else elseBlock">
-    <button nz-button nzType="primary" nzSearch (click)="edit(true)" type="button">添 加</button>
-    <button nz-button nzType="primary" nzSearch (click)="appS.edit = true" type="button" *ngIf="appS.leftMenu">修 改</button>
-    <button nz-button nzType="danger" nzSearch (click)="edit()" type="button" *ngIf="appS.leftMenu">复 制</button>
+    <button nz-button nzType="primary" nzSearch (click)="edit(true)" type="button" *ngIf="op('a')">添 加</button>
+    <button nz-button nzType="primary" nzSearch (click)="appS.edit = true" type="button" *ngIf="op('m') && appS.leftMenu">修 改</button>
+    <button nz-button nzType="default" nzSearch (click)="edit()" type="button" *ngIf="op('a') && appS.leftMenu">复 制</button>
+    <button nz-button nzType="danger" nzGhost nzSearch (click)="delete()" type="button" *ngIf="op('d') && appS.leftMenu">删 除</button>
   </div>
   <ng-template #elseBlock>
     <button nz-button nzType="primary" nzSearch (click)="save()" type="button" [disabled]="!saveState">保 存</button>

@@ -1,10 +1,11 @@
 import { OtherInfo } from './common';
+import { IBase } from './base';
 
-export interface TensionTask {
-  id?: any;
-  name: string;
+export interface TensionTask extends IBase {
+  // id?: any;
+  // name: string;
   project: number;
-  device: string;
+  device: any;
   component: any;
   steelStrand: string;
   otherInfo: Array<OtherInfo>;

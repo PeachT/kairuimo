@@ -25,10 +25,21 @@
         <nz-form-label [nzSm]="3" nzRequired nzFor="name">权限</nz-form-label>
         <nz-form-control [nzSm]="21">
           <nz-radio-group formControlName="jurisdiction" #jackModeV>
-            <label nz-radio [nzValue]="9" *ngIf="appS.userInfo?.jurisdiction === 9">管理员</label>
+            <label nz-radio [nzValue]="8" *ngIf="appS.userInfo?.jurisdiction === 9">管理员</label>
             <label nz-radio [nzValue]="1">技术员</label>
             <label nz-radio [nzValue]="0">操作员</label>
           </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item *ngIf="formData.value.jurisdiction === 0">
+        <nz-form-label [nzSm]="3" nzFor="name">操作</nz-form-label>
+        <nz-form-control [nzSm]="21">
+          <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="selectOperation($event)">
+            <label nz-checkbox nzValue="a">添加</label>
+            <label nz-checkbox nzValue="m">修改</label>
+            <label nz-checkbox nzValue="d">删除</label>
+          </nz-checkbox-wrapper>
         </nz-form-control>
       </nz-form-item>
 

@@ -41,7 +41,8 @@ export class AppComponent implements OnInit {
         const user: User = {
           name: 'kvm',
           password: 'kvmadmin',
-          jurisdiction: 9
+          jurisdiction: 9,
+          operation: []
         };
         this.db.users.add(user).then(() => {
           this.message.success('添加成功🙂');
@@ -53,107 +54,107 @@ export class AppComponent implements OnInit {
       console.log('数据库错误！！', error);
     });
     /** 添加顶 */
-    this.db.jack.count().then((data) => {
-      console.log('获取用户数量', data);
-      if (data === 0) {
-        for (let index = 0; index < 5; index++) {
-          const jack: Jack = {
-            name: `未命名${index}`,
-            jackMode: 2,
-            equation: null,
-            jackModel: null,
-            pumpModel: null,
-            zA: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            zB: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            zC: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            zD: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            cA: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            cB: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            cC: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-            cD: {
-              jackNumber: null,
-              pumpNumber: null,
-              upper: 180,
-              floot: 105,
-              a: 1,
-              b: 0,
-              date: null,
-              mm: [1, 1, 1, 1, 1, 1],
-            },
-          };
-          this.db.jack.add(jack).then(() => {
-            this.message.success('添加成功🙂');
-          }).catch(() => {
-            this.message.error('添加失败😔');
-          });
-        }
-      }
-    }).catch((error) => {
-      console.log('数据库错误！！', error);
-    });
+    // this.db.jack.count().then((data) => {
+    //   console.log('获取用户数量', data);
+    //   if (data === 0) {
+    //     for (let index = 0; index < 5; index++) {
+    //       const jack: Jack = {
+    //         name: `未命名${index}`,
+    //         jackMode: 2,
+    //         equation: null,
+    //         jackModel: null,
+    //         pumpModel: null,
+    //         zA: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         zB: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         zC: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         zD: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         cA: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         cB: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         cC: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //         cD: {
+    //           jackNumber: null,
+    //           pumpNumber: null,
+    //           upper: 180,
+    //           floot: 105,
+    //           a: 1,
+    //           b: 0,
+    //           date: null,
+    //           mm: [1, 1, 1, 1, 1, 1],
+    //         },
+    //       };
+    //       this.db.jack.add(jack).then(() => {
+    //         this.message.success('添加成功🙂');
+    //       }).catch(() => {
+    //         this.message.error('添加失败😔');
+    //       });
+    //     }
+    //   }
+    // }).catch((error) => {
+    //   console.log('数据库错误！！', error);
+    // });
 
     router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
@@ -199,9 +200,6 @@ export class AppComponent implements OnInit {
       });
       // 更新请求
       // this.e.ipcRenderer.send('update');
-      this.PLCS.PLCobservble.subscribe(() => {
-        // console.log('123132');
-      });
       document.body.addEventListener('focus', (event: any) => {
         keyboard = JSON.parse(localStorage.getItem('keyboard'));
         let type = event.target.type;

@@ -18,6 +18,7 @@ import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component'
 import { copyAny } from 'src/app/models/base';
 import { RepetitionARV } from 'src/app/Validator/async.validator';
 
+const os = ['see'];
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
@@ -60,6 +61,7 @@ export class UserComponent implements OnInit {
       name: [null, [Validators.required], [new RepetitionARV(this.db, 'jack')]],
       password: [null, [Validators.required]],
       jurisdiction: [0],
+      operation: []
     });
   }
 
@@ -93,5 +95,9 @@ export class UserComponent implements OnInit {
       this.leftMenu.onClick();
     }
   }
-
+  selectOperation(event) {
+    // const o = ['see', ...event];
+    this.formData.controls.operation.setValue(event);
+    console.log(event, this.formData.value.operation);
+  }
 }

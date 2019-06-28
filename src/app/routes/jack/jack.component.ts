@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
@@ -29,13 +29,16 @@ export class JackComponent implements OnInit {
 
   formData: FormGroup;
   data: Jack;
+  deleteShow = false;
 
   constructor(
     private fb: FormBuilder,
+    private message: NzMessageService,
     private db: DbService,
     public appS: AppService,
     public PLCS: PLCService,
     private cfr: ComponentFactoryResolver,
+    private cdr: ChangeDetectorRef,
   ) {
   }
 
@@ -112,6 +115,28 @@ export class JackComponent implements OnInit {
     } else {
       this.leftMenu.onClick();
     }
+  }
+
+  /** 删除 */
+  async delete() {
+    const id = this.appS.leftMenu;
+    const count = await this.db.db.task.filter(t => t.device[0] === id).count();
+    if (count === 0) {
+      this.deleteShow = true;
+      this.cdr.markForCheck();
+      console.log('删除', id, '任务', count, this.deleteShow);
+    } else {
+      this.message.error(`有 ${count} 条任务在该项目下，不允许删除！`);
+    }
+  }
+  async deleteOk(state = false) {
+    if (state) {
+      const msg = await this.db.db.jack.delete(this.appS.leftMenu);
+      console.log('删除了', msg);
+      this.appS.leftMenu = null;
+      this.leftMenu.getMenuData();
+    }
+    this.deleteShow = false;
   }
 
   /** 获取顶设置数据 */

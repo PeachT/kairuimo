@@ -90,7 +90,7 @@
     color: rgba(0,0,0,.65);
     li {
       position: relative;
-      height: 48px;
+      height: auto;
       line-height: 48px;
       border-bottom: 1px solid #d9d9d9;
       padding-left: 5px;
@@ -110,6 +110,13 @@
         transition: all .6s;
         transform:rotate(0deg);
       }
+      p {
+        width: 100%;
+        word-wrap: break-word;
+        margin: 0;
+        padding: 0;
+        padding-right: 5px;
+      }
     }
     li:last-of-type{
       border: 0;
@@ -117,22 +124,26 @@
     &.menu-2 {
       font-size: 18px;
       li {
-        padding: 0;
+        padding: 0 5px 0 0;
         display: flex;
         transition: color .3s cubic-bezier(.645,.045,.355,1),border-color .3s cubic-bezier(.645,.045,.355,1),background .3s cubic-bezier(.645,.045,.355,1),padding .15s cubic-bezier(.645,.045,.355,1);
+        height: auto;
         &.active {
           background-color: #e6f7ff;
           color: #1890ff;
           border-right: 3px solid #1890ff;
         }
-        .state {
-          display: flex;
-          flex-direction: column;
-          padding-right: 5px;
-          height: 100%;
-          width: 10px;
-          div {
-            flex: 1;
+        .state-content{
+          flex: 1;
+          .state {
+            display: flex;
+            flex-direction: column;
+            padding-right: 5px;
+            height: 100%;
+            width: 10px;
+            div {
+              flex: 1;
+            }
           }
         }
       }
@@ -219,13 +230,13 @@
 /* 表单样式 */
 form {
   &.form-edit {
-    .ant-input, .in-error .ant-input  {
+    .ant-input, .in-error .ant-input, .ant-select-selection--single {
       border-color: #d9d9d9;
       color: rgba(0, 0, 0, 0.65);
     }
   }
 
-  .ant-input {
+  .ant-input, .ant-select-selection--single {
     border-left: 5px solid #40a9ff;
     border-radius: 4px !important;
     &[disabled] {
@@ -237,13 +248,16 @@ form {
   }
   /* 表单错误*/
   .in-error {
-    .ant-input {
+    .ant-input, .ant-select-selection--single {
       border: 1px solid #f5222d;
       border-left: 4px solid #F5222d;
     }
     .ant-form-explain {
       color: #f5222d;
     }
+  }
+  .ant-select-disabled, .ant-cascader-picker-disabled, .ant-input-disabled {
+    color: rgba(0, 0, 0, 0.65);
   }
 }
 .form-edit {
@@ -253,7 +267,7 @@ form {
     top: 0;
     height: 100%;
     width: 100%;
-    background-color:rgba(0, 0, 0, 0.1);
+    background-color:rgba(0, 0, 0, .07);
     animation:editoff .3s;
     display: flex;
     justify-content: center;
@@ -403,6 +417,17 @@ width: 10px;
     }
     .ant-steps-item-wait > .ant-steps-item-content > .ant-steps-item-title {
       color: #aaa;
+    }
+  }
+}
+
+nz-tree {
+  nz-tree-node {
+    nz-tree-node {
+      .ant-tree-child-tree {
+        display: flex;
+        flex-wrap: wrap;
+      }
     }
   }
 }

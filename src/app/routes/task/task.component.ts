@@ -88,6 +88,9 @@ export class TaskComponent implements OnInit {
   };
   /**  */
   holeNames: any;
+  deleteShow = false;
+  /** 选择顶状态 */
+  selectJackState = false;
 
   addFilterFun = (o1: any, o2: any) => o1.name === o2.name
     && o1.component === o2.component && o1.project === o2.project
@@ -191,10 +194,12 @@ export class TaskComponent implements OnInit {
   /** 构造孔菜单 */
   holeMneu() {
     this.holeMneuData.names = [];
+    this.selectJackState = false;
     this.data.groups.map(g => {
       let cls = 0;
       if (g.record) {
         cls = g.record.state;
+        this.selectJackState = true;
       }
       // this.holeMneuData.names.push({ name: g.name, cls });
       this.holeMneuData.names.push({ name: g.name, cls });
@@ -238,6 +243,28 @@ export class TaskComponent implements OnInit {
       // this.leftMenu.onClick();
       this.taskMneu.onMneu();
     }
+  }
+
+  /** 删除 */
+  async delete() {
+    const id = this.appS.leftMenu;
+    const count = this.holeMneuData.names.filter(h => h.cls > 0).length;
+    if (count === 0) {
+      this.deleteShow = true;
+      this.cdr.markForCheck();
+      console.log('删除', id, '任务', count, this.deleteShow);
+    } else {
+      this.message.error(`有 ${count} 条任务在该项目下，不允许删除！`);
+    }
+  }
+  async deleteOk(state = false) {
+    if (state) {
+      const msg = await this.db.task.delete(this.appS.leftMenu);
+      console.log('删除了', msg);
+      this.appS.leftMenu = null;
+      this.taskMneu.getBridge();
+    }
+    this.deleteShow = false;
   }
   /** 更新孔数据 */
   updateGroupItem() {
@@ -371,6 +398,7 @@ export class TaskComponent implements OnInit {
       console.log('导出', data);
     });
   }
+  /** 张拉 */
   onTension() {
     const localData = {
       project: this.taskMneu.project.select.id,

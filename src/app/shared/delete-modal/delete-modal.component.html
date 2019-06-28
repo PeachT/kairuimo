@@ -1,0 +1,5 @@
+<nz-modal [nzVisible]="show" nzTitle="删除" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()" nzWidth="90%">
+  <h1 style="color: red;">删除后数据不能恢复，您确定要删除吗?</h1>
+  <input nz-input placeholder="输入OK" [(ngModel)]="delOk" />
+  <p>输入ok才能删除</p>
+</nz-modal>

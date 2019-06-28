@@ -1,29 +1,18 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { AppService } from 'src/app/services/app.service';
-import { ElectronService } from 'ngx-electron';
-import { DbService, tableName } from 'src/app/services/db.service';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input, ViewChild } from '@angular/core';
+import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { DbService } from 'src/app/services/db.service';
+import { NzFormatEmitEvent, NzTreeComponent } from 'ng-zorro-antd';
+import { AppService } from 'src/app/services/app.service';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.less'],
+  selector: 'app-data-treating',
+  templateUrl: './data-treating.component.html',
+  styleUrls: ['./data-treating.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HeaderComponent implements OnInit {
-  // menus = [
-  //   {url: '/task', icon: 'form', name: '任务'},
-  //   {url: '/manual', icon: 'deployment-unit', name: '手动'},
-  //   {url: '/setting', icon: 'setting', name: '设置'},
-  //   {url: '/jack', icon: 'usb', name: '千斤顶'},
-  //   {url: '/project', icon: 'form', name: '项目'},
-  //   {url: '/component', icon: 'deployment-unit', name: '构建'},
-  //   {url: '/user', icon: 'user', name: '用户'},
-  //   {url: '/auto', icon: 'box-plot', name: '自动'},
-  //   {url: '/hole', icon: 'question-circlet', name: '帮助'},
-  // ];
+export class DataTreatingComponent implements OnInit {
+  @ViewChild('taskTerr') taskTerr: NzTreeComponent;
   dataProcessing = {
     state: false,
     radioValue: false,
@@ -43,49 +32,37 @@ export class HeaderComponent implements OnInit {
     taskAll: false,
     taskindeterminate: false,
   };
-  powerState = false;
   constructor(
-    private router: Router,
-    public appS: AppService,
+    private cdr: ChangeDetectorRef,
     private db: DbService,
-    private changeDetectorRef: ChangeDetectorRef
+    public apps: AppService,
   ) { }
 
   ngOnInit() {
   }
 
-  goUrl(url) {
-    this.router.navigate([url]);
-  }
-  ifUrl(url) {
-    return this.appS.nowUrl.indexOf(url) > -1;
-  }
-
-  power() {
-    this.appS.powerState = true;
-  }
-
   onDataProcessing() {
-    this.dataProcessing.state = true;
-    this.appS.dataTreatingShow = true;
-    console.log(this.appS.dataTreatingShow);
+    this.apps.dataTreatingShow = true;
   }
 
   dataHandleCancel() {
-    this.dataProcessing.state = false;
+    this.apps.dataTreatingShow = false;
   }
   dataHandleOk() {
-    this.dataProcessing.state = false;
+    this.apps.dataTreatingShow = false;
   }
-
   /** 选择类型 */
   async onSelectClass(value, key) {
     console.log(value, key);
-    if (value) {
+    if (key === 'task') {
+      // this.dataProcessing[`${key}Data$`] = await this.db.getTaskBridgeMenuData(f => true);
+      this.dataProcessing[`${key}Data$`] = await this.db.getTaskDataTreatingProject();
+      console.log(this.dataProcessing[`${key}Data$`]);
+    } else {
       this.dataProcessing[`${key}Data$`] = await this.db.getAllAsync(key);
       console.log(this.dataProcessing[`${key}Data$`]);
-      this.changeDetectorRef.markForCheck();
     }
+    this.cdr.markForCheck();
   }
   /** 任务筛选 */
   onTaskCheckbox(value) {
@@ -127,8 +104,28 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  sss(v) {
-    console.log('sss', v);
-    return v;
+  async nzEvent(event: Required<NzFormatEmitEvent>): Promise<void> {
+    console.log(event);
+    // load child async
+    const node = event.node;
+    // console.log(node);
+    if (node.level === 0) {
+      const data = await this.db.getTaskDataTreatingComponent(o1 => o1.project === Number(node.key), node.key);
+      node.addChildren(data);
+    } else if (node.level === 1) {
+      console.log(node.key);
+      const data = await this.db.getTaskBridgeMenuData(
+        o1 => o1.project === Number(node.key[1]) && o1.component === node.key[0],
+        true
+      );
+      node.addChildren(data);
+    }
+  }
+  onclick(event: Required<NzFormatEmitEvent>) {
+    console.log(event.nodes);
+  }
+
+  getTrr() {
+    console.log(this.taskTerr.getCheckedNodeList(), this.taskTerr.getSelectedNodeList());
   }
 }

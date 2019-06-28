@@ -71,7 +71,7 @@ export class TaskMenuComponent implements OnInit {
     console.log(this.project);
   }
   async getComponent() {
-    this.component.menu = await this.db.getTaskComponentMenuData(this.project.select.id);
+    this.component.menu = await this.db.getTaskComponentMenuData((o1) => o1.project === this.project.select.id);
     console.log(this.component);
     if (this.component.select) {
       this.getBridge(this.bridge.select);
@@ -80,7 +80,8 @@ export class TaskMenuComponent implements OnInit {
     }
   }
   async getBridge(id = null) {
-    this.bridge.menu = await this.db.getTaskBridgeMenuData(this.project.select.id, this.component.select);
+    // tslint:disable-next-line:max-line-length
+    this.bridge.menu = await this.db.getTaskBridgeMenuData((o1) => o1.project === this.project.select.id && o1.component === this.component.select);
     if (id) {
       this.onBridge(id);
     }

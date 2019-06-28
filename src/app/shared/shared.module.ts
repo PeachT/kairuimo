@@ -18,6 +18,8 @@ import { LeftMenuComponent } from './left-menu/left-menu.component';
 import { OperatComponent } from './operat/operat.component';
 import { AddOtherComponent } from './add-other/add-other.component';
 import { TimeSecComponent } from './time-sec/time-sec.component';
+import { DataTreatingComponent } from './data-treating/data-treating.component';
+import { DeleteModalComponent } from './delete-modal/delete-modal.component';
 
 
 // pipe
@@ -41,6 +43,8 @@ const COMPONENTS = [
   OperatComponent,
   AddOtherComponent,
   TimeSecComponent,
+  DataTreatingComponent,
+  DeleteModalComponent,
 ];
 const PIPE = [
   ToFixedrPipe,

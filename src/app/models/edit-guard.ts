@@ -30,6 +30,7 @@ export class GlobalEditGuard implements CanDeactivate<any> {
       });
     } else {
       console.log('可以跳转');
+      this.apps.leftMenu = null;
       return true;
     }
   }

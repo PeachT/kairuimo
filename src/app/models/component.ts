@@ -1,7 +1,9 @@
-export interface Comp {
-  id?: number;
-  /** 构建名称 */
-  name: string;
+import { IBase } from './base';
+
+export interface Comp extends IBase {
+  // id?: number;
+  // /** 构建名称 */
+  // name: string;
   /** 梁数据 */
   hole: Array<Hole>;
 }

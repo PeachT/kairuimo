@@ -99,7 +99,8 @@ export class LoginComponent implements OnInit {
           this.appS.userInfo = {
             name: user.name,
             jurisdiction: user.jurisdiction,
-            nameId: `${user.name}${user.id}`
+            nameId: `${user.name}-${user.id}`,
+            operation: user.operation || []
           };
           this.message.success('登录成功🙂');
           this.router.navigate(['/task']);

@@ -1,4 +1,5 @@
 import { OtherInfo } from './common';
+import { IBase } from './base';
 
 /**
  * 项目
@@ -7,10 +8,10 @@ import { OtherInfo } from './common';
  * @interface Project
  * @extends {Base}
  */
-export interface Project {
-  id?: number;
-  /** 项目名称 */
-  name: string;
+export interface Project extends IBase {
+  // id?: number;
+  // /** 项目名称 */
+  // name: string;
   // /** 分布工程 */
   // divisionProject: string;
   // /** 施工单位 */

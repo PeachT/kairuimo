@@ -1,3 +1,5 @@
+import { IBase } from './base';
+
 /**
  * 登录用户
  *
@@ -7,6 +9,7 @@ export interface LoginUser {
   name: string;
   jurisdiction: number;
   nameId: string;
+  operation: Array<string>;
 }
 
 /**
@@ -14,15 +17,16 @@ export interface LoginUser {
  *
  * @export
  */
-export interface User {
+export interface User extends IBase {
   /** id */
-  id?: string;
-  /** 名称 */
-  name: string;
+  // id?: string;
+  // /** 名称 */
+  // name: string;
   /** 密码 */
   password: string;
   /** 超级管理员 */
   jurisdiction: number;
+  operation?: any;
 }
 /** 用户索引 */
 export const userIndex = '++id,&name';

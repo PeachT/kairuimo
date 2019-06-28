@@ -11,12 +11,15 @@ import { NzMessageService } from 'ng-zorro-antd';
 import { Comp, compIndex } from '../models/component';
 import { Menu } from '../models/menu';
 import { keyGroupBy } from '../Function/groupBy';
+import { AppService } from './app.service';
+import { IBase } from '../models/base';
 
 @Injectable({ providedIn: 'root' })
 export class DbService {
   public db: DB;
   constructor(
     private message: NzMessageService,
+    private apps: AppService,
   ) {
     // tslint:disable-next-line: no-use-before-declare
     this.db = new DB();
@@ -31,11 +34,14 @@ export class DbService {
     return count;
   }
 
-  public async addAsync<T>(tName: string, data: T, filterFunction: (o1: T) => boolean) {
+  public async addAsync<T>(tName: string, data: IBase, filterFunction: (o1: T) => boolean) {
     if (await this.repetitionAsync(tName, filterFunction) > 0) {
       return {success: false, msg: '已存在'};
     }
     try {
+      data.createdDate = new Date().getTime();
+      data.modificationDate = new Date().getTime();
+      data.user = this.apps.userInfo.name || 'sys';
       const r = await this.db[tName].add(data);
       console.log('保存结果', r);
       return {success: true, id: r};
@@ -45,11 +51,12 @@ export class DbService {
     }
   }
 
-  public async updateAsync(tName: string, data: Project | TensionTask | Comp | User, filterFunction: (obj: any) => boolean) {
+  public async updateAsync(tName: string, data: IBase, filterFunction: (obj: any) => boolean) {
     if (await this.repetitionAsync(tName, filterFunction) > 0) {
       return {success: false, msg: '已存在'};
     }
     try {
+      data.modificationDate = new Date().getTime();
       const r = await this.db[tName].update(data.id, data);
       console.log('保存结果', r);
       return {success: true, id: data.id};
@@ -106,7 +113,7 @@ export class DbService {
     // console.log(ss);
   }
   /**
-   * 获取菜单数据
+   * * 获取菜单数据
    *
    * @param {string} name 数据库名称
    * @returns {Promise<any>}
@@ -125,41 +132,64 @@ export class DbService {
     }
     return r;
   }
-  public async getTaskComponentMenuData(project): Promise<Array<Menu>> {
+  /** 获取项目梁分类菜单 */
+  public async getTaskComponentMenuData(f: (o1: TensionTask) => boolean): Promise<Array<Menu>> {
     const r = [];
-    await this.db.task.filter(f => f.project === project).each(v => {
+    await this.db.task.filter((o1) => f(o1)).each(v => {
       r.push({ name: v.component, id: null });
     });
     const ar = keyGroupBy(r, 'name');
     console.log(ar);
     return ar;
   }
-  public async getTaskBridgeMenuData(project, component): Promise<Array<Menu>> {
+  /** 获取梁菜单 */
+  public async getTaskBridgeMenuData(f: (o1: TensionTask) => boolean, state: boolean = false): Promise<Array<Menu>> {
     const r = [];
-    await this.db.task.filter(f => f.project === project && f.component === component).each(v => {
-      const cls = {
-        a: false,
-        b: false,
-        c: false,
-        d: false,
-        e: false,
-      };
-      for (const g of v.groups) {
-        if (g.record) {
-          if (g.record.state === 2) {
-            cls.a = true;
-          } else if (g.record.state === 1) {
-            cls.b = true;
-          } else if (g.record.state === 3) {
-            cls.c = true;
-          } else if (g.record.state === 4) {
-            cls.d = true;
+    await this.db.task.filter(o1 => f(o1)).each(v => {
+      if (state) {
+        r.push({ title: v.name, key: v.id, isLeaf: true });
+      } else {
+        const cls = {
+          a: false,
+          b: false,
+          c: false,
+          d: false,
+          e: false,
+        };
+        for (const g of v.groups) {
+          if (g.record) {
+            if (g.record.state === 2) {
+              cls.a = true;
+            } else if (g.record.state === 1) {
+              cls.b = true;
+            } else if (g.record.state === 3) {
+              cls.c = true;
+            } else if (g.record.state === 4) {
+              cls.d = true;
+            }
+          } else {
+            cls.e = true;
           }
-        } else {
-          cls.e = true;
         }
+        r.push({ name: v.name, id: v.id, cls });
       }
-      r.push({ name: v.name, id: v.id, cls });
+    });
+    return r;
+  }
+  /** 任务数据导出菜单 */
+  public async getTaskDataTreatingProject() {
+    const r = [];
+    await this.db.project.each(v => {
+      r.push({ title: v.name, key: v.id, expanded: false });
+    });
+    return r;
+  }
+  /** 任务数据导出菜单 */
+  public async getTaskDataTreatingComponent(f: (o1: TensionTask) => boolean, key) {
+    const data = await this.getTaskComponentMenuData(f);
+    const r = [];
+    data.map(name => {
+      r.push({ title: name, key: [name, key], expanded: false });
     });
     return r;
   }
@@ -174,6 +204,10 @@ export class DbService {
    */
   public async getFirstId<T>(name: string, id: any): Promise<T> {
     return await this.db[name].filter(a => a.id === id).first();
+  }
+  /** 删除 */
+  delete(id) {
+    this.db.jack.delete(id);
   }
 }
 

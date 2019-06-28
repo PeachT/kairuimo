@@ -5,7 +5,10 @@
   <div class="main scroll-y">
     <app-operat [dbName]="dbName" [formData]="prjDom.validateForm" (outEdit)="edit($event)"
     (outEditOk)="editOk($event)"
-    [saveState]="prjDom.validateForm.valid"></app-operat>
+    [saveState]="prjDom.validateForm.valid"
+    (outDelete)="delete()"></app-operat>
     <app-project class="scroll-content" #prjDom></app-project>
   </div>
 </app-left>
+
+<app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>
