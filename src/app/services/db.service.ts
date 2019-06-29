@@ -185,6 +185,14 @@ export class DbService {
     return r;
   }
   /** 任务数据导出菜单 */
+  public async getTaskDataTreatingBredge(f: (o1: TensionTask) => boolean) {
+    const r = [];
+    await this.db.task.filter(t => f(t)).each(t => {
+      r.push({title: t.name, key: t.id});
+    });
+    return r;
+  }
+  /** 任务数据导出菜单 */
   public async getTaskDataTreatingComponent(f: (o1: TensionTask) => boolean, key) {
     const data = await this.getTaskComponentMenuData(f);
     const r = [];

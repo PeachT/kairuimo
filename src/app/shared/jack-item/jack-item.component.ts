@@ -20,14 +20,14 @@ import { ReviseItemComponent } from 'src/app/shared/revise-item/revise-item.comp
   styleUrls: ['./jack-item.component.less']
 })
 export class JackItemComponent implements OnInit {
-  @ViewChild('reviseDom')
-    reviseDom: ReviseItemComponent;
-  @Input()
-  formGroup: FormGroup;
-  @Input()
-  name: string;
-  @Input()
-  reviseBtnShow = true;
+  @ViewChild('reviseDom') reviseDom: ReviseItemComponent;
+  @Input() formGroup: FormGroup;
+  @Input() name: string;
+  @Input() reviseBtnShow = true;
+
+  get formItem(): FormGroup {
+    return this.formGroup.get(this.name) as FormGroup;
+  }
 
   setIndex = null;
   revise = {
@@ -47,7 +47,7 @@ export class JackItemComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('123123123');
+    console.log('123123123', this.formItem.get('date'));
   }
 
   onRevise() {

@@ -6,11 +6,11 @@
     </nz-form-item>
     <nz-form-item>
       <nz-form-label [nzSm]="3" nzRequired>千斤顶编号</nz-form-label>
-      <nz-form-control [nzSm]="5">
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('jackNumber').errors}">
         <input type="text" nz-input formControlName="jackNumber">
       </nz-form-control>
       <nz-form-label [nzSm]="3" nzRequired>油泵编号</nz-form-label>
-      <nz-form-control [nzSm]="5">
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('pumpNumber').errors}">
         <input type="text" nz-input formControlName="pumpNumber">
       </nz-form-control>
       <nz-form-control [nzSm]="8">
@@ -18,11 +18,11 @@
       </nz-form-control>
 
       <nz-form-label [nzSm]="3" nzRequired>位移上限</nz-form-label>
-      <nz-form-control [nzSm]="5">
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('upper').errors}">
         <input type="number" min="2" max="220" nz-input formControlName="upper">
       </nz-form-control>
       <nz-form-label [nzSm]="3" nzRequired>位移下限</nz-form-label>
-      <nz-form-control [nzSm]="5">
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('floot').errors}">
         <input type="number" min="2" max="220" nz-input formControlName="floot">
       </nz-form-control>
       <nz-form-control [nzSm]="8">
@@ -30,24 +30,24 @@
       </nz-form-control>
 
       <nz-form-label [nzSm]="3" nzRequired>标定参数a</nz-form-label>
-      <nz-form-control [nzSm]="5">
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('a').errors}">
         <input type="number" nz-input formControlName="a">
       </nz-form-control>
       <nz-form-label [nzSm]="3" nzRequired>标定参数b</nz-form-label>
-      <nz-form-control [nzSm]="5">
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('b').errors}">
         <input type="number" nz-input formControlName="b">
       </nz-form-control>
       <nz-form-label [nzSm]="3" nzRequired>标定日期</nz-form-label>
-      <nz-form-control [nzSm]="5">
-        <nz-date-picker readonly  class="revise-date" nzFormat="yyyy-MM-dd" formControlName="date"></nz-date-picker>
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('date').errors}">
+        <nz-date-picker readonly [nzAllowClear]="false" class="revise-date" nzFormat="yyyy-MM-dd" formControlName="date"></nz-date-picker>
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
       <div formArrayName="mm">
         <div *ngFor="let item of mmStage; index as i">
-          <nz-form-label [nzSm]="2" nzRequired>{{item}}</nz-form-label>
+          <nz-form-label [nzSm]="2">{{item}}</nz-form-label>
           <nz-form-control [nzSm]="2">
-            <input type="number" readonly disabled nz-input [formControlName]="i">
+            <input type="number" readonly disabled noinput nz-input [formControlName]="i">
           </nz-form-control>
         </div>
       </div>

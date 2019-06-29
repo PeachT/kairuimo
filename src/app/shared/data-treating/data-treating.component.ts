@@ -32,6 +32,12 @@ export class DataTreatingComponent implements OnInit {
     taskAll: false,
     taskindeterminate: false,
   };
+  taskData = {
+    project: [],
+    component: [],
+    bredge: []
+  };
+
   constructor(
     private cdr: ChangeDetectorRef,
     private db: DbService,
@@ -56,7 +62,7 @@ export class DataTreatingComponent implements OnInit {
     console.log(value, key);
     if (key === 'task') {
       // this.dataProcessing[`${key}Data$`] = await this.db.getTaskBridgeMenuData(f => true);
-      this.dataProcessing[`${key}Data$`] = await this.db.getTaskDataTreatingProject();
+      this.taskData.project = await this.db.getTaskDataTreatingProject();
       console.log(this.dataProcessing[`${key}Data$`]);
     } else {
       this.dataProcessing[`${key}Data$`] = await this.db.getAllAsync(key);
@@ -127,5 +133,16 @@ export class DataTreatingComponent implements OnInit {
 
   getTrr() {
     console.log(this.taskTerr.getCheckedNodeList(), this.taskTerr.getSelectedNodeList());
+  }
+
+  async onTaskProject($event: Array<number>) {
+    this.taskData.component = await this.db.getTaskComponentMenuData(o1 => $event.indexOf(o1.project) > -1);
+    console.log($event, this.taskData.component);
+    this.cdr.markForCheck();
+  }
+  async onTaskComponet($event: Array<number>) {
+    this.taskData.component = await this.db.getTaskComponentMenuData(o1 => $event.indexOf(o1.project) > -1);
+    console.log($event, this.taskData.component);
+    this.cdr.markForCheck();
   }
 }

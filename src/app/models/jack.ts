@@ -148,3 +148,12 @@ export function tableDev(mode: string, rowSpan = 2) {
     cD: 0,
   };
 }
+
+/** 泵顶组模式 */
+export const deviceGroupMode = [
+  [],
+  ['zA', 'cA'],
+  ['zA', 'zB', 'cA', 'cB'],
+  [],
+  ['zA', 'zB', 'zC', 'zD', 'cA', 'cB', 'cC', 'cD']
+];

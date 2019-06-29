@@ -37,15 +37,15 @@
                 </div>
                 <div class="content">
                   <nz-form-item>
-                    <nz-form-label [nzSm]="4">图片</nz-form-label>
-                    <nz-form-control [nzSm]="20">
+                    <nz-form-label [nzSm]="6">图片</nz-form-label>
+                    <nz-form-control [nzSm]="18">
                       <input type="text" nz-input placeholder="图片" formControlName="ImgBase64">
                     </nz-form-control>
                   </nz-form-item>
 
                   <nz-form-item>
-                    <nz-form-label [nzSm]="4" nzRequired>梁名称</nz-form-label>
-                    <nz-form-control [nzSm]="20" [ngClass]="{'in-error': item.get('name').errors}">
+                    <nz-form-label [nzSm]="6" nzRequired>梁名称</nz-form-label>
+                    <nz-form-control [nzSm]="18" [ngClass]="{'in-error': item.get('name').errors}">
                       <input type="text" nz-input placeholder="梁名称" formControlName="name">
                       <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain>
                     </nz-form-control>
@@ -53,8 +53,8 @@
 
                   <div>
                     <nz-form-item>
-                      <nz-form-label [nzSm]="4" >孔号</nz-form-label>
-                      <nz-form-control [nzSm]="20" >
+                      <nz-form-label [nzSm]="6" >孔号</nz-form-label>
+                      <nz-form-control [nzSm]="18" >
                           <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text"
                           (blur)="handleInputConfirm($event, item.get('holes'))"
                           (keydown.enter)="handleInputConfirm($event, item.get('holes'))" />

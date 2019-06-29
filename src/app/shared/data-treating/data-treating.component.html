@@ -1,5 +1,4 @@
-<nz-modal [nzVisible]="true" nzTitle="数据处理" (nzOnCancel)="dataHandleCancel()" (nzOnOk)="dataHandleOk()"
-  nzWidth="85%">
+<nz-modal [nzVisible]="true" nzTitle="数据处理" (nzOnCancel)="dataHandleCancel()" (nzOnOk)="dataHandleOk()" nzWidth="85%">
   <nz-radio-group [(ngModel)]="dataProcessing.radioValue">
     <label nz-radio [nzValue]="false">导出</label>
     <label nz-radio [nzValue]="true">导入</label>
@@ -29,23 +28,32 @@
       </nz-checkbox-wrapper>
       <hr>
       <div>
-        <nz-tree
-          [nzData]="dataProcessing.taskData$"
-          nzAsyncData
-          nzCheckable
-          (nzClick)="onclick($event)"
-          (nzExpandChange)="nzEvent($event)"
-          #taskTerr
-          >
-          <!-- [nzCheckedKeys]="defaultCheckedKeys"
-          [nzExpandedKeys]="defaultExpandedKeys"
-          [nzSelectedKeys]="defaultSelectedKeys"
-          (nzClick)="nzEvent($event)"
-          (nzExpandChange)="nzEvent($event)"
-          (nzCheckBoxChange)="nzEvent($event)" -->
-        </nz-tree>
-        <!-- <label nz-checkbox [(ngModel)]="dataProcessing.taskAll" [nzIndeterminate]="dataProcessing.taskindeterminate" (ngModelChange)="select('task', $event)">全选</label>
-        <nz-checkbox-group [(ngModel)]="dataProcessing.taskData$" (ngModelChange)="itemSelect('task')"></nz-checkbox-group> -->
+        <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskProject($event)">
+          <label nz-checkbox [nzValue]="item.key" *ngFor="let item of taskData.project">{{item.title}}</label>
+        </nz-checkbox-wrapper>
+        <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskComponet($event)">
+            <label nz-checkbox [nzValue]="item" *ngFor="let item of taskData.component">{{item}}</label>
+          </nz-checkbox-wrapper>
+        <!-- <nz-tree [nzData]="dataProcessing.taskData$" nzAsyncData nzCheckable (nzClick)="onclick($event)"
+          (nzExpandChange)="nzEvent($event)" #taskTerr>
+        </nz-tree> -->
+        <!-- {{dataProcessing.taskData$ | json}} -->
+        <!-- <div *ngFor="let item of dataProcessing.taskData$; index as i">
+          <p>{{item}}</p>
+          <div *ngFor="let item2 of dataProcessing.taskData$[i]">
+            <p>{{item}}</p>
+          </div>
+        </div> -->
+        <!-- <nz-transfer [nzDataSource]="list" nzShowSearch [nzOperations]="['to right', 'to left']"
+          [nzListStyle]="{ 'width.px': 250, 'height.px': 300 }" [nzRender]="render" [nzFooter]="footer"
+          (nzSelectChange)="select($event)" (nzChange)="change($event)">
+          <ng-template #render let-item> {{ item.title }}-{{ item.description }} </ng-template>
+          <ng-template #footer let-direction>
+            <button nz-button (click)="reload(direction)" [nzSize]="'small'" style="float: right; margin: 5px;">
+              reload
+            </button>
+          </ng-template>
+        </nz-transfer> -->
       </div>
     </nz-card>
     <nz-card nzTitle="项目" *ngIf="dataProcessing.project">

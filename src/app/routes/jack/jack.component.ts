@@ -7,7 +7,7 @@ import { User } from 'src/app/models/user.models';
 import { Router } from '@angular/router';
 import { GroupItem, TensionTask } from 'src/app/models/task.models';
 import { Observable } from 'rxjs';
-import { Jack } from 'src/app/models/jack';
+import { Jack, deviceGroupMode } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D } from 'src/app/models/IPCChannel';
 import { ManualComponent } from '../manual/manual.component';
@@ -49,21 +49,30 @@ export class JackComponent implements OnInit {
     this.formData = this.fb.group({
       id: [],
       name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
-      jackMode: [8],
-      equation: [1],
+      jackMode: [null],
+      equation: [false],
       jackModel: [],
       pumpModel: [],
-      zA: this.createDevGroup(),
-      zB: this.createDevGroup(),
-      zC: this.createDevGroup(),
-      zD: this.createDevGroup(),
-      cA: this.createDevGroup(),
-      cB: this.createDevGroup(),
-      cC: this.createDevGroup(),
-      cD: this.createDevGroup(),
+      // zA: this.createDevGroup(),
+      // zB: this.createDevGroup(),
+      // zC: this.createDevGroup(),
+      // zD: this.createDevGroup(),
+      // cA: this.createDevGroup(),
+      // cB: this.createDevGroup(),
+      // cC: this.createDevGroup(),
+      // cD: this.createDevGroup(),
     });
   }
   reset() {
+    if (this.formData.value.jackMode !== null) {
+      console.log(this.formData.value.jackMode);
+      this.data = Object.assign(this.data, this.formData.value);
+    }
+    this.createJackForm();
+    deviceGroupMode[this.data.jackMode].map(key => {
+      this.formData.addControl(key, this.createDevGroup());
+    });
+    console.log(this.data);
     this.formData.reset(this.data);
     this.f5();
     // tslint:disable-next-line:forin
@@ -75,13 +84,13 @@ export class JackComponent implements OnInit {
   /** 创建设备标定from */
   createDevGroup() {
     return this.fb.group({
-      jackNumber: [],
-      pumpNumber: [],
-      upper: 0,
-      floot: 0,
-      a: [],
-      b: [],
-      date: [],
+      jackNumber: [null, [Validators.required]],
+      pumpNumber: [null, [Validators.required]],
+      upper: [225, [Validators.required]],
+      floot: [10, [Validators.required]],
+      a: [1, [Validators.required]],
+      b: [0, [Validators.required]],
+      date: [null, [Validators.required]],
       mpa: this.fb.array([0, 1, 2, 3, 4, 5]),
       mm: this.fb.array([0, 1, 2, 3, 4, 5]),
     });
@@ -198,15 +207,10 @@ export class JackComponent implements OnInit {
     return 0;
   }
   f5() {
-    const devModeStr = [
-      [],
-      ['zA', 'cA'],
-      ['zA', 'zB', 'cA', 'cB'],
-      [],
-      ['zA', 'zB', 'zC', 'zD', 'cA', 'cB', 'cC', 'cD']
-    ];
+
+
     this.deviceDom.clear();
-    devModeStr[this.formData.value.jackMode].map(name => {
+    deviceGroupMode[this.formData.value.jackMode].map(name => {
       const com = this.cfr.resolveComponentFactory(JackItemComponent);
       const comp = this.deviceDom.createComponent(com);
       comp.instance.formGroup = this.formData;
@@ -214,5 +218,13 @@ export class JackComponent implements OnInit {
       console.log('添加', name);
     });
   }
-
+  getForm() {
+    console.log(this.formData.value);
+    // tslint:disable-next-line: forin
+    for (const i in this.formData.controls) {
+      this.formData.controls[i].markAsDirty();
+      this.formData.controls[i].updateValueAndValidity();
+      console.log(i, this.formData.controls[i].valid);
+    }
+  }
 }
