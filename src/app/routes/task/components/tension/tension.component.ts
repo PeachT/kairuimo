@@ -26,6 +26,7 @@ export class TensionComponent implements OnInit {
     cD: null,
   };
   holeMneuData = null;
+  localStorageData = null;
 
   constructor(
     public PLCS: PLCService,
@@ -37,7 +38,8 @@ export class TensionComponent implements OnInit {
   /**
    * *张拉
    */
-  tension(holeMneuData, localStorageData) {
+  tension(holeMneuData = this.holeMneuData, localStorageData = this.localStorageData) {
+    this.localStorageData = localStorageData;
     this.holeMneuData = holeMneuData;
     this.tensionDevice.state = true;
     // console.log('张拉', this.holeMneuData.data, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
