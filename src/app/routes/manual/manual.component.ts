@@ -90,6 +90,8 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   it = null;
+  zmsg = null;
+  cmsg = null;
 
   connection = true;
   constructor(
@@ -106,6 +108,24 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async ngOnInit() {
     this.PLCS.plcSubject.subscribe((data) => {
+      if (!this.PLCS.plcState.z) {
+        this.zmsg = '设备未连接！！';
+      } else if (this.PLCS.PD.zA.alarm.indexOf('急停') > -1) {
+        this.zmsg = '急停！！';
+      } else if (this.PLCS.PD.zA.alarm.indexOf('相序错误') > -1) {
+        this.zmsg = '相序错误！！';
+      } else {
+        this.zmsg = null;
+      }
+      if (!this.PLCS.plcState.c) {
+        this.cmsg = '设备未连接！！';
+      } else if (this.PLCS.PD.cA.alarm.indexOf('急停') > -1) {
+        this.cmsg = '急停！！';
+      } else if (this.PLCS.PD.cA.alarm.indexOf('相序错误') > -1) {
+        this.cmsg = '相序错误！！';
+      } else {
+        this.cmsg = null;
+      }
       this.cdr.markForCheck();
     });
     // this.it = setInterval(() => {

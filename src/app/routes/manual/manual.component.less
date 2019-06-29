@@ -27,8 +27,20 @@ main {
     flex-direction: row;
     overflow-y: auto;
     .content {
+      position: relative;
       flex: 1;
       overflow: hidden;
+      .alarm {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        font-size: 56px;
+        color: white;
+        justify-content: center;
+        align-items: center;
+        animation:alarm 3s infinite linear;
+      }
       .btn {
         background-image: linear-gradient(135deg, #92FFC0 0%, #002661 100%);
         display: flex;
@@ -73,6 +85,17 @@ nz-divider {
   }
   100%{
     background-color: #ffa39e;
+  }
+}
+@keyframes alarm {
+  0%{
+    background-color: rgba(255, 163, 158, 0.82);
+  }
+  50%{
+    background-color: rgba(255, 163, 158, .3);
+  }
+  100%{
+    background-color: rgba(255, 163, 158, 0.82);
   }
 }
 
