@@ -42,27 +42,24 @@ export class TensionComponent implements OnInit {
     this.localStorageData = localStorageData;
     this.holeMneuData = holeMneuData;
     this.tensionDevice.state = true;
-    // console.log('张拉', this.holeMneuData.data, this.jackData, this.PLCS.mpaRevise, this.PLCS.jack);
-    // if (this.tensionDeviceState()) {
-    //   this.tensionDevice.state = true;
-    //   this.tensionDevice.names = taskModeStr[this.holeMneuData.data.mode];
-    //   console.log('记录', 'record' in this.holeMneuData.data);
-    // } else {
-    //   // await this.PLCS.selectJack(this.jackData.id);
-    // //   localStorage.setItem('autoTask', JSON.stringify({
-    // //     project: this.project.id,
-    // //     component: this.menu.selectComponent,
-    // //     id: this.data.id,
-    // //     jackId: this.jackData.id,
-    // //     groupData: this.holeMneuData.data
-    // //   }));
-    // localStorage.setItem('autoTask', JSON.stringify(localStorageData));
-    //   this.tensionDevice.state = false;
-    //   this.router.navigate(['/auto']);
-    // }
-    localStorage.setItem('autoTask', JSON.stringify(localStorageData));
-    this.tensionDevice.state = false;
-    this.router.navigate(['/auto']);
+    console.log('张拉', this.holeMneuData.data, this.PLCS.mpaRevise, this.PLCS.jack);
+    if (this.tensionDeviceState()) {
+      this.tensionDevice.state = true;
+      this.tensionDevice.names = taskModeStr[this.holeMneuData.data.mode];
+      console.log('记录', 'record' in this.holeMneuData.data);
+    } else {
+    // await this.PLCS.selectJack(this.jackData.id);
+    //   localStorage.setItem('autoTask', JSON.stringify({
+    //     project: this.project.id,
+    //     component: this.menu.selectComponent,
+    //     id: this.data.id,
+    //     jackId: this.jackData.id,
+    //     groupData: this.holeMneuData.data
+    //   }));
+      localStorage.setItem('autoTask', JSON.stringify(localStorageData));
+      this.tensionDevice.state = false;
+      this.router.navigate(['/auto']);
+    }
   }
   /** 检查设备状态 */
   tensionDeviceState(): boolean {
