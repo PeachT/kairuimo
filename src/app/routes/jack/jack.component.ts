@@ -14,7 +14,7 @@ import { ManualComponent } from '../manual/manual.component';
 import { JackItemComponent } from 'src/app/shared/jack-item/jack-item.component';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { copyAny } from 'src/app/models/base';
-import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
+import { nameRepetition } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-jack',

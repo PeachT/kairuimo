@@ -14,7 +14,7 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { TensionMm } from 'src/app/Function/device.date.processing';
 import { ElectronService } from 'ngx-electron';
 import { Elongation } from 'src/app/models/live';
-import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
+import { nameRepetition } from 'src/app/Validator/async.validator';
 import { TaskMenuComponent } from './components/task-menu/task-menu.component';
 import { copyAny } from 'src/app/models/base';
 import { AddOtherComponent } from 'src/app/shared/add-other/add-other.component';
@@ -120,7 +120,6 @@ export class TaskComponent implements OnInit {
     this.formData = this.fb.group({
       id: [],
       name: [null, [Validators.required], [nameRepetition(this.odb, 'task', this.updateFilterFun)]],
-      // name: [null, [Validators.required], [new RepetitionARV(this.odb, 'task', this.updateFilterFun)]],
       device: [null, [Validators.required]],
       component: [null, [Validators.required]],
       steelStrand: [null],

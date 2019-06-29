@@ -16,7 +16,7 @@ import { reperitionValidator } from 'src/app/Validator/repetition.validator';
 import { User } from 'src/app/models/user.models';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { copyAny } from 'src/app/models/base';
-import { RepetitionARV } from 'src/app/Validator/async.validator';
+import { nameRepetition } from 'src/app/Validator/async.validator';
 
 const os = ['see'];
 @Component({
@@ -58,7 +58,7 @@ export class UserComponent implements OnInit {
   carterFormGroup() {
     this.formData = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [new RepetitionARV(this.db, 'jack')]],
+      name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
       password: [null, [Validators.required]],
       jurisdiction: [0],
       operation: []

@@ -12,7 +12,7 @@ import { reperitionValidator } from 'src/app/Validator/repetition.validator';
 import { Comp } from 'src/app/models/component';
 import { copyAny } from 'src/app/models/base';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
-import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
+import { nameRepetition } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-component',

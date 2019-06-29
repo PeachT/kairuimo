@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators, FormArray, AsyncValidatorFn, Abstra
 import { Project } from 'src/app/models/project';
 import { NzMessageService } from 'ng-zorro-antd';
 import { reperitionValidator } from 'src/app/Validator/repetition.validator';
-import { RepetitionARV, nameRepetition } from 'src/app/Validator/async.validator';
+import { nameRepetition } from 'src/app/Validator/async.validator';
 import { DbService } from 'src/app/services/db.service';
 import { AppService } from 'src/app/services/app.service';
 import { from, Observable } from 'rxjs';
