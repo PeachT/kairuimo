@@ -132,6 +132,7 @@ export class PLCService {
     private message: NzMessageService,
     private odb: DbService,
   ) {
+    console.log(this.e.isLinux);
     const revise = JSON.parse(localStorage.getItem('mpaRevise'));
     if (!revise) {
       this.setMpaRevise(mpaRevise);

@@ -26,9 +26,9 @@ import { DeleteModalComponent } from 'src/app/shared/delete-modal/delete-modal.c
 })
 export class ProjectComponent implements OnInit {
   dbName = 'project';
-  @ViewChild('prjDom') prjDom: appProjectComponent;
-  @ViewChild('leftMenu') leftMenu: LeftMenuComponent;
-  @ViewChild('del') deleteDom: DeleteModalComponent;
+  @ViewChild('prjDom', {static: false}) prjDom: appProjectComponent;
+  @ViewChild('leftMenu', {static: false}) leftMenu: LeftMenuComponent;
+  @ViewChild('del', {static: false}) deleteDom: DeleteModalComponent;
 
   data: Project;
   deleteShow = false;

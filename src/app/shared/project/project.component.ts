@@ -18,7 +18,7 @@ import { AddOtherComponent } from '../add-other/add-other.component';
 })
 export class ProjectComponent implements OnInit {
   @Input() data: Project = null;
-  @ViewChild('otherInfo') otherIngoDom: AddOtherComponent;
+  @ViewChild('otherInfo', {static: false}) otherIngoDom: AddOtherComponent;
   validateForm: FormGroup = this.fb.group({});
   otherKeys = [
     '分布工程',

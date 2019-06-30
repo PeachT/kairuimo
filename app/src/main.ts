@@ -38,7 +38,14 @@ let win: BrowserWindow;
 
 
 function createWindow() {
-  win = new BrowserWindow({ width: 1920, height: 1080 });
+  win = new BrowserWindow(
+    { width: 1920, height: 1080,
+      webPreferences: {
+        nodeIntegration: true,
+        backgroundThrottling: false
+      }
+    }
+  );
 
   // load the dist folder from Angular
   win.loadURL(winURL);

@@ -23,9 +23,8 @@ import { nameRepetition } from 'src/app/Validator/async.validator';
 })
 export class JackComponent implements OnInit {
   dbName = 'jack';
-  @ViewChild('leftMenu') leftMenu: LeftMenuComponent;
-  @ViewChild('device', { read: ViewContainerRef })
-    deviceDom: ViewContainerRef;
+  @ViewChild('leftMenu', {static: false}) leftMenu: LeftMenuComponent;
+  @ViewChild('device', {static: false}) deviceDom: ViewContainerRef;
 
   formData: FormGroup;
   data: Jack;

@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "ejsexcel": "^3.5.3",
-    "electron-updater": "^4.0.6",
-    "modbus-serial": "^7.5.1"
+    "electron-updater": "^4.0.14",
+    "modbus-serial": "^7.6.0"
   },
   "devDependencies": {
-    "typescript": "^3.3.3333"
+    "typescript": "~3.4.5"
   }
 }

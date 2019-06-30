@@ -15,10 +15,8 @@ import { ManualItemComponent } from 'src/app/shared/manual-item/manual-item.comp
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('domz', { read: ViewContainerRef })
-    domz: ViewContainerRef;
-  @ViewChild('domc', { read: ViewContainerRef })
-    domc: ViewContainerRef;
+  @ViewChild('domz', {static: false}) domz: ViewContainerRef;
+  @ViewChild('domc', {static: false}) domc: ViewContainerRef;
   db: DB;
   selectedJack: any;
   selectedI: any = null;

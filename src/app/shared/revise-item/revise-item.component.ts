@@ -9,8 +9,7 @@ import { PLCService } from 'src/app/services/PLC.service';
   styleUrls: ['./revise-item.component.less']
 })
 export class ReviseItemComponent implements OnInit {
-  @ViewChild('manual')
-    manualDom: ManualItemComponent;
+  @ViewChild('manual', {static: false}) manualDom: ManualItemComponent;
 
   @Input()
     name: string;
