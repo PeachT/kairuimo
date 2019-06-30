@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService } from 'ng-zorro-antd';
@@ -11,7 +11,8 @@ import { ElectronService } from 'ngx-electron';
 @Component({
   selector: 'app-help',
   templateUrl: './help.component.html',
-  styleUrls: ['./help.component.less']
+  styleUrls: ['./help.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HelpComponent implements OnInit {
   update = {
@@ -34,6 +35,7 @@ export class HelpComponent implements OnInit {
     private message: NzMessageService,
     private router: Router,
     private e: ElectronService,
+    private cdr: ChangeDetectorRef,
   ) {
 
   }
@@ -50,6 +52,7 @@ export class HelpComponent implements OnInit {
       console.log(data);
       this.update.files = data.stdout;
       this.update.fileMsg = data;
+      this.cdr.markForCheck();
     });
 
   }
