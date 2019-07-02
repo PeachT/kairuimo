@@ -19,15 +19,18 @@
           <!-- <button nzSize="large" nz-button nzShape="round"
           *ngFor="let item of devModeStr.z"
           [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button> -->
+          <nz-anchor [nzAffix]="false" [nzTarget]="dz" *ngIf="anchor.z.length > 0">
+            <nz-link *ngFor="let name of anchor.z; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
+          </nz-anchor>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[0]}" (click)="setF15(0)">点动</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[1]}" (click)="setF15(1)">强制运行</button>
         <!-- <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[2]}" (click)="setF15(2)">自动补压</button> -->
       </div>
-      <div class="manual-data scroll-content">
+      <div class="manual-data scroll-content" #dz>
         <div #domz>
         </div>
       </div>
-      <div class="alarm" *ngIf="zmsg">{{zmsg}}</div>
+      <div class="alarm" *ngIf="cmsg || !PLCS.plcState.z">{{!PLCS.plcState.z ? '设备未连接' : cmsg}}</div>
     </div>
     <br><br>
     <div class="content c scroll-y" [ngClass]="{'form-edit': !PLCS.plcState.c}" [hidden]="!connection">
@@ -36,16 +39,18 @@
           <!-- <button nzSize="large" nz-button nzShape="round"
           *ngFor="let item of devModeStr.c"
           [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button> -->
-
+          <nz-anchor [nzAffix]="false" [nzTarget]="dc" *ngIf="anchor.z.length > 0">
+            <nz-link *ngFor="let name of anchor.z; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
+          </nz-anchor>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[0]}" (click)="setF15(0, 'c')">点动</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[1]}" (click)="setF15(1, 'c')">强制运行</button>
         <!-- <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[2]}" (click)="setF15(2, 'c')">自动补压</button> -->
       </div>
 
-      <div class="manual-data scroll-content">
+      <div class="manual-data scroll-content" #dc>
         <div #domc hidden></div>
       </div>
-      <div class="alarm" *ngIf="cmsg">{{cmsg}}</div>
+      <div class="alarm" *ngIf="cmsg || !PLCS.plcState.c">{{!PLCS.plcState.c ? '设备未连接' : cmsg}}</div>
     </div>
   </main>
 </main>

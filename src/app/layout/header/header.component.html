@@ -1,5 +1,5 @@
-<nz-layout>
-  <nz-header>
+<div class="layout">
+  <header>
     <div class="left" (click)="power()" style="cursor: pointer">
       <div class="logo">
         <!-- <img src="/assets/img/logo.jpeg"> -->
@@ -23,13 +23,12 @@
         <div class="text">数据</div>
       </div>
     </div>
-
-  </nz-header>
-  <div style="flex: 1; display: flex;">
-    <div style="flex: 1;">
+  </header>
+  <main>
+    <div style="flex: 1; height: 100%;">
       <router-outlet></router-outlet>
     </div>
-  </div>
-</nz-layout>
+  </main>
+</div>
 
 <app-data-treating *ngIf="appS.dataTreatingShow"></app-data-treating>

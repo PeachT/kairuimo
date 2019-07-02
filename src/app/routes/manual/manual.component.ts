@@ -92,6 +92,12 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   cmsg = null;
 
   connection = true;
+
+  anchor = {
+    z: [],
+    c: []
+  };
+
   constructor(
     private e: ElectronService,
     private odb: DbService,
@@ -106,18 +112,14 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async ngOnInit() {
     this.PLCS.plcSubject.subscribe((data) => {
-      if (!this.PLCS.plcState.z) {
-        this.zmsg = '设备未连接！！';
-      } else if (this.PLCS.PD.zA.alarm.indexOf('急停') > -1) {
+      if (this.PLCS.PD.zA.alarm.indexOf('急停') > -1) {
         this.zmsg = '急停！！';
       } else if (this.PLCS.PD.zA.alarm.indexOf('相序错误') > -1) {
         this.zmsg = '相序错误！！';
       } else {
         this.zmsg = null;
       }
-      if (!this.PLCS.plcState.c) {
-        this.cmsg = '设备未连接！！';
-      } else if (this.PLCS.PD.cA.alarm.indexOf('急停') > -1) {
+      if (this.PLCS.PD.cA.alarm.indexOf('急停') > -1) {
         this.cmsg = '急停！！';
       } else if (this.PLCS.PD.cA.alarm.indexOf('相序错误') > -1) {
         this.cmsg = '相序错误！！';
@@ -215,6 +217,8 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('刷新', this.devModeStr);
     this.domz.clear();
     this.domc.clear();
+    this.anchor.z = [];
+    this.anchor.c = [];
     this.devModeStr.z.map(name => {
       const com = this.cfr.resolveComponentFactory(ManualItemComponent);
       const comp = this.domz.createComponent(com);
@@ -222,6 +226,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
       // name
       comp.instance.dev = this.setDev[name];
       comp.instance.name = name;
+      this.anchor.z.push(name);
       this.cdr.markForCheck();
     });
     this.devModeStr.c.map(name => {
@@ -232,6 +237,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
       // name
       comp.instance.dev = this.setDev[name];
       comp.instance.name = name;
+      this.anchor.c.push(name);
       this.cdr.markForCheck();
     });
   }

@@ -12,7 +12,6 @@ import { ElectronService } from 'ngx-electron';
   selector: 'app-help',
   templateUrl: './help.component.html',
   styleUrls: ['./help.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HelpComponent implements OnInit {
   update = {
@@ -69,6 +68,7 @@ export class HelpComponent implements OnInit {
         this.update.sucess = 2;
         return;
       }
+      this.cdr.markForCheck();
     }, 1000);
     this.e.ipcRenderer.once('onUpdate', (event, data) => {
       clearTimeout(it);
@@ -87,6 +87,7 @@ export class HelpComponent implements OnInit {
         this.update.msg = data.stderr;
         this.update.sucess = 2;
       }
+      this.cdr.markForCheck();
       return;
     });
   }
@@ -123,6 +124,7 @@ export class HelpComponent implements OnInit {
 
     this.e.ipcRenderer.once('test', (event, data) => {
       this.testMsg = data;
+      this.cdr.markForCheck();
     });
   }
   /** 打开天使面板 */

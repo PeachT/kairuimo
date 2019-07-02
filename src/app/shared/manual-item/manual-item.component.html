@@ -1,4 +1,4 @@
-<div class="item" [class]="name">
+<div class="item" [class]="name" [id]="name">
   <div class="title" [ngClass]="{'active': PLCD.alarm.length > 0}">
     <h1>{{name}}·{{PLCD.state}}</h1>
     <div *ngIf="PLCD.alarm.length > 0" class="alarm" >
