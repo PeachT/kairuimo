@@ -11,7 +11,7 @@ const echarts = require('echarts');
   styleUrls: ['./dynamic-line.component.less']
 })
 export class DynamicLineComponent implements OnInit, OnChanges {
-  @ViewChild('svg', {static: false}) svgDom: ElementRef;
+  @ViewChild('svg', null) svgDom: ElementRef;
   @Input()
     devs = [];
   @Input()

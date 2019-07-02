@@ -12,7 +12,7 @@ import { AppService } from 'src/app/services/app.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataTreatingComponent implements OnInit {
-  @ViewChild('taskTerr', {static: false}) taskTerr: NzTreeComponent;
+  @ViewChild('taskTerr', null) taskTerr: NzTreeComponent;
   dataProcessing = {
     state: false,
     radioValue: false,

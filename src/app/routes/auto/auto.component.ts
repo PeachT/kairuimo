@@ -21,8 +21,8 @@ import { getStageString } from 'src/app/Function/stageString';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild('mainContent', {static: false}) mainDom: ElementRef;
-  @ViewChild('table', {static: false}) tableDom: ElementRef;
+  @ViewChild('mainContent', null) mainDom: ElementRef;
+  @ViewChild('table', null) tableDom: ElementRef;
 
   svgHeight = 0;
   tableHeight = 0;

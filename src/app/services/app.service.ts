@@ -14,7 +14,7 @@ export class AppService {
     unit: {
       name: '柳州市凯瑞姆',
       tel: '888-8888888',
-      logo: '/assets/img/logo.jpeg'
+      logo: 'assets/img/logo.jpeg'
     }
   };
   /** 运行环境是否是Electron */

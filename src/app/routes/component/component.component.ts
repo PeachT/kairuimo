@@ -22,7 +22,7 @@ import { nameRepetition } from 'src/app/Validator/async.validator';
 })
 export class ComponentComponent implements OnInit {
   dbName = 'comp';
-  @ViewChild('leftMenu', {static: false}) leftMenu: LeftMenuComponent;
+  @ViewChild('leftMenu', null) leftMenu: LeftMenuComponent;
 
   formData: FormGroup;
   data: Comp;
@@ -34,7 +34,7 @@ export class ComponentComponent implements OnInit {
   tags = ['Unremovable', 'Tag 2', 'Tag 3'];
   inputVisible = false;
   inputValue = '';
-  @ViewChild('inputElement', {static: false}) inputElement: ElementRef;
+  @ViewChild('inputElement', null) inputElement: ElementRef;
 
   constructor(
     private fb: FormBuilder,

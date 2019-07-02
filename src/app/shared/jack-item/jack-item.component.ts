@@ -20,7 +20,7 @@ import { ReviseItemComponent } from 'src/app/shared/revise-item/revise-item.comp
   styleUrls: ['./jack-item.component.less']
 })
 export class JackItemComponent implements OnInit {
-  @ViewChild('reviseDom', {static: false}) reviseDom: ReviseItemComponent;
+  @ViewChild('reviseDom', null) reviseDom: ReviseItemComponent;
   @Input() formGroup: FormGroup;
   @Input() name: string;
   @Input() reviseBtnShow = true;

@@ -26,7 +26,7 @@ const os = ['see'];
 })
 export class UserComponent implements OnInit {
   dbName = 'users';
-  @ViewChild('leftMenu' , {static: false}) leftMenu: LeftMenuComponent;
+  @ViewChild('leftMenu' , null) leftMenu: LeftMenuComponent;
   formData: FormGroup;
   data: User;
   menuFilter = (f) => f.jurisdiction < 9;

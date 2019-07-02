@@ -15,7 +15,7 @@ import { MpaRevise, AutoDate } from 'src/app/models/device';
   styleUrls: ['./setting.component.less']
 })
 export class SettingComponent implements OnInit, OnDestroy {
-  @ViewChild('reviseDom', {static: false}) reviseDom: ReviseItemComponent;
+  @ViewChild('reviseDom', null) reviseDom: ReviseItemComponent;
 
   systenDate = [];
   refState = false;

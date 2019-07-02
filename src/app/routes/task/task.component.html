@@ -10,15 +10,15 @@
           <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">
             <nz-form-item>
               <nz-form-label [nzSm]="3" nzRequired>梁号</nz-form-label>
-              <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}">
+              <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}" [nzErrorTip]="formData.get('name').errors | ValidatorError">
                 <input type="text" nz-input placeholder="梁号" formControlName="name">
-                <nz-form-explain >{{formData.get('name').errors | ValidatorError}}
-                </nz-form-explain>
+                <!-- <nz-form-explain >{{formData.get('name').errors | ValidatorError}}
+                </nz-form-explain> -->
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
               <nz-form-label [nzSm]="3" nzRequired>构建</nz-form-label>
-              <nz-form-control [nzSm]="6">
+              <nz-form-control [nzSm]="6" nzErrorTip="请入选择构建！">
                 <div style="display: flex;">
                   <nz-select style="width: 100%;" formControlName="component" nzPlaceHolder="选择构建" (ngModelChange)="componentChange($event)" [nzDisabled]="selectJackState">
                     <nz-option [nzValue]="item.name" [nzLabel]="item.name" *ngFor="let item of componentOptions.menu"></nz-option>
@@ -26,17 +26,17 @@
                   <button nz-button nzType="primary" nzSearch (click)="groupDom.onShow()"
                     type="button" *ngIf="!data?.id" style="z-index: 1">分组</button>
                 </div>
-                <nz-form-explain *ngIf="formData.get('component').dirty && formData.get('component').errors">
-                  请入选择构建！</nz-form-explain>
+                <!-- <nz-form-explain *ngIf="formData.get('component').dirty && formData.get('component').errors">
+                  请入选择构建！</nz-form-explain> -->
               </nz-form-control>
 
               <nz-form-label [nzSm]="3" nzRequired>设备</nz-form-label>
-              <nz-form-control [nzSm]="5">
+              <nz-form-control [nzSm]="5" nzErrorTip="请入选择设备！">
                 <nz-cascader nzMenuClassName="task-cascader" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
                   (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="selectJackState">
                 </nz-cascader>
-                <nz-form-explain *ngIf="formData.get('device').dirty && formData.get('device').errors">请入选择设备！
-                </nz-form-explain>
+                <!-- <nz-form-explain *ngIf="formData.get('device').dirty && formData.get('device').errors">请入选择设备！
+                </nz-form-explain> -->
               </nz-form-control>
               <!-- <nz-form-label [nzSm]="3" nzRequired>钢绞线</nz-form-label>
               <nz-form-control [nzSm]="4">
@@ -52,7 +52,7 @@
             <app-add-other [validateForm]="formData" [keys]="bridgeOtherKey" [iselect]="0" #otherInfo></app-add-other>
 
             <nz-form-item *ngIf="data" style="z-index: 2;">
-              <nz-form-control>
+              <nz-form-control nzErrorTip="至少需要一组张拉数据！">
                 <nz-radio-group [nzButtonStyle]="'solid'">
                   <label nz-radio-button [nzValue]="item"
                     *ngFor="let item of holeMneuData.names; index as i"
@@ -62,9 +62,9 @@
                     class="hole"
                     >{{item.name}}</label>
                 </nz-radio-group>
-                <nz-form-explain style="color: #f5222d;"
+                <!-- <nz-form-explain style="color: #f5222d;"
                   *ngIf="formData.get('groups').dirty && formData.get('groups').errors">
-                  至少需要一组张拉数据！</nz-form-explain>
+                  至少需要一组张拉数据！</nz-form-explain> -->
               </nz-form-control>
             </nz-form-item>
           </form>

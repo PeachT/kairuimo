@@ -28,11 +28,11 @@ import { TensionComponent } from './components/tension/tension.component';
 })
 export class TaskComponent implements OnInit {
   dbName = 'task';
-  @ViewChild('taskMneu', {static: false}) taskMneu: TaskMenuComponent;
-  @ViewChild('groupDom', {static: false}) groupDom: GroupComponent;
-  @ViewChild('taskDataDom', {static: false}) taskDataDom: TaskDataComponent;
-  @ViewChild('otherInfo', {static: false}) otherIngoDom: AddOtherComponent;
-  @ViewChild('tension', {static: false}) tensionDom: TensionComponent;
+  @ViewChild('taskMneu', null) taskMneu: TaskMenuComponent;
+  @ViewChild('groupDom', null) groupDom: GroupComponent;
+  @ViewChild('taskDataDom', null) taskDataDom: TaskDataComponent;
+  @ViewChild('otherInfo', null) otherIngoDom: AddOtherComponent;
+  @ViewChild('tension', null) tensionDom: TensionComponent;
 
   formData: FormGroup;
   bridgeOtherKey = [
