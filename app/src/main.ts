@@ -281,10 +281,11 @@ ipcMain.on('power', (event, data) => {
 /** 获取更新文件 */
 ipcMain.on('select-file', (event, data) => {
   console.log('select-file');
-  let updatepath = '/media/kvm';
-  if (dev) {
-    updatepath = '/media/peach';
-  }
+  let updatepath = '/media';
+  // 获取用户名
+  exec(`whoami`,  { async : true }, (code, stdout, stderr) => {
+    updatepath = `/media/${stdout.split('\n')[0]}`;
+  });
   const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
     usb.kill();
     console.log('usb', stdout);
