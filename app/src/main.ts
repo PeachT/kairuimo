@@ -350,3 +350,8 @@ ipcMain.on('test', (event, data) => {
     upps.kill();
   });
 });
+
+/** 打开调试面板 */
+ipcMain.on('openDevTools', () => {
+  win.webContents.openDevTools();
+});

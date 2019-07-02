@@ -125,4 +125,8 @@ export class HelpComponent implements OnInit {
       this.testMsg = data;
     });
   }
+  /** 打开天使面板 */
+  openDevTools() {
+    this.e.ipcRenderer.send('openDevTools');
+  }
 }
