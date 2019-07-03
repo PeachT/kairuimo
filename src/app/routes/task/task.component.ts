@@ -215,7 +215,9 @@ export class TaskComponent implements OnInit {
       for (const c of data.groups) {
         delete c.record;
       }
+      this.holeMneu();
     } else {
+      this.selectJackState = false;
       data.project = this.taskMneu.project.select.id;
       this.holeMneuData.names = [];
     }
@@ -223,7 +225,7 @@ export class TaskComponent implements OnInit {
     this.holeMneuData.name = null,
     this.holeMneuData.index = null,
     this.holeMneuData.data = null,
-
+    this.taskDataDom.show = null;
     console.log('编辑', this.data);
     this.reset();
     console.log('编辑', this.data, this.appS.editId, this.appS.edit);
