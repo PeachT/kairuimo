@@ -40,7 +40,7 @@
           *ngFor="let item of devModeStr.c"
           [nzType]="showDev[item] ? 'primary' : 'dashed'"  (click)="showDev[item] = !showDev[item]">{{item}}</button> -->
           <nz-anchor [nzAffix]="false" [nzTarget]="dc" *ngIf="anchor.z.length > 0">
-            <nz-link *ngFor="let name of anchor.z; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
+            <nz-link *ngFor="let name of anchor.c; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
           </nz-anchor>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[0]}" (click)="setF15(0, 'c')">点动</button>
         <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[1]}" (click)="setF15(1, 'c')">强制运行</button>
