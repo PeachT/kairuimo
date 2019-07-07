@@ -7,6 +7,8 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D, PLC_M, PLC_S } from 'src/app/models/IPCChannel';
 import { plcToMpa } from 'src/app/Function/device.date.processing';
 import { ManualItemComponent } from 'src/app/shared/manual-item/manual-item.component';
+import { DebugData } from 'src/app/models/debug';
+import { deviceGroupMode } from 'src/app/models/jack';
 
 @Component({
   selector: 'app-manual',
@@ -147,6 +149,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getManualData('c');
     console.log('init');
     // this.f5();
+
   }
 
   ngAfterViewInit() {

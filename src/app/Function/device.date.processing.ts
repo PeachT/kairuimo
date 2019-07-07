@@ -1,5 +1,5 @@
-import { GroupItem } from '../models/task.models';
-import { taskModeStr } from '../models/jack';
+import { GroupItem, Record } from '../models/task.models';
+import { taskModeStr, Jack } from '../models/jack';
 import { ElongationItem, Elongation } from '../models/live';
 
 /** 设备数据换算处理 */
@@ -156,6 +156,49 @@ export function TensionMm(data: GroupItem, re = false): Elongation {
     }
   });
   return elongation;
+}
+
+export function mpaToKN(jack: Jack, mode: string, record: Record) {
+  const kn = {};
+  // console.log('4564564654', jackData);
+
+  taskModeStr[mode].map(d => {
+    const a = jack[d].a;
+    const b = jack[d].b;
+    const equation = jack.equation;
+    const mpas = record[d].mpa;
+    const k = [];
+    mpas.map((m, i) => {
+      console.log(m);
+      // console.log('a=', a, 'ap=', sp, 'kn=', kn, 'b=', b);
+      if (equation) {
+        // Mpa = a * Kn + b;
+        k[i] = myToFixed((m - b) / a);
+        // kn[i] = (a * sp * kn + b).toFixed(2);
+      } else {
+        // Kn = a * Mpa + b;
+        k[i] = myToFixed(a * m + b);
+        // kn[i] = ((kn * sp - b) / a).toFixed(2);
+      }
+    });
+    kn[d] = k;
+  });
+  return kn;
+}
+export function mpaToKNSingle(jack: Jack, name: string, mpa: number) {
+  const a = jack[name].a;
+  const b = jack[name].b;
+  const equation = jack.equation;
+  // console.log('a=', a, 'ap=', sp, 'kn=', kn, 'b=', b);
+  if (equation) {
+    // Mpa = a * Kn + b;
+    return myToFixed((mpa - b) / a);
+    // kn[i] = (a * sp * kn + b).toFixed(2);
+  } else {
+    // Kn = a * Mpa + b;
+    return  myToFixed(a * mpa + b);
+    // kn[i] = ((kn * sp - b) / a).toFixed(2);
+  }
 }
 
 /**

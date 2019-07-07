@@ -4,6 +4,13 @@ import { map } from 'rxjs/operators';
 import { DbService } from 'src/app/services/db.service';
 import { NzFormatEmitEvent, NzTreeComponent } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
+import { ElectronService } from 'ngx-electron';
+import { PLCService } from 'src/app/services/PLC.service';
+import { Elongation } from 'src/app/models/live';
+import { TensionMm, mpaToKN, mpaToKNSingle } from 'src/app/Function/device.date.processing';
+import { taskModeStr } from 'src/app/models/jack';
+import { NzMessageService } from 'ng-zorro-antd';
+import { DateFormat } from 'src/app/Function/DateFormat';
 
 @Component({
   selector: 'app-data-treating',
@@ -13,6 +20,16 @@ import { AppService } from 'src/app/services/app.service';
 })
 export class DataTreatingComponent implements OnInit {
   @ViewChild('taskTerr', null) taskTerr: NzTreeComponent;
+  exportMode = null;
+  savePath = null;
+  tempPath = null;
+  progress = {
+    state: false,
+    msg: '导出',
+    length: null,
+    now: 0,
+  };
+
   dataProcessing = {
     state: false,
     radioValue: false,
@@ -34,14 +51,20 @@ export class DataTreatingComponent implements OnInit {
   };
   taskData = {
     project: [],
+    sp: null,
     component: [],
-    bredge: []
+    sc: null,
+    bridge: [],
+    sb: []
   };
 
   constructor(
+    private message: NzMessageService,
     private cdr: ChangeDetectorRef,
     private db: DbService,
     public apps: AppService,
+    public e: ElectronService,
+    private PLCS: PLCService,
   ) { }
 
   ngOnInit() {
@@ -57,92 +80,179 @@ export class DataTreatingComponent implements OnInit {
   dataHandleOk() {
     this.apps.dataTreatingShow = false;
   }
-  /** 选择类型 */
-  async onSelectClass(value, key) {
-    console.log(value, key);
-    if (key === 'task') {
-      // this.dataProcessing[`${key}Data$`] = await this.db.getTaskBridgeMenuData(f => true);
-      this.taskData.project = await this.db.getTaskDataTreatingProject();
-      console.log(this.dataProcessing[`${key}Data$`]);
+  /** 选择处理模式 */
+  selectEM() {
+    console.log('选择Mode', this.exportMode, this.e.isWindows);
+    switch (this.exportMode) {
+      case 1:
+        this.getTaskProject();
+        break;
+      default:
+        break;
+    }
+  }
+  /** 选择保存路径 */
+  selectSavePath() {
+    this.savePath = this.e.remote.dialog.showOpenDialog({properties: ['openDirectory']})[0];
+    console.log(this.savePath);
+  }
+  /** 获取模板路径 */
+  selectTemp() {
+    this.tempPath = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
+      filters: [{ name: '模板', extensions: ['kvmt'] }]
+    })[0];
+  }
+  /** 获取项目数据 */
+  async getTaskProject() {
+    this.taskData.project = await this.db.getTaskDataTreatingProject();
+    console.log(this.taskData.project);
+    if (this.taskData.project.length === 1) {
+      this.taskData.sp = this.taskData.project[0].key;
+      this.getTaskComponent();
     } else {
-      this.dataProcessing[`${key}Data$`] = await this.db.getAllAsync(key);
-      console.log(this.dataProcessing[`${key}Data$`]);
+      this.taskData.sp = null;
     }
     this.cdr.markForCheck();
   }
-  /** 任务筛选 */
-  onTaskCheckbox(value) {
-    console.log(value);
-    console.log(this.dataProcessing);
+  /** 选择任务项目 */
+  selectTaskProject(e) {
+    console.log(this.taskData.sp, e);
+    this.getTaskComponent();
+  }
+  /** 获取任务构建数据 */
+  async getTaskComponent() {
+    const project = this.taskData.sp;
+    this.taskData.component = await this.db.getTaskComponentMenuData(o1 => o1.project === Number(project));
+    console.log(this.taskData.component);
+    if (this.taskData.component.length === 1) {
+      this.taskData.sc = this.taskData.component[0];
+      this.getTaskBridge();
+    } else {
+      this.taskData.sc = null;
+    }
+    this.cdr.markForCheck();
+  }
+  /** 选择构建 */
+  selectTaskComponent(e) {
+    console.log(this.taskData.sp, e);
+  }
+  /** 获取任务梁数据 */
+  async getTaskBridge() {
+    this.taskData.bridge = await this.db.getTaskBridgeMenuData(
+      (o1) => o1.project === this.taskData.sp && o1.component === this.taskData.sc);
+    console.log(this.taskData.bridge);
+    this.cdr.markForCheck();
+  }
+  /** 选择梁 */
+  setBridge(b) {
+    const {id} = b;
+    const index = this.taskData.sb.indexOf(id);
+    if (index > -1) {
+        // 有则移出
+       this.taskData.sb.splice(index, 1);
+        // this.onChange(this.model); // 需更新绑定的值
+    } else {
+        // 无则添加
+       this.taskData.sb.push(id);
+        // this.onChange(this.model); // 需更新绑定的值
+    }
+    console.log(this.taskData.sb);
+    this.progress.length = this.taskData.sb.length;
+    this.cdr.markForCheck();
+  }
+  /** 过滤 */
+  onTaskFliter(e) {
+    console.log(e);
   }
 
-  onTaskSelect(value, key) {
-    this.dataProcessing[`${key}Select`] = value;
-    console.log(this.dataProcessing[`${key}Select`].length,
-     of(this.dataProcessing.taskData$).pipe(
-       map(item => {
-         item.subscribe().pipe(
-           map(i => {
-             console.log(i);
-           })
-         );
-       })
-     )
-    );
+  exportOk() {
+    this.derivedExcel();
   }
-  select(key, value) {
-    console.log('all', value);
-    this.dataProcessing[`${key}indeterminate`] = false;
-    this.dataProcessing[`${key}Data$`].map(item => {
-      item.checked = value;
+
+  async derivedExcel() {
+    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    const outdata = {
+      record: [],
+      data: {
+        name: null,
+        component: null,
+        tensionDate: null,
+        project: null,
+        bridgeOtherInfo: null
+      }
+    };
+    let count = 0;
+    this.progress.state = true;
+    // {mm: 12.25, sumMm: 24.01, percent: -3.96, remm: 17.27}
+    await this.taskData.sb.map(async id => {
+      const data = await this.db.db.task.filter(t => t.id === id).first();
+      const project = await this.db.db.project.filter(p => p.id === this.taskData.sp).first();
+      outdata.data.name = data.name;
+      outdata.data.component = data.component;
+      outdata.data.bridgeOtherInfo = data.otherInfo;
+      outdata.data.project = project;
+      console.log(data, id);
+      const jack = await this.db.db.jack.filter(j => j.id === data.device[0]).first();
+      const tensionDate = [];
+      data.groups.map(g => {
+        if (g.record) {
+          tensionDate.push(g.record.time[1]);
+          const re = TensionMm(g, true);
+          const kns = mpaToKN(jack, g.mode, g.record);
+          console.log(re);
+          const elongation: Elongation = TensionMm(g);
+          taskModeStr[g.mode].map(name => {
+            outdata.record.push({
+              name: g.name,
+              devName: name,
+              jackNumber: jack[name].jackNumber,
+              pumpNumber: jack[name].pumpNumber,
+              tensionDate: DateFormat(new Date(g.record.time[1]), 'yyyy-MM-dd hh:mm'),
+              mpa: g.record[name].mpa,
+              kn: kns[name],
+              mm: g.record[name].mm,
+              setKn: g.tensionKn,
+              theoryMm: g[name].theoryMm,
+              lengthM: g.length,
+              tensiongMm: elongation[name].sumMm,
+              percent: elongation[name].percent,
+              wordMm: g[name].wordMm,
+              returnMm: g.returnMm,
+              returnKn: {
+                mpa: g.record[name].reData.map,
+                kn: mpaToKNSingle(jack, name, g.record[name].reData.map),
+                mm: g.record[name].reData.mm,
+                countMm: re[name].remm
+              }
+            });
+          });
+        }
+      });
+      const max = Math.max.apply(null, tensionDate);
+      const min = Math.min.apply(null, tensionDate);
+      outdata.data.tensionDate = `${DateFormat(new Date(min), 'yyyy-MM-dd hh:mm')} ~ ${DateFormat(new Date(max), 'yyyy-MM-dd hh:mm')}`;
+      console.log('处理后的数据', outdata);
+      // outdata.data = JSON.stringify(outdata.record);
+      // const exData = {data: outdata.data, exData: JSON.stringify(outdata.record)};
+      console.log('导出的数据', outdata);
+      this.e.ipcRenderer.send('derivedExcel', {
+        channel,
+        templatePath: this.tempPath,
+        outPath: this.savePath,
+        data: outdata,
+      });
+      this.e.ipcRenderer.once(channel, (event, data) => {
+        if (data.success) {
+          count++;
+          this.progress.now = count;
+          if (count === this.taskData.sb.length) {
+            // this.message.success(`导出${count}条完成`);
+            this.progress.msg = '导出完成';
+          }
+        }
+        this.cdr.markForCheck();
+        console.log('导出', data);
+      });
     });
-  }
-  itemSelect(key) {
-    const data = this.dataProcessing[`${key}Data$`];
-    if (data.every(item => item.checked === false)) {
-      this.dataProcessing[`${key}All`] = false;
-      this.dataProcessing[`${key}indeterminate`] = false;
-    } else if (data.every(item => item.checked === true)) {
-      this.dataProcessing[`${key}All`] = true;
-      this.dataProcessing[`${key}indeterminate`] = false;
-    } else {
-      this.dataProcessing[`${key}indeterminate`] = true;
-    }
-  }
-
-  async nzEvent(event: Required<NzFormatEmitEvent>): Promise<void> {
-    console.log(event);
-    // load child async
-    const node = event.node;
-    // console.log(node);
-    if (node.level === 0) {
-      const data = await this.db.getTaskDataTreatingComponent(o1 => o1.project === Number(node.key), node.key);
-      node.addChildren(data);
-    } else if (node.level === 1) {
-      console.log(node.key);
-      const data = await this.db.getTaskBridgeMenuData(
-        o1 => o1.project === Number(node.key[1]) && o1.component === node.key[0],
-        true
-      );
-      node.addChildren(data);
-    }
-  }
-  onclick(event: Required<NzFormatEmitEvent>) {
-    console.log(event.nodes);
-  }
-
-  getTrr() {
-    console.log(this.taskTerr.getCheckedNodeList(), this.taskTerr.getSelectedNodeList());
-  }
-
-  async onTaskProject($event: Array<number>) {
-    this.taskData.component = await this.db.getTaskComponentMenuData(o1 => $event.indexOf(o1.project) > -1);
-    console.log($event, this.taskData.component);
-    this.cdr.markForCheck();
-  }
-  async onTaskComponet($event: Array<number>) {
-    this.taskData.component = await this.db.getTaskComponentMenuData(o1 => $event.indexOf(o1.project) > -1);
-    console.log($event, this.taskData.component);
-    this.cdr.markForCheck();
   }
 }

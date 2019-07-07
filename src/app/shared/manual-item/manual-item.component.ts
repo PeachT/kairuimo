@@ -6,6 +6,7 @@ import { AppService } from 'src/app/services/app.service';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D, PLC_M } from 'src/app/models/IPCChannel';
 import { mpaToPlc, mmToPlc } from 'src/app/Function/device.date.processing';
+import { DebugData } from 'src/app/models/debug';
 
 @Component({
   selector: 'app-manual-item',
@@ -84,6 +85,11 @@ export class ManualItemComponent implements OnInit {
     160: null,
     200: null,
   };
+  debugItem = null;
+  debugItems = ['m5', 'm10', 'm15', 'm20', 'm25', 'm30', 'm35', 'm40', 'm45', 'm50', 'm55', 'mmSpeed'];
+  debugNames = ['5Mpa保压', '10Mpa保压', '15Mpa保压', '20Mpa保压', '25Mpa保压', '30Mpa保压',
+                '35Mpa保压', '40Mpa保压', '45Mpa保压', '50Mpa保压', '54.5 ~ 55Mpa安全阀测试', '顶速度'];
+  debugData: DebugData;
 
   constructor(
     private e: ElectronService,
@@ -121,6 +127,28 @@ export class ManualItemComponent implements OnInit {
       default:
         break;
     }
+    const localStorageName = `debug${this.PLCS.jack.id}${this.name}`;
+    const debugData =  JSON.parse(localStorage.getItem(localStorageName));
+    if (!debugData) {
+      this.debugData = {
+        m5: { date: null},
+        m10: { date: null},
+        m15: { date: null},
+        m20: { date: null},
+        m25: { date: null},
+        m30: { date: null},
+        m35: { date: null},
+        m40: { date: null},
+        m45: { date: null},
+        m50: { date: null},
+        m55: { date: null},
+        mmSpeed: { date: null},
+      }
+      localStorage.setItem(localStorageName, JSON.stringify(this.debugData));
+    } else {
+      this.debugData =  debugData;
+    }
+    console.log(this.debugData, localStorageName);
   }
 
   /** 设置数据 */
@@ -165,6 +193,35 @@ export class ManualItemComponent implements OnInit {
       console.log(this.setM[i]);
       this.PLCS.ipcSend(`${this.devName}F05`, PLC_M(this.setM[i]), false);
       this.setMState[i] = false;
+    }
+  }
+  selectDebug(e) {
+    console.log(e);
+  }
+  runDebug() {
+    const name = this.name;
+    const i = this.debugItem.i;
+    const key = this.debugItem.key;
+    console.log(name, i, key);
+
+    if (i < 10) {
+      const max = i * 5 + 5;
+      const min = i * 5;
+      if (this.showMpa > min && this.showMpa < max) {
+        this.debugData[name][key].start = this.showMpa;
+        this.debugData[name][key].date = new Date();
+        this.debugData[name][key].time = 0;
+        const ti = setInterval(() => {
+          this.debugData[name][key].time++;
+          console.log(this.debugData[name][key]);
+          this.debugData[name][key].end = this.showMpa;
+          this.cdr.markForCheck();
+          if (this.debugData[name][key].time >= 90) {
+            clearInterval(ti);
+          }
+        }, 1000);
+        this.t.push(ti);
+      }
     }
   }
 }

@@ -20,6 +20,7 @@ import { AddOtherComponent } from './add-other/add-other.component';
 import { TimeSecComponent } from './time-sec/time-sec.component';
 import { DataTreatingComponent } from './data-treating/data-treating.component';
 import { DeleteModalComponent } from './delete-modal/delete-modal.component';
+import { DebugComponent } from './debug/debug.component';
 
 
 // pipe
@@ -45,6 +46,7 @@ const COMPONENTS = [
   TimeSecComponent,
   DataTreatingComponent,
   DeleteModalComponent,
+  DebugComponent
 ];
 const PIPE = [
   ToFixedrPipe,

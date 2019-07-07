@@ -1,0 +1,30 @@
+.windows-select {
+  display: flex;
+  .item {
+    flex: 1;
+  }
+}
+
+.checkbox {
+  input {
+    position: absolute;
+    clip: rect(0, 0, 0, 0)
+  }
+  &::before {
+    content: '\a0';
+    display: inline-block;
+    border: 1px solid silver;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    font-weight: bold;
+  }
+  &.check::before {
+    content: '\2713';
+    color: white;
+    background: #1890ff;
+    border: 1px solid #1890ff;
+    line-height: 18px;
+  }
+}
+

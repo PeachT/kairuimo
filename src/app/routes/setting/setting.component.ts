@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DbService } from 'src/app/services/db.service';
@@ -41,6 +41,7 @@ export class SettingComponent implements OnInit, OnDestroy {
     public appService: AppService,
     public PLCS: PLCService,
     private message: NzMessageService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.getData();
     this.mpaRevise = this.PLCS.getMpaRevise();
@@ -65,12 +66,14 @@ export class SettingComponent implements OnInit, OnDestroy {
     // this.PLCS.ipcSend(`zF03`, PLC_D(410), 6);
     this.PLCS.ipcSend('zF03', PLC_D(408), 8).then((data: any) => {
       if (data) {
+        /** 设备模式 */
+        this.systenDate[4] = data.int16[0];
+
         this.systenDate[0] = plcToMpa(data.int16[2], null);
         this.systenDate[1] = plcToMpa(data.int16[3], null);
         this.systenDate[2] = plcToMpa(data.int16[4], null);
         this.systenDate[3] = data.int16[3] / 10;
-        /** 设备模式 */
-        this.systenDate[4] = data.int16[0];
+        this.cdr.markForCheck();
       }
       console.log('获取PLC设备数据', data, this.systenDate);
     }).finally(() => {

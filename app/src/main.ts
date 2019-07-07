@@ -197,7 +197,7 @@ ipcMain.on('derivedExcel', async (event, data) => {
   //   outPath: null,
   // };
   const filePath = data.templatePath;
-  const savePath = `${data.outPath}/${new Date().getTime()}.xlsx`;
+  const savePath = `${data.outPath}/${data.data.data.name}张拉记录.xlsx`;
   try {
     console.log(filePath, savePath, data.data);
     const exlBuf = await readFileAsync(filePath);
@@ -226,9 +226,9 @@ ipcMain.on('selectTemplate', (event, data) => {
     try {
       outPath = dialog.showOpenDialog(win, {properties: ['openDirectory']})[0];
       templatePath = dialog.showOpenDialog(win, {properties: ['openFile'], filters: [
-        { name: 'template', extensions: ['xlsx'] },
-      ]
-    })[0];
+          { name: 'template', extensions: ['xlsx'] },
+        ]
+      })[0];
       console.log(outPath, templatePath);
     } catch (error) {
     }

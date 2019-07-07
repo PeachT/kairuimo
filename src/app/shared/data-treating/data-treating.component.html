@@ -1,12 +1,30 @@
-<nz-modal [nzVisible]="true" nzTitle="数据处理" (nzOnCancel)="dataHandleCancel()" (nzOnOk)="dataHandleOk()" nzWidth="85%">
-  <nz-radio-group [(ngModel)]="dataProcessing.radioValue">
-    <label nz-radio [nzValue]="false">导出</label>
-    <label nz-radio [nzValue]="true">导入</label>
+<nz-modal [nzVisible]="true" nzTitle="数据处理"
+  (nzOnCancel)="dataHandleCancel()"
+  (nzOnOk)="dataHandleOk()"
+  nzWidth="85%"
+  [nzMaskClosable]="false">
+  <nz-radio-group [(ngModel)]="exportMode" (ngModelChange)="selectEM()">
+    <label nz-radio [nzValue]="1">导出表格</label>
+    <label nz-radio [nzValue]="2">导出数据</label>
+    <label nz-radio [nzValue]="3">导入</label>
   </nz-radio-group>
 
-  <nz-divider nzText="选择导出设备"></nz-divider>
+  <div *ngIf="e.isWindows">
+    <nz-divider nzText="选择导出位置" ></nz-divider>
+    <div class="windows-select">
+      <div class="item">
+        <p>保存路径：{{savePath}}</p>
+        <button nz-button nzType="primary" (click)="selectSavePath()">选择导出保存路径</button>
+      </div>
+      <div class="item" *ngIf="exportMode === 1">
+        <p>保存路径：{{tempPath}}</p>
+        <button nz-button nzType="primary" (click)="selectTemp()">选择导出模板</button>
+      </div>
+    </div>
 
-  <nz-divider nzText="选择处理数据"></nz-divider>
+  </div>
+
+  <!-- <nz-divider nzText="选择处理数据"></nz-divider>
   <nz-checkbox-wrapper style="width: 100%;">
     <label nz-checkbox [(ngModel)]="dataProcessing.task" (ngModelChange)="onSelectClass($event, 'task')">任 务</label>
     <label nz-checkbox [(ngModel)]="dataProcessing.project"
@@ -14,56 +32,48 @@
     <label nz-checkbox [(ngModel)]="dataProcessing.component"
       (ngModelChange)="onSelectClass($event, 'component')">构建</label>
     <label nz-checkbox [(ngModel)]="dataProcessing.jack" (ngModelChange)="onSelectClass($event, 'jack')">顶</label>
-  </nz-checkbox-wrapper>
+  </nz-checkbox-wrapper> -->
   <br>
   <br>
-  <div class="data-processing-content">
-    <nz-card nzTitle="任务" *ngIf="dataProcessing.task" style="flex: 2.2;">
-      <button (click)="getTrr()">get</button>
-      <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskCheckbox($event)">
-        <label nz-checkbox nzValue="0">已导出</label>
-        <label nz-checkbox nzValue="1">未导出</label>
-        <label nz-checkbox nzValue="2">已张拉</label>
-        <label nz-checkbox nzValue="3">未张拉</label>
-      </nz-checkbox-wrapper>
+  <div>
+    <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskFliter($event)">
+      <label nz-checkbox nzValue="0">已导出</label>
+      <label nz-checkbox nzValue="1">未导出</label>
+      <!-- <label nz-checkbox nzValue="2">已张拉</label>
+      <label nz-checkbox nzValue="3">未张拉</label> -->
+    </nz-checkbox-wrapper>
+    <div *ngIf="savePath && tempPath">
+      <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
+        <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
+      </nz-radio-group>
       <hr>
-      <div>
-        <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskProject($event)">
-          <label nz-checkbox [nzValue]="item.key" *ngFor="let item of taskData.project">{{item.title}}</label>
-        </nz-checkbox-wrapper>
-        <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskComponet($event)">
-            <label nz-checkbox [nzValue]="item" *ngFor="let item of taskData.component">{{item}}</label>
-          </nz-checkbox-wrapper>
-        <!-- <nz-tree [nzData]="dataProcessing.taskData$" nzAsyncData nzCheckable (nzClick)="onclick($event)"
-          (nzExpandChange)="nzEvent($event)" #taskTerr>
-        </nz-tree> -->
-        <!-- {{dataProcessing.taskData$ | json}} -->
-        <!-- <div *ngFor="let item of dataProcessing.taskData$; index as i">
-          <p>{{item}}</p>
-          <div *ngFor="let item2 of dataProcessing.taskData$[i]">
-            <p>{{item}}</p>
-          </div>
-        </div> -->
-        <!-- <nz-transfer [nzDataSource]="list" nzShowSearch [nzOperations]="['to right', 'to left']"
-          [nzListStyle]="{ 'width.px': 250, 'height.px': 300 }" [nzRender]="render" [nzFooter]="footer"
-          (nzSelectChange)="select($event)" (nzChange)="change($event)">
-          <ng-template #render let-item> {{ item.title }}-{{ item.description }} </ng-template>
-          <ng-template #footer let-direction>
-            <button nz-button (click)="reload(direction)" [nzSize]="'small'" style="float: right; margin: 5px;">
-              reload
-            </button>
-          </ng-template>
-        </nz-transfer> -->
+      <nz-radio-group [(ngModel)]="taskData.sc" (ngModelChange)="selectTaskComponent($event)">
+        <label nz-radio [nzValue]="c" *ngFor="let c of taskData.component">{{c}}</label>
+      </nz-radio-group>
+      <hr>
+      <div style="display: flex;flex-wrap: wrap;">
+        <div *ngFor="let b of taskData.bridge; index as i" style="margin: 0 15px 15px 0;">
+          <label
+            class="checkbox"
+            [ngClass]="{'check': taskData.sb.indexOf(b.id) > -1}"
+          >
+            <input
+              type="checkbox"
+              name="brigeBox"
+              [checked]="taskData.sb.indexOf(b.id) > -1"
+              (click)="setBridge(b)"
+              [value]="b.id"
+            />
+            {{b.name}}
+          </label>
+        </div>
       </div>
-    </nz-card>
-    <nz-card nzTitle="项目" *ngIf="dataProcessing.project">
-
-    </nz-card>
-    <nz-card nzTitle="构建" *ngIf="dataProcessing.component">
-      {{dataProcessing.componentData$ | async}}
-    </nz-card>
-    <nz-card nzTitle="顶" *ngIf="dataProcessing.jack">
-      {{dataProcessing.jackData$ | async}}
-    </nz-card>
+    </div>
+  </div>
+  <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;">
+    <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.msg === '导出'" [disabled]="!(taskData.sb.length > 0)" [nzLoading]="progress.state">{{progress.msg}}</button>
+    <span *ngIf="progress.msg === '导出完成'">{{progress.msg}}{{progress.now}}条</span>
+    <nz-progress [nzPercent]="progress.now / progress.length * 100" style="flex: 1; margin-left: 15px;" ></nz-progress>
+    <span>{{progress.length}} / {{progress.now}}</span>
   </div>
 </nz-modal>

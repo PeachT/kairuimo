@@ -1,0 +1,32 @@
+<div class="modal">
+  <div class="main">
+    <div (click)="close()" style="position: absolute; right: 25px;">
+      <i nz-icon nzType="close" nzTheme="outline" style="font-size: 35px;" ></i>
+    </div>
+    <nz-anchor [nzAffix]="false" [nzTarget]="y" style="    position: fixed;
+    top: 25px;
+    left: 15px;
+    width: 9.8%;">
+      <nz-link *ngFor="let name of mode; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
+    </nz-anchor>
+    <h1>{{modeName}}</h1>
+    <input type="number" [(ngModel)]="showMpa">
+    <div class="scroll-y">
+      <div class="scroll-content"  #y>
+        <div *ngFor="let name of mode" [id]="name">
+          <nz-divider style="min-width: auto;" [nzText]="name" nzOrientation="left"></nz-divider>
+          <div style="display: flex; flex-wrap: wrap;">
+            <div *ngFor="let item of debugItems; index as i" class="item">
+              <span style="background-color: #ddd;">{{debugNames[i]}}:</span>
+              <span style="color: white; background-color: #2486b9">时间：{{debugData[name][item].time}}s </span>
+              <span style="color: white; background-color: #12a182">开始值：{{debugData[name][item].start}}</span>
+              <span style="color: white; background-color: #96c24e">结束值：{{debugData[name][item].end}}</span>
+              <span style="color: white; background-color: #f9d770">日期：{{debugData[name][item].date | date: 'yyyy-MM-dd hh:mm'}}&nbsp;&nbsp;</span>
+              <button nz-button nzType="default" (click)="runDebug(name, i, item)">测试</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
