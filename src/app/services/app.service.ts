@@ -29,6 +29,8 @@ export class AppService {
   public edit = false;
   /** 数据导入导出 */
   dataTreatingShow = false;
+  /** 调试 */
+  debugShow = false;
 
   public powerState = false;
   public powerDelay = 5;

@@ -2,7 +2,7 @@
   <header>
     <div>
       <span style="margin-left: 60px;">选择千斤顶：</span>
-      <nz-select nzSize="large" style="width: 200px;" [(ngModel)]="selectJackId" nzPlaceHolder="Choose"
+      <nz-select nzSize="large" style="width: 200px;" [(ngModel)]="selectJackId" nzPlaceHolder="选择顶"
       (ngModelChange)="onSelectedDevice($event)">
       <nz-option [nzValue]="item.id" [nzLabel]="item.name" *ngFor="let item of jacks"></nz-option>
       </nz-select>
