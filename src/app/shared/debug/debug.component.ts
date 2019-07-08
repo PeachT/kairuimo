@@ -36,7 +36,7 @@ export class DebugComponent implements OnInit {
     private db: DbService,
     public apps: AppService,
     public e: ElectronService,
-    private PLCS: PLCService,
+    public PLCS: PLCService,
   ) { }
 
   ngOnInit() {
@@ -50,9 +50,10 @@ export class DebugComponent implements OnInit {
     }).finally(() => {
     });
     this.mode  = deviceGroupMode[4];
-    const debugData =  JSON.parse(localStorage.getItem('debugData'));
-    if (!debugData) {
-      this.mode.map(name => {
+    this.mode.map(name => {
+      const localStorageName = `debug${this.PLCS.jack.id}${name}`;
+      const debugData =  JSON.parse(localStorage.getItem(localStorageName));
+      if (!debugData) {
         this.debugData[name] = {
           m5: { date: null},
           m10: { date: null},
@@ -66,12 +67,25 @@ export class DebugComponent implements OnInit {
           m50: { date: null},
           m55: { date: null},
           mmSpeed: { date: null},
+        };
+      } else {
+        this.debugData[name] = debugData;
+        const i = 1;
+        // tslint:disable-next-line: forin
+        for (const key in this.debugData[name]) {
+          this.debugData[name][key].state = 0;
+          const v = this.debugData[name][key];
+          if (v.time >= 90 && v.start && v.end) {
+            if (v.start - v.end >= 0.5) {
+              this.debugData[name][key].state = 1;
+            } else {
+              this.debugData[name][key].state = 2;
+            }
+          }
         }
-      });
-      localStorage.setItem('unitInfo', JSON.stringify(this.debugData));
-    } else {
-      this.debugData =  debugData;
-    }
+      }
+    });
+
     console.log(this.debugData);
   }
 
@@ -79,26 +93,4 @@ export class DebugComponent implements OnInit {
     this.apps.debugShow = false;
   }
 
-  runDebug(name, i, key) {
-    console.log(name, i, key);
-    if (i < 10) {
-      const max = i * 5 + 5;
-      const min = i * 5;
-      if (this.showMpa > min && this.showMpa < max) {
-        this.debugData[name][key].start = this.showMpa;
-        this.debugData[name][key].date = new Date();
-        this.debugData[name][key].time = 0;
-        const ti = setInterval(() => {
-          this.debugData[name][key].time++;
-          console.log(this.debugData[name][key]);
-          this.debugData[name][key].end = this.showMpa;
-          this.cdr.markForCheck();
-          if (this.debugData[name][key].time >= 90) {
-            clearInterval(ti);
-          }
-        }, 1000);
-        this.t.push(ti);
-      }
-    }
-  }
 }

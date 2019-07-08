@@ -203,25 +203,25 @@ export class ManualItemComponent implements OnInit {
     const i = this.debugItem.i;
     const key = this.debugItem.key;
     console.log(name, i, key);
-
-    if (i < 10) {
-      const max = i * 5 + 5;
-      const min = i * 5;
-      if (this.showMpa > min && this.showMpa < max) {
-        this.debugData[name][key].start = this.showMpa;
-        this.debugData[name][key].date = new Date();
-        this.debugData[name][key].time = 0;
-        const ti = setInterval(() => {
-          this.debugData[name][key].time++;
-          console.log(this.debugData[name][key]);
-          this.debugData[name][key].end = this.showMpa;
-          this.cdr.markForCheck();
-          if (this.debugData[name][key].time >= 90) {
-            clearInterval(ti);
-          }
-        }, 1000);
-        this.t.push(ti);
-      }
-    }
+    this.message.warning('未完成功能');
+    // if (i < 10) {
+    //   const max = i * 5 + 5;
+    //   const min = i * 5;
+    //   if (this.showMpa > min && this.showMpa < max) {
+    //     this.debugData[name][key].start = this.showMpa;
+    //     this.debugData[name][key].date = new Date();
+    //     this.debugData[name][key].time = 0;
+    //     const ti = setInterval(() => {
+    //       this.debugData[name][key].time++;
+    //       console.log(this.debugData[name][key]);
+    //       this.debugData[name][key].end = this.showMpa;
+    //       this.cdr.markForCheck();
+    //       if (this.debugData[name][key].time >= 90) {
+    //         clearInterval(ti);
+    //       }
+    //     }, 1000);
+    //     this.t.push(ti);
+    //   }
+    // }
   }
 }

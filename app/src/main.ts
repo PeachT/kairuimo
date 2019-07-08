@@ -188,6 +188,11 @@ function IPCSend(channel: string, message: any) {
 }
 
 ///////////////////////////////////////////////////////////// 导出表格
+/** 获取模板 */
+ipcMain.on('get-template', async (event, data) => {
+  event.sender.send('get-template-back', moundUSB('*.kvmt'));
+});
+
 // 开始导出
 ipcMain.on('derivedExcel', async (event, data) => {
   // console.log('123456789', path);
@@ -196,19 +201,16 @@ ipcMain.on('derivedExcel', async (event, data) => {
   //   templatePath: null,
   //   outPath: null,
   // };
-  const filePath = data.templatePath;
-  const savePath = `${data.outPath}/${data.data.data.name}张拉记录.xlsx`;
-  try {
-    console.log(filePath, savePath, data.data);
-    const exlBuf = await readFileAsync(filePath);
-    // 数据源
-    // const data = [
-    //   {name: 'N1', kh: 'A1'},
-    //   {name: 'N1', kh: 'A2'},
-    //   {name: 'N2', kh: 'B1'},
-    //   {name: 'N2', kh: 'B2'},
-    // ]
+  const outPath = data.outPath;
+  if (!fs.existsSync(outPath)) {
+    fs.mkdirSync(outPath);
+  }
 
+  const filePath = data.templatePath;
+  const savePath = `${outPath}/${data.data.data.name}张拉记录.xlsx`;
+  try {
+    console.log(filePath, savePath, outPath, data.outPath);
+    const exlBuf = await readFileAsync(filePath);
     // 用数据源(对象)data渲染Excel模板
     const exlBuf2 = await ejsexcel.renderExcel(exlBuf, data.data);
     await writeFileAsync(savePath, exlBuf2);
@@ -280,39 +282,40 @@ ipcMain.on('power', (event, data) => {
 
 /** 获取更新文件 */
 ipcMain.on('select-file', (event, data) => {
-  console.log('select-file');
-  let updatepath = '/media';
-  // 获取用户名
-  exec(`whoami`,  { async : true }, (code, stdout, stderr) => {
-    updatepath = `/media/${stdout.split('\n')[0]}`;
-  });
-  const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
-    usb.kill();
-    console.log('usb', stdout);
-    if (stdout) {
-      const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`,  { async : true }, (code, stdout, stderr) => {
-        up.kill();
-        console.log('mount code:', code);
-        console.log('mount output:', stdout);
-        console.log('mount stderr:', stderr);
-        if (stderr.indexOf('不存在') !== -1) {
-          event.sender.send('select-file-out', {stdout, stderr: '加载U盘失败！'});
-          return;
-        } else {
-          const upps = exec(`find ${updatepath} -name "*kvm-device*.kvm"`, { async : true }, (code, stdout, stderr) => {
-            stdout = stdout.split('\n').filter(t => t !== '');
-            console.log('Exit code:', code);
-            console.log('Program output:', stdout);
-            console.log('Program stderr:', stderr);
-            event.sender.send('select-file-out', {stdout, stderr});
-            upps.kill();
-          });
-        }
-      });
-    } else {
-      event.sender.send('select-file-out', {stdout, stderr: '未检测到U盘！！'});
-    }
-  });
+  event.sender.send('select-file-out', moundUSB('*kvm-device*.kvm'));
+  // console.log('select-file');
+  // let updatepath = '/media';
+  // // 获取用户名
+  // exec(`whoami`,  { async : true }, (code, stdout, stderr) => {
+  //   updatepath = `/media/${stdout.split('\n')[0]}`;
+  // });
+  // const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
+  //   usb.kill();
+  //   console.log('usb', stdout);
+  //   if (stdout) {
+  //     const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`,  { async : true }, (code, stdout, stderr) => {
+  //       up.kill();
+  //       console.log('mount code:', code);
+  //       console.log('mount output:', stdout);
+  //       console.log('mount stderr:', stderr);
+  //       if (stderr.indexOf('不存在') !== -1) {
+  //         event.sender.send('select-file-out', {stdout, stderr: '加载U盘失败！'});
+  //         return;
+  //       } else {
+  //         const upps = exec(`find ${updatepath} -name "*kvm-device*.kvm"`, { async : true }, (code, stdout, stderr) => {
+  //           stdout = stdout.split('\n').filter(t => t !== '');
+  //           console.log('Exit code:', code);
+  //           console.log('Program output:', stdout);
+  //           console.log('Program stderr:', stderr);
+  //           event.sender.send('select-file-out', {stdout, stderr});
+  //           upps.kill();
+  //         });
+  //       }
+  //     });
+  //   } else {
+  //     event.sender.send('select-file-out', {stdout, stderr: '未检测到U盘！！'});
+  //   }
+  // });
 });
 /** 本地文件更新 */
 ipcMain.on('local-update', (event, data) => {
@@ -356,3 +359,39 @@ ipcMain.on('test', (event, data) => {
 ipcMain.on('openDevTools', () => {
   win.webContents.openDevTools();
 });
+
+/** 挂载U盘 */
+function moundUSB(filterName) {
+  console.log('select-file');
+  let updatepath = '/media';
+  // 获取用户名
+  exec(`whoami`,  { async : true }, (code, stdout, stderr) => {
+    updatepath = `/media/${stdout.split('\n')[0]}`;
+  });
+  const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
+    usb.kill();
+    console.log('usb', stdout);
+    if (stdout) {
+      const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`,  { async : true }, (code, stdout, stderr) => {
+        up.kill();
+        console.log('mount code:', code);
+        console.log('mount output:', stdout);
+        console.log('mount stderr:', stderr);
+        if (stderr.indexOf('不存在') !== -1) {
+          return {stdout, stderr: '加载U盘失败！'};
+        } else {
+          const upps = exec(`find ${updatepath} -name ${filterName}`, { async : true }, (code, stdout, stderr) => {
+            stdout = stdout.split('\n').filter(t => t !== '');
+            console.log('Exit code:', code);
+            console.log('Program output:', stdout);
+            console.log('Program stderr:', stderr);
+            upps.kill();
+            return {stdout, stderr};
+          });
+        }
+      });
+    } else {
+      return {stdout, stderr: '未检测到U盘！！'};
+    }
+  });
+}

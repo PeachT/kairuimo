@@ -18,4 +18,6 @@ export interface KeyValue {
   time?: number;
   start?: number;
   end?: number;
+  state?: number;
+  name?: string;
 }

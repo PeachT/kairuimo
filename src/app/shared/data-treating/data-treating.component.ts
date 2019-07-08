@@ -30,25 +30,6 @@ export class DataTreatingComponent implements OnInit {
     now: 0,
   };
 
-  dataProcessing = {
-    state: false,
-    radioValue: false,
-    task: false,
-    project: false,
-    jack: false,
-    component: false,
-    taskCheckbox: null,
-    taskData$: null,
-    projectData$: null,
-    jackData$: null,
-    componentData$: null,
-    taskSelect: [],
-    projectSelect: [],
-    componentSelect: [],
-    jackSelect: [],
-    taskAll: false,
-    taskindeterminate: false,
-  };
   taskData = {
     project: [],
     sp: null,
@@ -56,6 +37,13 @@ export class DataTreatingComponent implements OnInit {
     sc: null,
     bridge: [],
     sb: []
+  };
+  template = {
+    state: false,
+    files: null,
+    selectFile: null,
+    start: false,
+    fileMsg: null,
   };
 
   constructor(
@@ -85,10 +73,29 @@ export class DataTreatingComponent implements OnInit {
     console.log('选择Mode', this.exportMode, this.e.isWindows);
     switch (this.exportMode) {
       case 1:
+        this.getTemplate();
         this.getTaskProject();
+        break;
+      case 2:
+        this.message.warning('功能没有实现');
+        break;
+      case 3:
+        this.message.warning('功能没有实现');
         break;
       default:
         break;
+    }
+  }
+  /** 获取模板 */
+  getTemplate() {
+    if (this.e.isLinux) {
+      this.e.ipcRenderer.send('get-template', 'get-template-back');
+      this.e.ipcRenderer.once('get-template-back', (event, data) => {
+        console.log(data);
+        this.template.files = data.stdout;
+        this.template.fileMsg = data;
+        this.cdr.markForCheck();
+      });
     }
   }
   /** 选择保存路径 */
@@ -101,6 +108,30 @@ export class DataTreatingComponent implements OnInit {
     this.tempPath = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
       filters: [{ name: '模板', extensions: ['kvmt'] }]
     })[0];
+    this.createSavePath();
+    // let obj = null;
+    // if (this.e.isWindows) {
+    //   obj = this.tempPath.lastIndexOf(`\\`);
+    // } else if (this.e.isLinux) {
+    //   obj = this.tempPath.lastIndexOf(`/`);
+    // }
+    // this.savePath = this.tempPath.substr(0, obj);
+    // console.log(obj, this.savePath);
+  }
+  radioSelectTemp() {
+    console.log(this.template.selectFile);
+    this.tempPath = this.template.selectFile;
+    this.createSavePath();
+  }
+  createSavePath() {
+    let obj = null;
+    if (this.e.isWindows) {
+      obj = this.tempPath.lastIndexOf(`\\`);
+    } else if (this.e.isLinux) {
+      obj = this.tempPath.lastIndexOf(`/`);
+    }
+    this.savePath = this.tempPath.substr(0, obj);
+    console.log(obj, this.savePath);
   }
   /** 获取项目数据 */
   async getTaskProject() {
@@ -170,7 +201,11 @@ export class DataTreatingComponent implements OnInit {
   }
 
   async derivedExcel() {
-    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    const id = this.taskData.sb[this.progress.now];
+    if (this.progress.now === 0) {
+      this.savePath = `${this.savePath}/${DateFormat(new Date(), 'yyyy年MM月dd日Thh时mm分ss秒')}导出`;
+    }
+    // this.savePath = this.savePath.replace(new RegExp(/(\\)/g), '/');
     const outdata = {
       record: [],
       data: {
@@ -181,78 +216,83 @@ export class DataTreatingComponent implements OnInit {
         bridgeOtherInfo: null
       }
     };
-    let count = 0;
     this.progress.state = true;
     // {mm: 12.25, sumMm: 24.01, percent: -3.96, remm: 17.27}
-    await this.taskData.sb.map(async id => {
-      const data = await this.db.db.task.filter(t => t.id === id).first();
-      const project = await this.db.db.project.filter(p => p.id === this.taskData.sp).first();
-      outdata.data.name = data.name;
-      outdata.data.component = data.component;
-      outdata.data.bridgeOtherInfo = data.otherInfo;
-      outdata.data.project = project;
-      console.log(data, id);
-      const jack = await this.db.db.jack.filter(j => j.id === data.device[0]).first();
-      const tensionDate = [];
-      data.groups.map(g => {
-        if (g.record) {
-          tensionDate.push(g.record.time[1]);
-          const re = TensionMm(g, true);
-          const kns = mpaToKN(jack, g.mode, g.record);
-          console.log(re);
-          const elongation: Elongation = TensionMm(g);
-          taskModeStr[g.mode].map(name => {
-            outdata.record.push({
-              name: g.name,
-              devName: name,
-              jackNumber: jack[name].jackNumber,
-              pumpNumber: jack[name].pumpNumber,
-              tensionDate: DateFormat(new Date(g.record.time[1]), 'yyyy-MM-dd hh:mm'),
-              mpa: g.record[name].mpa,
-              kn: kns[name],
-              mm: g.record[name].mm,
-              setKn: g.tensionKn,
-              theoryMm: g[name].theoryMm,
-              lengthM: g.length,
-              tensiongMm: elongation[name].sumMm,
-              percent: elongation[name].percent,
-              wordMm: g[name].wordMm,
-              returnMm: g.returnMm,
-              returnKn: {
-                mpa: g.record[name].reData.map,
-                kn: mpaToKNSingle(jack, name, g.record[name].reData.map),
-                mm: g.record[name].reData.mm,
-                countMm: re[name].remm
-              }
-            });
+    console.log(id);
+    const data = await this.db.db.task.filter(t => t.id === id).first();
+    const project = await this.db.db.project.filter(p => p.id === this.taskData.sp).first();
+    outdata.data.name = data.name;
+    outdata.data.component = data.component;
+    outdata.data.bridgeOtherInfo = data.otherInfo;
+    outdata.data.project = project;
+    console.log(data, id);
+    const jack = await this.db.db.jack.filter(j => j.id === data.device[0]).first();
+    const tensionDate = [];
+    data.groups.map(g => {
+      if (g.record) {
+        tensionDate.push(g.record.time[1]);
+        const re = TensionMm(g, true);
+        const kns = mpaToKN(jack, g.mode, g.record);
+        console.log(re);
+        const elongation: Elongation = TensionMm(g);
+        taskModeStr[g.mode].map(name => {
+          outdata.record.push({
+            name: g.name,
+            devName: name,
+            jackNumber: jack[name].jackNumber,
+            pumpNumber: jack[name].pumpNumber,
+            tensionDate: DateFormat(new Date(g.record.time[1]), 'yyyy-MM-dd hh:mm'),
+            mpa: g.record[name].mpa,
+            kn: kns[name],
+            mm: g.record[name].mm,
+            setKn: g.tensionKn,
+            theoryMm: g[name].theoryMm,
+            lengthM: g.length,
+            tensiongMm: elongation[name].sumMm,
+            percent: elongation[name].percent,
+            wordMm: g[name].wordMm,
+            returnMm: g.returnMm,
+            returnKn: {
+              mpa: g.record[name].reData.map,
+              kn: mpaToKNSingle(jack, name, g.record[name].reData.map),
+              mm: g.record[name].reData.mm,
+              countMm: re[name].remm
+            }
           });
-        }
-      });
-      const max = Math.max.apply(null, tensionDate);
-      const min = Math.min.apply(null, tensionDate);
-      outdata.data.tensionDate = `${DateFormat(new Date(min), 'yyyy-MM-dd hh:mm')} ~ ${DateFormat(new Date(max), 'yyyy-MM-dd hh:mm')}`;
-      console.log('处理后的数据', outdata);
-      // outdata.data = JSON.stringify(outdata.record);
-      // const exData = {data: outdata.data, exData: JSON.stringify(outdata.record)};
-      console.log('导出的数据', outdata);
-      this.e.ipcRenderer.send('derivedExcel', {
-        channel,
-        templatePath: this.tempPath,
-        outPath: this.savePath,
-        data: outdata,
-      });
-      this.e.ipcRenderer.once(channel, (event, data) => {
-        if (data.success) {
-          count++;
-          this.progress.now = count;
-          if (count === this.taskData.sb.length) {
-            // this.message.success(`导出${count}条完成`);
-            this.progress.msg = '导出完成';
-          }
-        }
-        this.cdr.markForCheck();
-        console.log('导出', data);
-      });
+        });
+      }
     });
+    const max = Math.max.apply(null, tensionDate);
+    const min = Math.min.apply(null, tensionDate);
+    outdata.data.tensionDate = `${DateFormat(new Date(min), 'yyyy-MM-dd hh:mm')} ~ ${DateFormat(new Date(max), 'yyyy-MM-dd hh:mm')}`;
+    console.log('处理后的数据', id, outdata);
+    // outdata.data = JSON.stringify(outdata.record);
+    // const exData = {data: outdata.data, exData: JSON.stringify(outdata.record)};
+    console.log('导出的数据', outdata);
+    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    this.e.ipcRenderer.send('derivedExcel', {
+      channel,
+      templatePath: this.tempPath,
+      outPath: this.savePath,
+      data: outdata,
+    });
+    this.e.ipcRenderer.once(channel, (event, data) => {
+      if (data.success) {
+        this.progress.now++;
+        if (this.progress.now === this.taskData.sb.length) {
+          // this.message.success(`导出${count}条完成`);
+          this.progress.msg = '导出完成';
+        } else {
+          this.derivedExcel();
+        }
+      } else {
+        this.progress.msg = '导出错误';
+      }
+      this.cdr.markForCheck();
+      console.log('导出', data);
+    });
+    // this.taskData.sb.map(async id => {
+
+    // });
   }
 }

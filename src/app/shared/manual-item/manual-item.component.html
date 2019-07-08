@@ -105,11 +105,12 @@
       <button nz-button nzSize="large" nzType="default" (click)="runDebug()" [disabled]="!debugItem">测试</button>
     </div>
     <div class="debug-item" *ngIf="debugItem">
-      <span style="background-color: #ddd;">{{debugNames[debugItem.i]}}:</span>
-      <span style="color: white; background-color: #2486b9">时间:{{debugData[debugItem.key].time}}120s </span>
-      <span style="color: white; background-color: #12a182">开始值:{{debugData[debugItem.key].start}}555.99</span>
-      <span style="color: white; background-color: #96c24e">结束值:{{debugData[debugItem.key].end}}999.99</span>
-      <span style="color: white; background-color: #f9d770; flex: auto;">
+      <span [class]="'state' + debugData[debugItem.key].state">{{debugNames[debugItem.i]}}:</span>
+      <span class="time" >时间:{{debugData[debugItem.key].time}}s</span>
+      <span class="start" >开始值:{{debugData[debugItem.key].start}}</span>
+      <span class="end" >结束值:{{debugData[debugItem.key].end}}</span>
+      <span class="name" >{{debugData[debugItem.key].name}}</span>
+      <span class="date" style="flex: auto;">
         日期:{{debugData[debugItem.key].date | date: 'yyyy-MM-dd hh:mm'}}2019-07-07 24
       </span>
     </div>
