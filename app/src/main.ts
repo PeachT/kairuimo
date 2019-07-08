@@ -39,7 +39,8 @@ let win: BrowserWindow;
 
 function createWindow() {
   win = new BrowserWindow(
-    { width: 1920, height: 1080,
+    {
+      width: 1920, height: 1080,
       webPreferences: {
         nodeIntegration: true,
         backgroundThrottling: false
@@ -190,7 +191,8 @@ function IPCSend(channel: string, message: any) {
 ///////////////////////////////////////////////////////////// 导出表格
 /** 获取模板 */
 ipcMain.on('get-template', async (event, data) => {
-  event.sender.send('get-template-back', moundUSB('*.kvmt'));
+  moundUSB('*.kvmt', 'get-template-back');
+  // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
 });
 
 // 开始导出
@@ -214,9 +216,9 @@ ipcMain.on('derivedExcel', async (event, data) => {
     // 用数据源(对象)data渲染Excel模板
     const exlBuf2 = await ejsexcel.renderExcel(exlBuf, data.data);
     await writeFileAsync(savePath, exlBuf2);
-    event.sender.send(data.channel, {success: true, filePath, savePath});
+    event.sender.send(data.channel, { success: true, filePath, savePath });
   } catch (error) {
-    event.sender.send(data.channel, {success: false, filePath, savePath, error});
+    event.sender.send(data.channel, { success: false, filePath, savePath, error });
   }
 });
 
@@ -226,8 +228,9 @@ ipcMain.on('selectTemplate', (event, data) => {
   let templatePath = '';
   if (data) {
     try {
-      outPath = dialog.showOpenDialog(win, {properties: ['openDirectory']})[0];
-      templatePath = dialog.showOpenDialog(win, {properties: ['openFile'], filters: [
+      outPath = dialog.showOpenDialog(win, { properties: ['openDirectory'] })[0];
+      templatePath = dialog.showOpenDialog(win, {
+        properties: ['openFile'], filters: [
           { name: 'template', extensions: ['xlsx'] },
         ]
       })[0];
@@ -239,7 +242,7 @@ ipcMain.on('selectTemplate', (event, data) => {
     } catch (error) {
     }
   }
-  event.sender.send(data.channel, {msg: `获取成功`, outPath, templatePath, data});
+  event.sender.send(data.channel, { msg: `获取成功`, outPath, templatePath, data });
 });
 
 
@@ -263,7 +266,7 @@ ipcMain.on('showKeyboard', (event, data) => {
       console.log('Program output:', stdout);
       console.log('Program stderr:', stderr);
       ps.kill();
-  });
+    });
 });
 
 ipcMain.on('offKdNumber', (event, data) => {
@@ -282,7 +285,7 @@ ipcMain.on('power', (event, data) => {
 
 /** 获取更新文件 */
 ipcMain.on('select-file', (event, data) => {
-  event.sender.send('select-file-out', moundUSB('*kvm-device*.kvm'));
+  moundUSB('*kvm-device*.kvm', 'select-file-out');
   // console.log('select-file');
   // let updatepath = '/media';
   // // 获取用户名
@@ -322,17 +325,17 @@ ipcMain.on('local-update', (event, data) => {
   console.log('local-update');
   // const updatepath = '/media/kvm/kvm/kvm/update/update.sh';
   // const updatepath = '/home/peach/KVM/update/update.sh';
-  const upps = exec(`sudo dpkg -i ${data}`, { async : true}, (code, stdout, stderr) => {
+  const upps = exec(`sudo dpkg -i ${data}`, { async: true }, (code, stdout, stderr) => {
     console.log('Exit code:', code);
     console.log('Program output:', stdout);
     console.log('Program stderr:', stderr);
-    event.sender.send('onUpdate', {stdout, stderr});
+    event.sender.send('onUpdate', { stdout, stderr });
     upps.kill();
   });
 });
 /** 卸载U盘 */
 ipcMain.on('usb-umount', (event, data) => {
-  const upps = exec(`sudo umount /dev/sd[b-z]`, { async : true}, (code, stdout, stderr) => {
+  const upps = exec(`sudo umount /dev/sd[b-z]`, { async: true }, (code, stdout, stderr) => {
     console.log('Exit code:', code);
     console.log('Program output:', stdout);
     console.log('Program stderr:', stderr);
@@ -346,11 +349,11 @@ ipcMain.on('usb-umount', (event, data) => {
 });
 /** 输入linux-shell命令 */
 ipcMain.on('test', (event, data) => {
-  const upps = exec(`${data.data}`, { async : true}, (code, stdout, stderr) => {
+  const upps = exec(`${data.data}`, { async: true }, (code, stdout, stderr) => {
     console.log('Exit code:', code);
     console.log('Program output:', stdout);
     console.log('Program stderr:', stderr);
-    event.sender.send(data.out, {stdout, stderr});
+    event.sender.send(data.out, { stdout, stderr });
     upps.kill();
   });
 });
@@ -361,37 +364,38 @@ ipcMain.on('openDevTools', () => {
 });
 
 /** 挂载U盘 */
-function moundUSB(filterName) {
+function moundUSB(filterName, sendName) {
   console.log('select-file');
   let updatepath = '/media';
   // 获取用户名
-  exec(`whoami`,  { async : true }, (code, stdout, stderr) => {
+  exec(`whoami`, { async: true }, (code, stdout, stderr) => {
     updatepath = `/media/${stdout.split('\n')[0]}`;
   });
-  const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
+  // tslint:disable-next-line: no-unused-expression
+  const usb = exec(`ls /dev/ | grep "sd[b-z]"`, { async: true }, (code, stdout, stderr) => {
     usb.kill();
     console.log('usb', stdout);
     if (stdout) {
-      const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`,  { async : true }, (code, stdout, stderr) => {
+      const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`, { async: true }, (code, stdout, stderr) => {
         up.kill();
         console.log('mount code:', code);
         console.log('mount output:', stdout);
         console.log('mount stderr:', stderr);
         if (stderr.indexOf('不存在') !== -1) {
-          return {stdout, stderr: '加载U盘失败！'};
+          win.webContents.send(sendName, { stdout, stderr: '加载U盘失败！' });
         } else {
-          const upps = exec(`find ${updatepath} -name ${filterName}`, { async : true }, (code, stdout, stderr) => {
+          const upps = exec(`find ${updatepath} -name ${filterName}`, { async: true }, (code, stdout, stderr) => {
             stdout = stdout.split('\n').filter(t => t !== '');
             console.log('Exit code:', code);
             console.log('Program output:', stdout);
             console.log('Program stderr:', stderr);
             upps.kill();
-            return {stdout, stderr};
+            win.webContents.send(sendName, { stdout, stderr });
           });
         }
       });
     } else {
-      return {stdout, stderr: '未检测到U盘！！'};
+      win.webContents.send(sendName, { stdout, stderr: '未检测到U盘！！' });
     }
   });
 }

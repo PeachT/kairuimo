@@ -10,22 +10,27 @@
     <nz-divider nzText="选择导出位置"></nz-divider>
     <div>
       <p>导出会在模板所在的文件夹下创建一个导出时的时间文件夹（例：1970-01-01T12:12:12导出）</p>
-      <button *ngIf="e.isWindows || apps.userInfo.jurisdiction > 8" nz-button nzType="primary"
-        (click)="selectTemp()">选择导出模板</button>
-        <div *ngIf="e.isLinux">
-          <h2 *ngIf="template.files?.length === 0">没有找到更新文件
-            <button nz-button nzType="primary" (click)="getTemplate()">
-              获取更新文件
-            </button>
-            <p>{{template.fileMsg | json}}</p>
-          </h2>
-          <nz-radio-group [(ngModel)]="template.selectFile" [nzDisabled]="template.start" (ngModelChange)="radioSelectTemp()">
-            <label nzSize="large" class="radio-item" nz-radio [nzValue]="item"
-              *ngFor="let item of template.files">{{item | GetPathName}}</label>
-          </nz-radio-group>
-        </div>
-      <span>保存路径：{{savePath || '请选择模板'}}</span>&nbsp;&nbsp;&nbsp;
-      <span>模板路径：{{tempPath}}</span>
+      <div *ngIf="e.isLinux">
+        <h2 *ngIf="template.files?.length === 0">没有找到更新文件
+          <button nz-button nzType="primary" (click)="getTemplate()">
+            获取模板文件
+          </button>
+          <p>{{template.fileMsg | json}}</p>
+        </h2>
+        <nz-radio-group [(ngModel)]="template.selectFile" [nzDisabled]="template.start"
+          (ngModelChange)="radioSelectTemp()">
+          <label nzSize="large" class="radio-item" nz-radio [nzValue]="item"
+            *ngFor="let item of template.files">{{item | GetPathName}}</label>
+        </nz-radio-group>
+      </div>
+      <div style="display: flex;flex-wrap: wrap;">
+        <button *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8" nz-button nzType="primary"
+          (click)="selectTemp()">选择导出模板</button>&nbsp;&nbsp;&nbsp;
+        <button *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8" nz-button nzType="primary"
+          (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #12a182; color: white;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #96c24e; color: white;">模板路径：{{tempPath}}</span>
+      </div>
     </div>
   </div>
 
