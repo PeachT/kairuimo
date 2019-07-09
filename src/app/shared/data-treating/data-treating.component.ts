@@ -166,6 +166,7 @@ export class DataTreatingComponent implements OnInit {
   /** 选择构建 */
   selectTaskComponent(e) {
     console.log(this.taskData.sp, e);
+    this.getTaskBridge();
   }
   /** 获取任务梁数据 */
   async getTaskBridge() {

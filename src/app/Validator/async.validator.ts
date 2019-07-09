@@ -47,6 +47,7 @@ export function nameRepetition(
   nowkey: string = 'name'): AsyncValidatorFn {
   return (control: AbstractControl): Observable<ValidationErrors | null> => {
     const value = control.root.value;
+    console.log(value);
     value[nowkey] = control.value;
     return control.valueChanges.pipe(
       // 延时防抖

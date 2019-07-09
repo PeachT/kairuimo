@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn,
          AbstractControl, ValidationErrors, FormArray } from '@angular/forms';
 import { DB, DbService, tableName } from 'src/app/services/db.service';
@@ -26,6 +26,7 @@ export class ComponentComponent implements OnInit {
 
   formData: FormGroup;
   data: Comp;
+  deleteShow = false;
 
   get formArr(): FormArray {
     return this.formData.get('hole') as FormArray;
@@ -41,6 +42,7 @@ export class ComponentComponent implements OnInit {
     private db: DbService,
     private message: NzMessageService,
     public appS: AppService,
+    private cdr: ChangeDetectorRef,
   ) {
   }
 
@@ -50,6 +52,9 @@ export class ComponentComponent implements OnInit {
   createFormGroup() {
     this.formData = this.fb.group({
       id: [],
+      createdDate: [],
+      modificationDate: [],
+      user: [],
       name: [null, [Validators.required], [nameRepetition(this.db, 'comp')]],
       hole: this.fb.array(
         this.holeForm()
@@ -60,6 +65,7 @@ export class ComponentComponent implements OnInit {
     // this.createFormGroup();
     this.formData.setControl('hole', this.fb.array(this.holeForm()));
     this.formData.setValue(this.data);
+    console.log(this.formData, this.data);
     // tslint:disable-next-line:forin
     for (const i in this.formData.controls) {
       this.formData.controls[i].markAsDirty();
@@ -115,6 +121,27 @@ export class ComponentComponent implements OnInit {
       this.leftMenu.onClick();
     }
   }
+  /** 删除 */
+  async delete() {
+    const id = this.appS.leftMenu;
+    const count = await this.db.db.task.filter(t => t.device[0] === id).count();
+    if (count === 0) {
+      this.deleteShow = true;
+      this.cdr.markForCheck();
+      console.log('删除', id, '任务', count, this.deleteShow);
+    } else {
+      this.message.error(`有 ${count} 条任务在该项目下，不允许删除！`);
+    }
+  }
+  async deleteOk(state = false) {
+    if (state) {
+      const msg = await this.db.db.jack.delete(this.appS.leftMenu);
+      console.log('删除了', msg);
+      this.appS.leftMenu = null;
+      this.leftMenu.getMenuData();
+    }
+    this.deleteShow = false;
+  }
 
 
   addHole() {
@@ -160,6 +187,11 @@ export class ComponentComponent implements OnInit {
   handleInputConfirm(event, form: FormControl): void {
     const iv = event.target.value.replace(/\s+/g, '');
     console.log(iv, iv.length);
+    // tslint:disable-next-line:forin
+    for (const i in this.formData.controls) {
+      this.formData.controls[i].markAsDirty();
+      this.formData.controls[i].updateValueAndValidity();
+    }
     if (iv.length <= 0) {
       return;
     }

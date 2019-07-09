@@ -23,13 +23,13 @@
             *ngFor="let item of template.files">{{item | GetPathName}}</label>
         </nz-radio-group>
       </div>
-      <div style="display: flex;flex-wrap: wrap;">
-        <button *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8" nz-button nzType="primary"
+      <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
+        <button nz-button nzType="primary"
           (click)="selectTemp()">选择导出模板</button>&nbsp;&nbsp;&nbsp;
-        <button *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8" nz-button nzType="primary"
+        <button nz-button nzType="primary"
           (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
-        <span style="background-color: #12a182; color: white;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
-        <span style="background-color: #96c24e; color: white;">模板路径：{{tempPath}}</span>
+        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #96c24e; color: white; display: flex; align-items: center; padding: 0 15px;">模板路径：{{tempPath}}</span>
       </div>
     </div>
   </div>
