@@ -59,7 +59,7 @@
   [nzFooter]="null" (nzOnCancel)="handleCancel(handle=false)">
   <div nz-row nzGutter="25">
     <nz-divider style="min-width: auto;" nzText="设备状态" nzOrientation="left"></nz-divider>
-    <h2 style="color: red;">{{auto.pauseMsg}}</h2>
+    <h2 style="color: red;">{{auto.pauseMsg}}{{auto.msg | json}}</h2>
     <div nz-col nzSm="24" nzLg="12" class="title" *ngFor="let name of devNames; index as i">
       <h1>{{name}}·{{PLCS.PD[name].state}}-{{PLCS.PD[name].alarm | json}}</h1>
       <h1 style="color: red;" *ngIf="task.record && task.record[name].make.length > 0">

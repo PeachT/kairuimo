@@ -64,6 +64,16 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     nowBack: false,
     nowDelay: false,
     nowTwice: false,
+    msg: {
+      zA: null,
+      zB: null,
+      zC: null,
+      zD: null,
+      cA: null,
+      cB: null,
+      cC: null,
+      cD: null,
+    },
   };
   autoData: AutoDate;
   // 张拉完成
@@ -336,21 +346,26 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     let is = 0;
     this.selfInspectData[`${device}t`] = setInterval(() => {
       // console.log('运行中');
-      const nameSatate = this.selfInspectData.state[name];
       names.map(n => {
         const subMm = Number(this.PLCS.PD[n].showMm) - Number(this.selfInspectData.mm[n]);
         console.log(n, subMm, is);
         if (n === name) {
-          if (subMm > 1) {
+          if (subMm >= 1) {
             this.selfInspectData.state[name] = 2;
-          } else if (subMm < -2 || this.PLCS.PD[n].showMpa > 1.5) {
+            this.auto.msg[name] = '自检完成';
+          } else if (subMm < -1.5) {
             this.selfInspectData.state[name] = 3;
+            this.auto.msg[name] = `位移自己错误${subMm}`;
+          } else if (this.PLCS.PD[n].showMpa > 1.5) {
+            this.selfInspectData.state[name] = 3;
+            this.auto.msg[name] = `压力自检错误${this.PLCS.PD[n].showMpa}`;
           }
         } else if (subMm > 2 || subMm < -2) {
           this.selfInspectData.state[name] = 3;
         }
       });
-      if (nameSatate > 2 || is > 10) {
+      const nameSatate = this.selfInspectData.state[name];
+      if (nameSatate > 2 || is > 30) {
         console.log(name, device, '失败');
         clearInterval(this.selfInspectData[`${device}t`]);
         console.log(this.selfInspectData.state);

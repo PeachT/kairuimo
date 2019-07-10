@@ -1,5 +1,5 @@
 <nz-modal [nzVisible]="tensionDevice.state" nzTitle="设备状态错误！" nzOkText="张拉" nzWidth="80%"
-  (nzOnCancel)="show = false"
+  (nzOnCancel)="tensionDevice.state = false"
   (nzOnOk)="tension()">
   <div nz-row nzGutter="25">
     <div nz-col nzSm="24" nzLg="12" class="title" *ngFor="let name of tensionDevice.names; index as i">
