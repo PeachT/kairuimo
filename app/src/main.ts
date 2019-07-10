@@ -206,6 +206,8 @@ ipcMain.on('derivedExcel', async (event, data) => {
   const outPath = data.outPath;
   if (!fs.existsSync(outPath)) {
     fs.mkdirSync(outPath);
+    // tslint:disable-next-line: no-use-before-declare
+    // exec(`sudo mkdir ${outPath}`, { async: true }, (code, stdout, stderr) => {});
   }
 
   const filePath = data.templatePath;
@@ -286,39 +288,6 @@ ipcMain.on('power', (event, data) => {
 /** 获取更新文件 */
 ipcMain.on('select-file', (event, data) => {
   moundUSB('*kvm-device*.kvm', 'select-file-out');
-  // console.log('select-file');
-  // let updatepath = '/media';
-  // // 获取用户名
-  // exec(`whoami`,  { async : true }, (code, stdout, stderr) => {
-  //   updatepath = `/media/${stdout.split('\n')[0]}`;
-  // });
-  // const usb = exec(`ls /dev/ | grep "sd[b-z]"`,  { async : true }, (code, stdout, stderr) => {
-  //   usb.kill();
-  //   console.log('usb', stdout);
-  //   if (stdout) {
-  //     const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`,  { async : true }, (code, stdout, stderr) => {
-  //       up.kill();
-  //       console.log('mount code:', code);
-  //       console.log('mount output:', stdout);
-  //       console.log('mount stderr:', stderr);
-  //       if (stderr.indexOf('不存在') !== -1) {
-  //         event.sender.send('select-file-out', {stdout, stderr: '加载U盘失败！'});
-  //         return;
-  //       } else {
-  //         const upps = exec(`find ${updatepath} -name "*kvm-device*.kvm"`, { async : true }, (code, stdout, stderr) => {
-  //           stdout = stdout.split('\n').filter(t => t !== '');
-  //           console.log('Exit code:', code);
-  //           console.log('Program output:', stdout);
-  //           console.log('Program stderr:', stderr);
-  //           event.sender.send('select-file-out', {stdout, stderr});
-  //           upps.kill();
-  //         });
-  //       }
-  //     });
-  //   } else {
-  //     event.sender.send('select-file-out', {stdout, stderr: '未检测到U盘！！'});
-  //   }
-  // });
 });
 /** 本地文件更新 */
 ipcMain.on('local-update', (event, data) => {
@@ -335,7 +304,7 @@ ipcMain.on('local-update', (event, data) => {
 });
 /** 卸载U盘 */
 ipcMain.on('usb-umount', (event, data) => {
-  const upps = exec(`sudo umount /dev/sd[b-z]`, { async: true }, (code, stdout, stderr) => {
+  const upps = exec(`sudo umount /dev/sd[b-z][0-9]`, { async: true }, (code, stdout, stderr) => {
     console.log('Exit code:', code);
     console.log('Program output:', stdout);
     console.log('Program stderr:', stderr);
@@ -372,11 +341,15 @@ function moundUSB(filterName, sendName) {
     updatepath = `/media/${stdout.split('\n')[0]}`;
   });
   // tslint:disable-next-line: no-unused-expression
+  // -o iocharset=utf8
+  // mount -t vfat -o iocharset=utf8
+  // sudo mount -o rw,nosuid,nodev,relatime,uid=1000,gid=1000,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,showexec,utf8,flush,errors=remount-ro,uhelper=udisks2 /dev/sdc1 /media/peach/
   const usb = exec(`ls /dev/ | grep "sd[b-z]"`, { async: true }, (code, stdout, stderr) => {
     usb.kill();
     console.log('usb', stdout);
     if (stdout) {
-      const up = exec(`sudo mount /dev/sd[b-z] ${updatepath}`, { async: true }, (code, stdout, stderr) => {
+      const up = exec(`sudo mount -o rw,nosuid,nodev,relatime,uid=1000,utf8 /dev/sd[b-z][0-9] ${updatepath}`,
+                        { async: true }, (code, stdout, stderr) => {
         up.kill();
         console.log('mount code:', code);
         console.log('mount output:', stdout);

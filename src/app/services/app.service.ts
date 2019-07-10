@@ -10,7 +10,7 @@ import { NzMessageService } from 'ng-zorro-antd';
 export class AppService {
   /** 软件信息 */
   public info = {
-    version: '0.0.14',
+    version: '0.0.18',
     unit: {
       name: '柳州市凯瑞姆',
       tel: '888-8888888',
