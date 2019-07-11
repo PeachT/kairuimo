@@ -32,7 +32,7 @@
       <ng-container  *ngFor="let item of devModeStr; index as i">
         <tr [class]="item">
           <td class="device-name" rowSpan="2" class="text-c">
-            {{item}}
+            {{item  | nameConvert}}
           </td>
           <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]" class="text-c">
             {{holeNames[i / 2]}}

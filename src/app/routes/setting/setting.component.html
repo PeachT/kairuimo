@@ -132,7 +132,7 @@
     <nz-divider style="min-width: auto;" nzText="压力校正" nzOrientation="left"></nz-divider>
     <table>
       <tr>
-        <th *ngFor="let item of revise.mpaStage; index as i">{{item}}</th>
+        <th *ngFor="let item of revise.mpaStage; index as i">{{item  | nameConvert}}</th>
         <th>操 作</th>
       </tr>
 
@@ -142,7 +142,7 @@
           <input nzSize="large" readonly disabled type="number" nz-input [value]="mpaRevise[name][i]">
         </td>
         <td><button nzSize="large" nz-button nzType="default" (click)="onRevise(name)"
-            [disabled]="!PLCS.plcState.z">{{name}}校 正</button></td>
+            [disabled]="!PLCS.plcState.z">{{name | nameConvert}}校 正</button></td>
       </tr>
     </table>
   </div>

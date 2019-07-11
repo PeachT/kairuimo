@@ -1,7 +1,7 @@
 <div [formGroup]="formGroup">
   <div [formGroupName]="name" [class]="name">
     <nz-form-item class="revise-btn">
-      <nz-divider style="min-width: auto;" [nzText]="name" nzOrientation="left"></nz-divider>
+      <nz-divider style="min-width: auto;" [nzText]="name  | nameConvert" nzOrientation="left"></nz-divider>
       <button nzSize="large" nz-button nzType="default" (click)="onRevise()" *ngIf="reviseBtnShow">校 正</button>
     </nz-form-item>
     <nz-form-item>

@@ -24,7 +24,7 @@
       <tbody>
         <tr *ngFor="let item of devNames; index as i" [class]="item">
           <td class="center">
-            {{item}}
+            {{item | nameConvert}}
           </td>
           <td class="center" *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
             {{holeNames[i / 2]}}
@@ -96,7 +96,7 @@
 
         <tr *ngFor="let item of devNames; index as i" [class]="item">
           <td class="device-name" class="text-c">
-            {{item}}
+            {{item | nameConvert}}
           </td>
           <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]" class="text-c">
             {{holeNames[i / 2]}}

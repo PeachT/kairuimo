@@ -4,12 +4,11 @@
       <li *ngFor="let item of menu.datas; index as i" [ngClass]="{'active': menu.select === item.id}"
         (click)="onMneu(item.id)">{{item.name}}</li>
     </ul> -->
-    {{appS.sss('变更')}}
+    <!-- {{appS.sss('变更')}} -->
     <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
-      <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"
-      [saveState]="formData.valid"></app-operat>
+      <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"></app-operat>
 
     <div class="scroll-content">
       <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">

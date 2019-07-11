@@ -142,7 +142,7 @@ export function TensionMm(data: GroupItem, re = false): Elongation {
       elongation[key].remm =
        myToFixed((data.record[key].mm[data.record.tensionStage] - data.record[key].reData.mm)
         - (1 - data.record[key].mpa[0] / data.record[key].mpa[data.record.tensionStage])
-        * data.cA.wordMm || 1);
+        * data[key].wordMm || 1);
     }
   });
   // 总位移 / 偏差率计算
@@ -211,4 +211,12 @@ export function myToFixed(data): number {
     length = 2;
   }
   return Number(data.toFixed(length));
+}
+
+export function nameConvert(name: string): string {
+  if (name.indexOf('z') > -1) {
+    return name.replace('z', '主');
+  } else {
+    return name.replace('c', '副');
+  }
 }

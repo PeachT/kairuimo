@@ -4,9 +4,7 @@
     <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
-    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)"
-      (outEditOk)="editOk($event)" (outModification)="modification()"
-    [saveState]="formData.valid" (outDelete)="delete()"></app-operat>
+    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)" (outDelete)="delete()"></app-operat>
     <div class="scroll-content" >
       <!-- <button (click)="getForm()">get</button> -->
       <form [ngClass]="{'form-edit': !appS.edit}" nz-form [formGroup]="formData">

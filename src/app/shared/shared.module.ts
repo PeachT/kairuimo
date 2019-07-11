@@ -21,6 +21,7 @@ import { TimeSecComponent } from './time-sec/time-sec.component';
 import { DataTreatingComponent } from './data-treating/data-treating.component';
 import { DeleteModalComponent } from './delete-modal/delete-modal.component';
 import { DebugComponent } from './debug/debug.component';
+import { NameConvertPipe } from '../pipes/name-convert.pipe';
 
 
 // pipe
@@ -52,6 +53,7 @@ const PIPE = [
   ToFixedrPipe,
   ValidatorErrorPipe,
   GetPathNamePipe,
+  NameConvertPipe,
 ];
 
 @NgModule({

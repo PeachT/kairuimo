@@ -57,6 +57,17 @@ export class DbService {
       return {success: false, msg: '已存在'};
     }
     try {
+      if (tName === 'task') {
+        const d: TensionTask = await this.getFirstId('task', data.id);
+        const t = data as TensionTask;
+        d.groups.map((g, i) => {
+          if ('record' in g) {
+            t.groups[i].record = g.record;
+          }
+        });
+        data = t;
+      }
+      console.log('处理', data);
       data.modificationDate = new Date().getTime();
       const r = await this.db[tName].update(data.id, data);
       console.log('保存结果', r);

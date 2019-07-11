@@ -6,7 +6,7 @@
     <button nz-button nzType="danger" nzGhost nzSearch (click)="delete()" type="button" *ngIf="op('d') && appS.leftMenu">删 除</button>
   </div>
   <ng-template #elseBlock>
-    <button nz-button nzType="primary" nzSearch (click)="save()" type="button" [disabled]="!formData.valid">保 存</button>
+    <button nz-button nzType="primary" nzSearch (click)="save()" type="button" [disabled]="!formData.valid && saveState">保 存</button>
     <button nz-button nzType="danger" nzSearch (click)="cancelEdit()" type="button" >取 消</button>
   </ng-template>
   <ng-content select="button"></ng-content>

@@ -411,5 +411,15 @@ export class TaskComponent implements OnInit {
     };
     this.tensionDom.tension(this.holeMneuData, localData);
   }
-
+  async getUpdateData() {
+    const d: TensionTask = await this.odb.getFirstId('task', this.data.id);
+    const t = this.formData.value as TensionTask;
+    d.groups.map((g, i) => {
+      if ('record' in g) {
+        t.groups[i].record = g.record;
+      }
+    });
+    // const data = Object.assign(d, this.formData.value);
+    console.log(t);
+  }
 }

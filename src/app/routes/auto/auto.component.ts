@@ -413,7 +413,26 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   selfInspectStart(device: string) {
     const names = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}[device];
     // const name = names[this.selfInspectData.index];
-    const name = taskModeStr[this.task.mode][this.selfInspectData.index];
+    const tms = {
+      z: {
+        A1: ['zA'],
+        A2: ['zA'],
+        B1: ['zB'],
+        B2: ['zB'],
+        AB4: ['zA', 'zB'],
+        AB8: ['zA', 'zB', 'zC', 'zD']
+      },
+      c: {
+        A1: ['cA'],
+        A2: ['cA'],
+        B1: ['cB'],
+        B2: ['cB'],
+        AB4: ['cA', 'cB'],
+        AB8: ['cA', 'cB', 'cC', 'cD']
+      },
+    };
+    // const name = taskModeStr[this.task.mode][this.selfInspectData.index];
+    const name = tms[device][this.task.mode][this.selfInspectData.index];
     names.map(n => {
       this.selfInspectData.mm[n] = this.PLCS.PD[n].showMm || 0;
     });

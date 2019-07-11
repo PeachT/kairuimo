@@ -1,6 +1,7 @@
 import { Component, OnInit, OnChanges, ViewChild, ElementRef, Input, SimpleChanges } from '@angular/core';
 import { DateFormat } from 'src/app/Function/DateFormat';
 import { ECharts } from 'echarts';
+import { nameConvert } from 'src/app/Function/device.date.processing';
 // 引入 ECharts 主模块
 const echarts = require('echarts');
 
@@ -81,7 +82,19 @@ export class DynamicLineComponent implements OnInit, OnChanges {
 
   init() {
     this.devs.map((name) => {
-      this.series.push({ type: 'line', smooth: 0.3, symbol: 'none', seriesLayoutBy: 'row', color: [this.color[name]] });
+      this.series.push({type: 'line', smooth: 0.3, symbol: 'none', seriesLayoutBy: 'row', color: [this.color[name]],
+      areaStyle: {
+        normal: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                offset: 0,
+                color: this.color[name]
+            }, {
+                offset: 1,
+                color: '#ffe'
+            }])
+        }
+      },
+    });
     });
   }
   carterSvg() {
@@ -103,11 +116,15 @@ export class DynamicLineComponent implements OnInit, OnChanges {
         data: this.devs,
         type: 'scroll',
         top: 25,
-        itemGap: 25,
-        itemWidth: 20,
+        itemGap: 20,
+        itemWidth: 15,
         itemHeight: 20,
         textStyle: {
-          fontSize: 18
+          fontSize: 16
+        },
+        // 使用回调函数
+        formatter: (name) => {
+          return nameConvert(name);
         }
       },
       tooltip: {

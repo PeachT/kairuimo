@@ -79,7 +79,8 @@
 
         <tr *ngFor="let item of devModeStr; index as i" [formGroupName]="item" [class]="item">
           <td class="device-name">
-            {{item}}{{theoryIf[item]}}
+            {{item | nameConvert}}
+            <!-- {{theoryIf[item]}} -->
           </td>
           <td *ngIf="theoryIf[item] !== 0" [rowSpan]="theoryIf[item]">
             <nz-form-item>

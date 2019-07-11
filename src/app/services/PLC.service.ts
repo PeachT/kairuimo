@@ -7,7 +7,7 @@ import { PLC_D } from '../models/IPCChannel';
 import { PLCLiveData, GetPLCLiveData } from '../models/live';
 import { plcToMpa, plcToMm, mmToPlc } from '../Function/device.date.processing';
 import { MpaRevise, AutoDate, GetMpaRevise } from '../models/device';
-import { Jack, taskModeStr } from '../models/jack';
+import { Jack, taskModeStr, deviceGroupMode } from '../models/jack';
 import { DbService } from './db.service';
 
 
@@ -162,7 +162,9 @@ export class PLCService {
       this.plcState[dev] = true;
       if (this.mpaRevise && this.jack) {
         let i = 0;
-        ['A', 'B', 'C', 'D'].forEach(k => {
+        [[], ['A'], ['A', 'B'], [], ['A', 'B', 'C', 'D']][this.jack.jackMode].forEach(k => {
+          // console.log(this.jack);
+
           const key = `${dev}${k}`;
           this.PD[key].showMpa = plcToMpa(data.int16[i], this.mpaRevise[key]);
           this.PD[key].showMm = plcToMm(data.int16[i + 1], this.jack[key].mm);
@@ -310,18 +312,37 @@ export class PLCService {
     await this.odb.db.jack.filter(f => f.id === id).first(d => {
       this.jack = d;
     });
-    this.ipcSend('zF016', PLC_D(420), [
-      mmToPlc(this.jack.zA.upper, this.jack.zA.mm), mmToPlc(this.jack.zA.floot, this.jack.zA.mm),
-      mmToPlc(this.jack.zB.upper, this.jack.zB.mm), mmToPlc(this.jack.zB.floot, this.jack.zB.mm),
-      mmToPlc(this.jack.zC.upper, this.jack.zC.mm), mmToPlc(this.jack.zC.floot, this.jack.zC.mm),
-      mmToPlc(this.jack.zD.upper, this.jack.zD.mm), mmToPlc(this.jack.zD.floot, this.jack.zD.mm),
-    ]);
-    this.ipcSend('cF016', PLC_D(420), [
-      mmToPlc(this.jack.cA.upper, this.jack.zA.mm), mmToPlc(this.jack.cA.floot, this.jack.zA.mm),
-      mmToPlc(this.jack.cB.upper, this.jack.zB.mm), mmToPlc(this.jack.cB.floot, this.jack.zB.mm),
-      mmToPlc(this.jack.cC.upper, this.jack.zC.mm), mmToPlc(this.jack.cC.floot, this.jack.zC.mm),
-      mmToPlc(this.jack.cD.upper, this.jack.zD.mm), mmToPlc(this.jack.cD.floot, this.jack.zD.mm),
-    ]);
+    const z = [];
+    const c = [];
+    deviceGroupMode[4].map((key) => {
+      if (key.indexOf('z') > -1) {
+        if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
+          z.push(mmToPlc(this.jack[key].upper, this.jack[key].mm), mmToPlc(this.jack[key].floot, this.jack[key].mm));
+        } else {
+          z.push(0, 0);
+        }
+      } else {
+        if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
+          c.push(mmToPlc(this.jack[key].upper, this.jack[key].mm), mmToPlc(this.jack[key].floot, this.jack[key].mm));
+        } else {
+          c.push(0, 0);
+        }
+      }
+    });
+    this.ipcSend('zF016', PLC_D(420), z);
+    this.ipcSend('cF016', PLC_D(420), c);
+    // this.ipcSend('zF016', PLC_D(420), [
+    //   mmToPlc(this.jack.zA.upper, this.jack.zA.mm), mmToPlc(this.jack.zA.floot, this.jack.zA.mm),
+    //   mmToPlc(this.jack.zB.upper, this.jack.zB.mm), mmToPlc(this.jack.zB.floot, this.jack.zB.mm),
+    //   mmToPlc(this.jack.zC.upper, this.jack.zC.mm), mmToPlc(this.jack.zC.floot, this.jack.zC.mm),
+    //   mmToPlc(this.jack.zD.upper, this.jack.zD.mm), mmToPlc(this.jack.zD.floot, this.jack.zD.mm),
+    // ]);
+    // this.ipcSend('cF016', PLC_D(420), [
+    //   mmToPlc(this.jack.cA.upper, this.jack.zA.mm), mmToPlc(this.jack.cA.floot, this.jack.zA.mm),
+    //   mmToPlc(this.jack.cB.upper, this.jack.zB.mm), mmToPlc(this.jack.cB.floot, this.jack.zB.mm),
+    //   mmToPlc(this.jack.cC.upper, this.jack.zC.mm), mmToPlc(this.jack.cC.floot, this.jack.zC.mm),
+    //   mmToPlc(this.jack.cD.upper, this.jack.zD.mm), mmToPlc(this.jack.cD.floot, this.jack.zD.mm),
+    // ]);
     console.log('切换顶', this.jack);
     return this.jack;
   }
