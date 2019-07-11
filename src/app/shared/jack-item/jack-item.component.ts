@@ -47,7 +47,7 @@ export class JackItemComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    console.log('123123123', this.formItem.get('date'));
+    // console.log('123123123', this.formItem.get('date'));
   }
 
   onRevise() {

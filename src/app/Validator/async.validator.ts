@@ -57,6 +57,10 @@ export function nameRepetition(
         console.log(c);
         return c > 0 ? { reperition: `${control.value} 已存在!!` } : null;
       }),
+      catchError(() => {
+        console.log('名称验证查询结果错误');
+        return null;
+      }),
       // 每次验证的结果是唯一的，截断流
       first()
     );

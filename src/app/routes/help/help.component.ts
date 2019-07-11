@@ -26,6 +26,9 @@ export class HelpComponent implements OnInit {
     fileMsg: null,
   };
   testMsg: null;
+  get powerDelay(): number {
+    return this.appS.powerDelay;
+  }
 
   constructor(
     public appS: AppService,
@@ -33,7 +36,7 @@ export class HelpComponent implements OnInit {
     private odb: DbService,
     private message: NzMessageService,
     private router: Router,
-    private e: ElectronService,
+    public e: ElectronService,
     private cdr: ChangeDetectorRef,
   ) {
 
@@ -61,9 +64,9 @@ export class HelpComponent implements OnInit {
     this.e.ipcRenderer.send('local-update', this.update.selectFile);
     const it = setInterval(() => {
       this.update.time ++;
-      if (this.update.time > 500) {
+      if (this.update.time > 120) {
         clearTimeout(it);
-        this.update.msg = '更新超时，更新失败！请重启！';
+        this.update.msg = '更新失败！2分钟未更新完成！更新超时，请重启！';
         this.e.ipcRenderer.removeAllListeners('onUpdate');
         this.update.sucess = 2;
         return;
@@ -130,5 +133,11 @@ export class HelpComponent implements OnInit {
   /** 打开天使面板 */
   openDevTools() {
     this.e.ipcRenderer.send('openDevTools');
+  }
+  /** 选择更新文件 */
+  getUpdateFile() {
+    this.update.selectFile = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
+      filters: [{ name: 'KVM更新文件', extensions: ['kvm'] }]
+    })[0];
   }
 }

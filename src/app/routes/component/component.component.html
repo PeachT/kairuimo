@@ -15,9 +15,9 @@
       <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">
         <nz-form-item>
           <nz-form-label [nzSm]="3" nzRequired nzFor="name">构建名称：</nz-form-label>
-          <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}">
+          <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}" [nzErrorTip]="formData.get('name').errors | ValidatorError">
             <input type="text" nz-input placeholder="构建名称" formControlName="name">
-            <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain>
+            <!-- <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain> -->
           </nz-form-control>
         </nz-form-item>
 
@@ -45,17 +45,17 @@
 
                   <nz-form-item>
                     <nz-form-label [nzSm]="6" nzRequired>梁名称</nz-form-label>
-                    <nz-form-control [nzSm]="18" [ngClass]="{'in-error': item.get('name').errors}">
+                    <nz-form-control [nzSm]="18" [ngClass]="{'in-error': item.get('name').errors}" [nzErrorTip]="item.get('name').errors | ValidatorError">
                       <input type="text" nz-input placeholder="梁名称" formControlName="name">
-                      <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain>
+                      <!-- <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain> -->
                     </nz-form-control>
                   </nz-form-item>
 
                   <div>
-                    <nz-form-item>
+                    <nz-form-item *ngIf="appS.edit">
                       <nz-form-label [nzSm]="6" >孔号</nz-form-label>
-                      <nz-form-control [nzSm]="18" >
-                          <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text"
+                      <nz-form-control [nzSm]="18">
+                          <input nz-input nzSize="large"  placeholder="添加孔" type="text"
                           (blur)="handleInputConfirm($event, item.get('holes'))"
                           (keydown.enter)="handleInputConfirm($event, item.get('holes'))" />
                       </nz-form-control>
@@ -71,8 +71,8 @@
                       </span>
                     </div>
                   </div>
-                  <nz-form-control [ngClass]="{'in-error': item.get('holes').errors}">
-                    <nz-form-explain *ngIf="appS.edit && item.get('holes').errors">至少需要要个孔号！</nz-form-explain>
+                  <nz-form-control *ngIf="appS.edit && item.get('holes').errors">
+                    <span style="color: red;"> 至少需要要个孔号！</span>
                   </nz-form-control>
                 </div>
               </div>

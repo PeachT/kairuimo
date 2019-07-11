@@ -47,7 +47,7 @@
         <div *ngFor="let item of mmStage; index as i">
           <nz-form-label [nzSm]="2">{{item}}</nz-form-label>
           <nz-form-control [nzSm]="2">
-            <input type="number" readonly disabled noinput nz-input [formControlName]="i">
+            <input type="number" readonly noinput nz-input [formControlName]="i">
           </nz-form-control>
         </div>
       </div>

@@ -31,6 +31,7 @@ export class DbService {
   // tslint:disable-next-line:max-line-length
   public async repetitionAsync<T>(tName: string, filterFunction: (o1: T) => boolean): Promise<number> {
     const count = await this.db[tName].filter(filterFunction).count();
+    console.log('重复查询', count);
     return count;
   }
 

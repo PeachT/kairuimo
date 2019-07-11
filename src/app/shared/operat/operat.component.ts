@@ -18,6 +18,7 @@ export class OperatComponent implements OnInit {
 
   @Output() outEditOk = new EventEmitter();
   @Output() outEdit = new EventEmitter();
+  @Output() outModification = new EventEmitter();
   @Output() outDelete = new EventEmitter();
 
   @Input() addFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name;
@@ -79,6 +80,10 @@ export class OperatComponent implements OnInit {
     const data = state ? getModelBase(this.dbName) : null;
     this.outEdit.emit(data);
     this.appS.edit = true;
+  }
+  /** 修改 */
+  modification() {
+    this.outModification.emit();
   }
   /** 删除 */
   delete() {

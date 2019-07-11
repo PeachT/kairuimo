@@ -13,6 +13,10 @@ export interface IBase {
 
 const base = {
   project: {
+    id: null,
+    createdDate: null,
+    modificationDate: null,
+    user: null,
     name: null,
     otherInfo: [],
     supervisions: [
@@ -26,6 +30,9 @@ const base = {
   },
   comp: {
     id: null,
+    createdDate: null,
+    modificationDate: null,
+    user: null,
     name: null,
     hole: [
       {
@@ -36,6 +43,10 @@ const base = {
     ],
   },
   jack: {
+    id: null,
+    createdDate: null,
+    modificationDate: null,
+    user: null,
     name: null,
     jackMode: 2,
     equation: false,
@@ -124,12 +135,19 @@ const base = {
   },
   users: {
     id: null,
+    createdDate: null,
+    modificationDate: null,
+    user: null,
     name: null,
     password: null,
     jurisdiction: 0,
     operation: ['see']
   },
   task: {
+    id: null,
+    createdDate: null,
+    modificationDate: null,
+    user: null,
     name: null,
     project: null,
     device: null,

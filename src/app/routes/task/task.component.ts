@@ -180,7 +180,7 @@ export class TaskComponent implements OnInit {
       return;
     }
     this.data = data;
-
+    console.log('梁梁梁梁', this.data);
     this.holeMneuData = {
       name: null,
       names: [],
@@ -189,6 +189,7 @@ export class TaskComponent implements OnInit {
     };
     this.holeMneu();
     this.reset();
+    this.onHoleRadio(this.data.groups[0].name, 0);
   }
   /** 构造孔菜单 */
   holeMneu() {

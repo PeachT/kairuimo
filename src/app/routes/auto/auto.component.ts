@@ -355,13 +355,17 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.auto.msg[name] = '自检完成';
           } else if (subMm < -1.5) {
             this.selfInspectData.state[name] = 3;
-            this.auto.msg[name] = `位移自己错误${subMm}`;
+            this.auto.msg[name] = `位移自检错误${subMm}`;
           } else if (this.PLCS.PD[n].showMpa > 1.5) {
             this.selfInspectData.state[name] = 3;
             this.auto.msg[name] = `压力自检错误${this.PLCS.PD[n].showMpa}`;
           }
         } else if (subMm > 2 || subMm < -2) {
           this.selfInspectData.state[name] = 3;
+          this.auto.msg[name] = `位移自检错误${subMm}`;
+        } else if (this.PLCS.PD[n].showMpa > 1.5) {
+          this.selfInspectData.state[name] = 3;
+          this.auto.msg[name] = `压力自检错误${subMm}`;
         }
       });
       const nameSatate = this.selfInspectData.state[name];
@@ -411,7 +415,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     // const name = names[this.selfInspectData.index];
     const name = taskModeStr[this.task.mode][this.selfInspectData.index];
     names.map(n => {
-      this.selfInspectData.mm[n] = this.PLCS.PD[n].showMm;
+      this.selfInspectData.mm[n] = this.PLCS.PD[n].showMm || 0;
     });
     this.selfInspectData.state[name] = 1;
     const address = { A: 16, B: 20, C: 24, D: 28}[name[1]];

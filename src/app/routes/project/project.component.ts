@@ -54,10 +54,10 @@ export class ProjectComponent implements OnInit {
    */
   edit(data) {
     if (!data) {
-      data = copyAny(this.data);
-      data.id = null;
+      this.data.id = null;
+    } else {
+      this.data = data;
     }
-    this.data = data;
     console.log(this.data, data);
     this.prjDom.reset(this.data);
     this.leftMenu.markForCheck();

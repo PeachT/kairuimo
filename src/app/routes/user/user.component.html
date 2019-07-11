@@ -1,4 +1,5 @@
 <app-left>
+    {{appS.sss('变更')}}
   <div class="sider sider-menu">
     <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" [menuFilter]="menuFilter" #leftMenu></app-left-menu>
   </div>
@@ -7,17 +8,15 @@
     <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="formData">
       <nz-form-item>
         <nz-form-label [nzSm]="3" nzRequired nzFor="name">用户姓名</nz-form-label>
-        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}">
+        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}" [nzErrorTip]="formData.get('name').errors | ValidatorError">
           <input type="text" nz-input placeholder="输入姓名" formControlName="name">
-          <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain>
         </nz-form-control>
       </nz-form-item>
 
       <nz-form-item>
         <nz-form-label [nzSm]="3" nzRequired nzFor="name">密码</nz-form-label>
-        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('password').errors}">
-          <input type="text" nz-input placeholder="输入姓名" formControlName="password">
-          <nz-form-explain *ngIf="appS.edit">{{formData.get('password').errors | ValidatorError}}</nz-form-explain>
+        <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('password').errors}" [nzErrorTip]="formData.get('password').errors | ValidatorError">
+          <input type="text" nz-input placeholder="输入密码" formControlName="password">
         </nz-form-control>
       </nz-form-item>
 
@@ -47,3 +46,4 @@
     </form>
   </div>
 </app-left>
+<app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>

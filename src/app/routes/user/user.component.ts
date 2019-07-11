@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import {
   FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn,
   AbstractControl, ValidationErrors, FormArray
@@ -22,13 +22,15 @@ const os = ['see'];
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  styleUrls: ['./user.component.less']
+  styleUrls: ['./user.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserComponent implements OnInit {
   dbName = 'users';
   @ViewChild('leftMenu' , null) leftMenu: LeftMenuComponent;
   formData: FormGroup;
   data: User;
+  deleteShow = false;
   menuFilter = (f) => f.jurisdiction < 9;
 
   constructor(
@@ -39,6 +41,7 @@ export class UserComponent implements OnInit {
     private router: Router,
     private modalService: NzModalService,
     public PLCS: PLCService,
+    private cdr: ChangeDetectorRef,
   ) {
   }
 
@@ -46,18 +49,21 @@ export class UserComponent implements OnInit {
     this.carterFormGroup();
   }
   reset() {
-    this.carterFormGroup();
+    // this.carterFormGroup();
     this.formData.setValue(this.data);
+    this.formData.controls.name.updateValueAndValidity();
     // tslint:disable-next-line:forin
-    for (const i in this.formData.controls) {
-      this.formData.controls[i].markAsDirty();
-      this.formData.controls[i].updateValueAndValidity();
-    }
+    // for (const i in this.formData.controls) {
+    //   this.formData.controls[i].markAsDirty();
+    // }
   }
   carterFormGroup() {
     this.formData = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
+      createdDate: [],
+      modificationDate: [],
+      user: [],
+      name: [null, [Validators.required], [nameRepetition(this.db, 'users')]],
       password: [null, [Validators.required]],
       jurisdiction: [0],
       operation: []
@@ -75,11 +81,11 @@ export class UserComponent implements OnInit {
    */
   edit(data) {
     if (!data) {
-      data = copyAny(this.data);
-      data.id = null;
+      this.data.id = null;
+    } else {
+      this.data = data;
+      console.log(this.data, data);
     }
-    this.data = data;
-    console.log(this.data, data);
     this.reset();
     this.leftMenu.markForCheck();
   }
@@ -93,6 +99,27 @@ export class UserComponent implements OnInit {
     } else {
       this.leftMenu.onClick();
     }
+  }
+  /** 删除 */
+  async delete() {
+    const id = this.appS.leftMenu;
+    const count = await this.db.db.task.filter(t => t.device[0] === id).count();
+    if (count === 0) {
+      this.deleteShow = true;
+      this.cdr.markForCheck();
+      console.log('删除', id, '任务', count, this.deleteShow);
+    } else {
+      this.message.error(`有 ${count} 条任务在该项目下，不允许删除！`);
+    }
+  }
+  async deleteOk(state = false) {
+    if (state) {
+      const msg = await this.db.db.jack.delete(this.appS.leftMenu);
+      console.log('删除了', msg);
+      this.appS.leftMenu = null;
+      this.leftMenu.getMenuData();
+    }
+    this.deleteShow = false;
   }
   selectOperation(event) {
     // const o = ['see', ...event];

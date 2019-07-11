@@ -1,25 +1,29 @@
 <app-left>
+    <!-- {{appS.sss('变更')}} -->
   <div class="sider sider-menu">
     <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
-    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"
+    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)"
+      (outEditOk)="editOk($event)" (outModification)="modification()"
     [saveState]="formData.valid" (outDelete)="delete()"></app-operat>
     <div class="scroll-content" >
       <!-- <button (click)="getForm()">get</button> -->
       <form [ngClass]="{'form-edit': !appS.edit}" nz-form [formGroup]="formData">
         <nz-form-item>
           <nz-form-label [nzSm]="4" nzRequired>千斤顶名称</nz-form-label>
-          <nz-form-control [nzSm]="20" [ngClass]="{'in-error': formData.get('name').errors}">
-            <input type="text" nz-input formControlName="name" >
-            <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain>
+          <nz-form-control [nzSm]="20" [ngClass]="{'in-error': formData.get('name').errors}" [nzErrorTip]="formData.get('name').errors | ValidatorError">
+            <input type="text" nz-input placeholder="千斤顶名称" formControlName="name" >
           </nz-form-control>
+          <!-- <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain> -->
+        <!-- </nz-form-item>
+        <nz-form-item> -->
           <nz-form-label [nzSm]="4" nzRequired>泵顶组合</nz-form-label>
           <nz-form-control [nzSm]="20">
-            <nz-radio-group formControlName="jackMode" (ngModelChange)="reset()">
-              <label nz-radio [nzValue]="4">一泵四顶</label>
-              <label nz-radio [nzValue]="2">一泵两顶</label>
-              <label nz-radio [nzValue]="1">一泵一顶</label>
+            <nz-radio-group formControlName="jackMode" >
+              <label nz-radio [nzValue]="4" (click)="reset(true)">一泵四顶</label>
+              <label nz-radio [nzValue]="2" (click)="reset(true)">一泵两顶</label>
+              <label nz-radio [nzValue]="1" (click)="reset(true)">一泵一顶</label>
             </nz-radio-group>
           </nz-form-control>
           <nz-form-label [nzSm]="4" nzRequired>回归方程</nz-form-label>
@@ -45,7 +49,6 @@
     </div>
     <!-- <button nz-button nzType="primary" nzSearch (click)="save()" type="button" >保 存</button> -->
   </div>
-
 </app-left>
 
 <app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>

@@ -102,13 +102,15 @@ export class ComponentComponent implements OnInit {
    * * 编辑
    */
   edit(data) {
+    console.log(data);
     if (!data) {
-      data = copyAny(this.data);
-      data.id = null;
+      this.data.id = null;
+    } else {
+      this.data = data;
+      console.log(this.data, data);
     }
-    this.data = data;
-    console.log(this.data, data);
     this.reset();
+    this.leftMenu.markForCheck();
   }
   /**
    * *编辑完成
@@ -186,11 +188,12 @@ export class ComponentComponent implements OnInit {
 
   handleInputConfirm(event, form: FormControl): void {
     const iv = event.target.value.replace(/\s+/g, '');
-    console.log(iv, iv.length);
+    console.log(iv, iv.length, this.formData.valid);
     // tslint:disable-next-line:forin
     for (const i in this.formData.controls) {
-      this.formData.controls[i].markAsDirty();
+    //   this.formData.controls[i].markAsDirty();
       this.formData.controls[i].updateValueAndValidity();
+      console.log('表单校验', i, this.formData.controls[i].valid);
     }
     if (iv.length <= 0) {
       return;

@@ -1,4 +1,6 @@
-import { Component, OnInit, ViewChild, ViewContainerRef, ComponentFactoryResolver, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewContainerRef,
+  ComponentFactoryResolver, ChangeDetectorRef, ChangeDetectionStrategy,
+  DoCheck, OnChanges, AfterViewChecked, AfterContentInit, AfterContentChecked, AfterViewInit } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
@@ -19,9 +21,10 @@ import { nameRepetition } from 'src/app/Validator/async.validator';
 @Component({
   selector: 'app-jack',
   templateUrl: './jack.component.html',
-  styleUrls: ['./jack.component.less']
+  styleUrls: ['./jack.component.less'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class JackComponent implements OnInit {
+export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewChecked, AfterContentInit, AfterContentChecked, AfterViewInit {
   dbName = 'jack';
   @ViewChild('leftMenu', null) leftMenu: LeftMenuComponent;
   @ViewChild('device', { read: ViewContainerRef, static: false }) deviceDom: ViewContainerRef;
@@ -29,6 +32,7 @@ export class JackComponent implements OnInit {
   formData: FormGroup;
   data: Jack;
   deleteShow = false;
+  delayValidator = null;
 
   constructor(
     private fb: FormBuilder,
@@ -41,17 +45,38 @@ export class JackComponent implements OnInit {
   ) {
   }
 
+  ngOnChanges() {
+    console.log('ngOnChanges');
+  }
   ngOnInit() {
     this.createJackForm();
+  }
+  ngDoCheck() {
+    console.log('DoCheck');
+  }
+  ngAfterContentInit() {
+    console.log('ngAfterContentInit()');
+  }
+  ngAfterViewChecked() {
+    console.log('ngAfterViewChecked');
+    // this.getForm();
+  }
+  ngAfterViewInit() {
+    console.log('ngAfterViewInit');
+  }
+  ngAfterContentChecked() {
+    console.log('ngAfterContentChecked');
   }
   createJackForm() {
     this.formData = this.fb.group({
       id: [],
-      name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
       jackMode: [null],
       equation: [false],
       jackModel: [],
       pumpModel: [],
+      name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
+      // tslint:disable-next-line: max-line-lengthKU
+      // name: [null, { validators: [Validators.required], asyncValidators: [nameRepetition(this.db, 'jack')], updateOn: [ 'submit' ] }]
       // zA: this.createDevGroup(),
       // zB: this.createDevGroup(),
       // zC: this.createDevGroup(),
@@ -62,23 +87,38 @@ export class JackComponent implements OnInit {
       // cD: this.createDevGroup(),
     });
   }
-  reset() {
-    if (this.formData.value.jackMode !== null) {
+  reset(state = false) {
+    console.log(this.data, this.formData.value);
+    clearTimeout(this.delayValidator);
+    if (state && this.data.jackMode !== this.formData.value.jackMode && this.formData.value.jackMode !== null) {
       console.log(this.formData.value.jackMode);
       this.data = Object.assign(this.data, this.formData.value);
     }
-    this.createJackForm();
-    deviceGroupMode[this.data.jackMode].map(key => {
-      this.formData.addControl(key, this.createDevGroup());
+    // this.createJackForm();
+    this.deviceDom.clear();
+    deviceGroupMode[4].map(key => {
+      if (deviceGroupMode[this.data.jackMode].indexOf(key) > -1) {
+        if (!(key in this.formData.value)) {
+          this.formData.addControl(key, this.createDevGroup());
+        }
+        this.addJackItem(key);
+      } else if (key in this.formData.value) {
+        this.formData.removeControl(key);
+      }
     });
     console.log(this.data);
     this.formData.reset(this.data);
-    this.f5();
+    this.delayValidator = setTimeout(() => {
+      this.formData.controls.name.updateValueAndValidity();
+    }, 1000);
+    // this.f5();
     // tslint:disable-next-line:forin
-    for (const i in this.formData.controls) {
-      this.formData.controls[i].markAsDirty();
-      this.formData.controls[i].updateValueAndValidity();
-    }
+    // for (const i in this.formData.controls) {
+    //   this.formData.controls[i].markAsDirty();
+    //   this.formData.controls[i].updateValueAndValidity();
+    //   console.log('表单校验', i, this.formData.controls[i].valid);
+    //   console.log('表单校验', this.formData.valid);
+    // }
   }
   /** 创建设备标定from */
   createDevGroup() {
@@ -90,11 +130,22 @@ export class JackComponent implements OnInit {
       a: [1, [Validators.required]],
       b: [0, [Validators.required]],
       date: [null, [Validators.required]],
-      mpa: this.fb.array([0, 1, 2, 3, 4, 5]),
-      mm: this.fb.array([0, 1, 2, 3, 4, 5]),
+      mm: this.fb.array([1, 1, 1, 1, 1, 1]),
+      // mm: this.fb.array([new FormControl({value: 1, disabled: true}), {value: 1, disabled: true}, {value: 1, disabled: true},
+      //                    {value: 1, disabled: true}, {value: 1, disabled: true}, {value: 1, disabled: true}]),
     });
   }
+  /** 添加顶 */
+  addJackItem(name: string) {
+    const com = this.cfr.resolveComponentFactory(JackItemComponent);
+    const comp = this.deviceDom.createComponent(com);
+    comp.instance.formGroup = this.formData;
+    comp.instance.name = name;
+    console.log('添加', name);
+  }
+
   onMneu(data: Jack) {
+    this.data = null;
     console.log('一条数据', data);
     this.data = data;
     this.reset();
@@ -104,12 +155,12 @@ export class JackComponent implements OnInit {
    * *编辑
    */
   edit(data) {
+    console.log(data);
     if (!data) {
       data = copyAny(this.data);
       data.id = null;
     }
     this.data = data;
-    console.log(this.data, data);
     this.reset();
     this.leftMenu.markForCheck();
   }
@@ -121,10 +172,14 @@ export class JackComponent implements OnInit {
     if (id) {
       this.leftMenu.getMenuData(id);
     } else {
+      this.data = null;
       this.leftMenu.onClick();
     }
   }
-
+  /** 修改 */
+  modification() {
+    // this.getForm();
+  }
   /** 删除 */
   async delete() {
     const id = this.appS.leftMenu;
@@ -206,24 +261,22 @@ export class JackComponent implements OnInit {
     return 0;
   }
   f5() {
-
-
     this.deviceDom.clear();
-    deviceGroupMode[this.formData.value.jackMode].map(name => {
+    deviceGroupMode[this.formData.value.jackMode].map((name, i) => {
       const com = this.cfr.resolveComponentFactory(JackItemComponent);
       const comp = this.deviceDom.createComponent(com);
       comp.instance.formGroup = this.formData;
       comp.instance.name = name;
       console.log('添加', name);
+      if (i === deviceGroupMode[this.formData.value.jackMode].length - 1) {
+        this.getForm();
+      }
     });
   }
   getForm() {
     console.log(this.formData.value);
-    // tslint:disable-next-line: forin
-    for (const i in this.formData.controls) {
-      this.formData.controls[i].markAsDirty();
-      this.formData.controls[i].updateValueAndValidity();
-      console.log(i, this.formData.controls[i].valid);
-    }
+    console.log(this.formData.valid);
+    this.formData.controls.name.updateValueAndValidity();
+    this.cdr.markForCheck();
   }
 }

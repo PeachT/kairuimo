@@ -26,6 +26,7 @@
   <nz-radio-group [(ngModel)]="update.selectFile" [nzDisabled]="update.start" >
     <label nzSize="large" class="radio-item" nz-radio [nzValue]="item" *ngFor="let item of update.files">{{item | GetPathName}}</label>
   </nz-radio-group>
+  <button *ngIf="e.isLinux && appS.userInfo?.jurisdiction > 8" nz-button nzType="primary" (click)="getUpdateFile()">选择更新文件</button>
   <div>
     <button nz-button nzType="primary" *ngIf="update.selectFile && !update.start" (click)="runUpdate()">
       <i nz-icon nzType="file-sync" nzTheme="outline"></i>
@@ -46,11 +47,11 @@
         <button class="restart" (click)="power(false)"> <i nz-icon nzType="reload" style="color:lime"></i> 重 启 </button>
         <button class="shutdown" (click)="power(true)"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button>
       </ng-container>
-      <ng-container *ngIf="appS.powerDelayT && appS.powerDelay">
-        <h1 >{{appS.powerDelay}}s后{{appS.powerText}}！</h1>
+      <ng-container *ngIf="appS.powerDelayT && powerDelay">
+        <h1 >{{powerDelay}}s后{{appS.powerText}}！</h1>
         <button class="shutdown" (click)="cancle()"> <i nz-icon nzType="poweroff" style="color:brown"></i> 取 消</button>
       </ng-container>
-      <h1 *ngIf="!appS.powerDelay">正在{{appS.powerText}}...</h1>
+      <h1 *ngIf="!powerDelay">正在{{appS.powerText}}...</h1>
     </div>
     <div class="power-btn" *ngIf="update.sucess === 3">
       <button class="login-out" (click)="loginOut()"> <i nz-icon nzType="logout" style="color:dodgerblue"></i> 登 出 </button>

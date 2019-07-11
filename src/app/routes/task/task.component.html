@@ -12,8 +12,6 @@
               <nz-form-label [nzSm]="3" nzRequired>梁号</nz-form-label>
               <nz-form-control [nzSm]="21" [ngClass]="{'in-error': formData.get('name').errors}" [nzErrorTip]="formData.get('name').errors | ValidatorError">
                 <input type="text" nz-input placeholder="梁号" formControlName="name">
-                <!-- <nz-form-explain >{{formData.get('name').errors | ValidatorError}}
-                </nz-form-explain> -->
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
