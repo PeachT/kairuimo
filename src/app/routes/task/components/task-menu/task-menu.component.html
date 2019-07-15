@@ -20,7 +20,8 @@
       </li>
     </ng-container>
   </ul>
-  <ul class="menu-2" *ngIf="component.select !== null">
+  <ul class="menu-2" [hidden]="component.select === null" #bridgeScroll  (scroll)="bScroll($event)"  >
+    <li [style.height]="paddingTop + 'px'"></li>
     <li *ngFor="let item of bridge.menu; index as i"
       [ngClass]="{'active': bridge.select === item.id && (!appS.edit || appS.editId === item.id)}"
       (click)="onBridge(item.id)">

@@ -43,9 +43,9 @@ export class OperatComponent implements OnInit {
     if (!data.id) {
       delete data.id;
       // r = await this.db.addAsync(this.dbName, data, (p: Project) => p.name === data.name);
-      r = await this.db.addAsync(this.dbName, data, (o: Project) => this.addFilterFun(o, data));
+      r = await this.db.addAsync(this.dbName, data, (o: any) => this.addFilterFun(o, data));
     } else {
-      r = await this.db.updateAsync(this.dbName, data, (o: Project) => this.updateFilterFun(o, data));
+      r = await this.db.updateAsync(this.dbName, data, (o: any) => this.updateFilterFun(o, data));
     }
 
     console.log(r);

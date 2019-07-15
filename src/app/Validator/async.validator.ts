@@ -2,8 +2,8 @@ import { Directive, forwardRef, Injectable } from '@angular/core';
 import { AsyncValidator, AbstractControl, ValidationErrors, ValidatorFn, AsyncValidatorFn } from '@angular/forms';
 import { DbService } from '../services/db.service';
 import { copyAny } from '../models/base';
-import { Observable, from, observable, of } from 'rxjs';
-import { map, catchError, debounceTime, switchMap, first } from 'rxjs/operators';
+import { Observable, from, observable, of, empty } from 'rxjs';
+import { map, catchError, debounceTime, switchMap, first, distinctUntilChanged } from 'rxjs/operators';
 
 // @Injectable({ providedIn: 'root' })
 // export class RepetitionARV implements AsyncValidator {
@@ -52,6 +52,7 @@ export function nameRepetition(
     return control.valueChanges.pipe(
       // 延时防抖
       debounceTime(400),
+      distinctUntilChanged(),
       switchMap(() => db.repetitionAsync(name, (o: any) => f(o, value))),
       map(c => {
         console.log(c);

@@ -13,6 +13,7 @@ import { mpaToPlc, TensionMm, myToFixed, mmToPlc } from 'src/app/Function/device
 import { AutoDate } from 'src/app/models/device';
 import { Elongation } from 'src/app/models/live';
 import { getStageString } from 'src/app/Function/stageString';
+import { SelfInspect } from './class/selfInspect';
 
 @Component({
   selector: 'app-auto',
@@ -84,32 +85,33 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   // 卸荷完成
   unloading = false;
   /** 自检状态 */
-  selfInspectData = {
-    mm: {
-      zA: 0,
-      zB: 0,
-      zC: 0,
-      zD: 0,
-      cA: 0,
-      cB: 0,
-      cC: 0,
-      cD: 0,
-    },
-    state: {
-      zA: 0,
-      zB: 0,
-      zC: 0,
-      zD: 0,
-      cA: 0,
-      cB: 0,
-      cC: 0,
-      cD: 0,
-    },
-    device: [],
-    index: 0,
-    zt: null,
-    ct: null,
-  };
+  selfInspectData: any;
+  // {
+  //   mm: {
+  //     zA: 0,
+  //     zB: 0,
+  //     zC: 0,
+  //     zD: 0,
+  //     cA: 0,
+  //     cB: 0,
+  //     cC: 0,
+  //     cD: 0,
+  //   },
+  //   state: {
+  //     zA: 0,
+  //     zB: 0,
+  //     zC: 0,
+  //     zD: 0,
+  //     cA: 0,
+  //     cB: 0,
+  //     cC: 0,
+  //     cD: 0,
+  //   },
+  //   device: [],
+  //   index: 0,
+  //   zt: null,
+  //   ct: null,
+  // };
   selfInspectMsg = [null, '自检中', '自检完成', '自检错误'];
   /** 伸长量/偏差率 */
   elongation: Elongation = {
@@ -329,13 +331,49 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   selfRead() {
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.PLCS.ipcSend('cF05', PLC_S(10), true);
-      this.selfInspectStart('z');
-      this.selfInspectStart('c');
+      // this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      // this.PLCS.ipcSend('cF05', PLC_S(10), true);
+      // this.selfInspectStart('z');
+      // this.selfInspectStart('c');
+
+      const zSelf = new SelfInspect('z', this.task.mode, this.PLCS);
+      const cSelf = new SelfInspect('c', this.task.mode, this.PLCS);
+      let zsb;
+      let csb;
+      zsb = zSelf.subject.subscribe((state) => {
+        if (state) {
+          if (cSelf.success === 1) {
+            this.run();
+            zsb.unsubscribe();
+            csb.unsubscribe();
+          }
+        } else {
+          cSelf.startSb.unsubscribe();
+        }
+      });
+      csb = cSelf.subject.subscribe((state) => {
+        if (state) {
+          if (zSelf.success === 1) {
+            this.run();
+            zsb.unsubscribe();
+            csb.unsubscribe();
+          }
+        } else {
+          zSelf.startSb.unsubscribe();
+        }
+      });
+      // this.selfInspectData = zSelf.data;
+      // this.auto.msg[name] = '自检完成';
     } else {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.selfInspectStart('z');
+      // this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      // this.selfInspectStart('z');
+
+      const zSelf = new SelfInspect('z', this.task.mode, this.PLCS);
+      zSelf.subject.subscribe((state) => {
+        if (state) {
+          this.run();
+        }
+      });
     }
     this.modal.state = false;
   }

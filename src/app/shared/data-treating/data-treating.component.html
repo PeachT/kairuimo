@@ -46,12 +46,6 @@
   <br>
   <br>
   <div>
-    <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskFliter($event)">
-      <label nz-checkbox nzValue="0">已导出</label>
-      <label nz-checkbox nzValue="1">未导出</label>
-      <!-- <label nz-checkbox nzValue="2">已张拉</label>
-      <label nz-checkbox nzValue="3">未张拉</label> -->
-    </nz-checkbox-wrapper>
     <div *ngIf="savePath && tempPath">
       <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
         <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
@@ -71,6 +65,12 @@
         </div>
       </div>
     </div>
+  </div>
+  <div>
+    <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskFliter($event)">
+      <label nz-checkbox nzValue="0">已导出</label>
+      <label nz-checkbox nzValue="1">未导出</label>
+    </nz-checkbox-wrapper>
   </div>
   <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;">
     <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.msg === '导出'"

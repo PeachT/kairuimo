@@ -91,6 +91,7 @@ export class TaskComponent implements OnInit {
   deleteShow = false;
   /** 选择顶状态 */
   selectJackState = false;
+  save100Count = 0;
 
   addFilterFun = (o1: any, o2: any) => o1.name === o2.name
     && o1.component === o2.component && o1.project === o2.project
@@ -246,6 +247,17 @@ export class TaskComponent implements OnInit {
       this.taskMneu.onMneu();
     }
   }
+  async save100() {
+    const data = copyAny(this.formData.value);
+    this.save100Count ++;
+    data.name = `${data.name}-${this.save100Count}`;
+    console.log(data);
+    delete data.id;
+    const r = await this.odb.addAsync('task', data, (o: any) => this.updateFilterFun(o, data));
+    if (r && this.save100Count < 5) {
+      this.save100();
+    }
+  }
 
   /** 删除 */
   async delete() {
@@ -270,7 +282,11 @@ export class TaskComponent implements OnInit {
   }
   /** 更新孔数据 */
   updateGroupItem() {
+    console.log('更新孔数据');
     const g = this.taskDataDom.holeForm.value;
+    if ('record' in  this.data.groups[this.holeMneuData.index]) {
+      g.record = this.data.groups[this.holeMneuData.index].record;
+    }
     this.data.groups[this.holeMneuData.index] = g;
     this.formData.controls.groups.setValue(this.data.groups);
   }
@@ -283,10 +299,10 @@ export class TaskComponent implements OnInit {
       this.message.error('数据填写有误！！');
     } else {
       /** 取消监听 */
-      if (this.holeSub$) {
-        this.holeSub$.unsubscribe();
-        this.holeSub$ = null;
-      }
+      // if (this.holeSub$) {
+      //   this.holeSub$.unsubscribe();
+      //   this.holeSub$ = null;
+      // }
       /** 获取编辑数据 */
       this.holeMneuData.index = i;
       this.holeMneuData.name = name;
@@ -297,7 +313,7 @@ export class TaskComponent implements OnInit {
       }
       this.taskDataDom.createHoleform(this.holeMneuData.data, this.jackData);
     }
-    console.log(this.holeMneuData.index);
+    console.log(this.holeMneuData.index, this.holeMneuData.data,  this.holeMneuData.data.record);
   }
 
   /** 切换显示项 */

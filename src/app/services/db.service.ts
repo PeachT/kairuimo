@@ -155,9 +155,16 @@ export class DbService {
     return ar;
   }
   /** 获取梁菜单 */
-  public async getTaskBridgeMenuData(f: (o1: TensionTask) => boolean, state: boolean = false): Promise<Array<Menu>> {
+  public async getTaskBridgeMenuData(f: (o1: TensionTask) => boolean, state: boolean = false, p: number = 0, y: number = 0)
+  : Promise<Array<Menu>> {
     const r = [];
-    await this.db.task.filter(o1 => f(o1)).each(v => {
+    const count =  await this.db.task.count();
+    y = y || count;
+    await this.db.task.filter(o1 => f(o1))
+    .reverse() // 按id 反序获取
+    .offset(p) // 第几条开始
+    .limit(y) // 获取几条
+    .each(v => {
       if (state) {
         r.push({ title: v.name, key: v.id, isLeaf: true });
       } else {
@@ -186,6 +193,35 @@ export class DbService {
         r.push({ name: v.name, id: v.id, cls });
       }
     });
+    // await this.db.task.filter(o1 => f(o1)).each(v => {
+    //   if (state) {
+    //     r.push({ title: v.name, key: v.id, isLeaf: true });
+    //   } else {
+    //     const cls = {
+    //       a: false,
+    //       b: false,
+    //       c: false,
+    //       d: false,
+    //       e: false,
+    //     };
+    //     for (const g of v.groups) {
+    //       if (g.record) {
+    //         if (g.record.state === 2) {
+    //           cls.a = true;
+    //         } else if (g.record.state === 1) {
+    //           cls.b = true;
+    //         } else if (g.record.state === 3) {
+    //           cls.c = true;
+    //         } else if (g.record.state === 4) {
+    //           cls.d = true;
+    //         }
+    //       } else {
+    //         cls.e = true;
+    //       }
+    //     }
+    //     r.push({ name: v.name, id: v.id, cls });
+    //   }
+    // });
     return r;
   }
   /** 任务数据导出菜单 */

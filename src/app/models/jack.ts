@@ -1,3 +1,13 @@
+export interface DeviceValue {
+  zA?: any;
+  zB?: any;
+  zC?: any;
+  zD?: any;
+  cA?: any;
+  cB?: any;
+  cC?: any;
+  cD?: any;
+}
 export interface Jack {
   id?: any;
   name: string;
