@@ -70,7 +70,7 @@
   },
   "build": {
     "appId": "con.KVM-Tesk.app",
-    "productName": "KVM-Tesk",
+    "productName": "KVM智能设备",
     "directories": {
       "output": "win"
     },
@@ -83,7 +83,8 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "src/assets/img/logo.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -93,7 +94,8 @@
     "linux": {
       "target": [
         "deb"
-      ]
+      ],
+      "icon": "src/assets/img/logo.ico"
     }
   },
   "keywords": [
