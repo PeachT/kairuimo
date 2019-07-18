@@ -10,11 +10,11 @@ import { NzMessageService } from 'ng-zorro-antd';
 export class AppService {
   /** 软件信息 */
   public info = {
-    version: '0.0.18',
+    version: '0.0.24',
     unit: {
       name: '柳州市凯瑞姆',
       tel: '888-8888888',
-      logo: 'assets/img/logo.jpeg'
+      logo: 'assets/img/logo.png'
     }
   };
   /** 运行环境是否是Electron */
