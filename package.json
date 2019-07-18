@@ -84,7 +84,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "src/assets/img/logo.ico"
+      "icon": "build/icons/256x256.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -95,7 +95,7 @@
       "target": [
         "deb"
       ],
-      "icon": "src/assets/img/logo.ico"
+      "icon": "build/icons"
     }
   },
   "keywords": [
