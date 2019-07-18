@@ -304,7 +304,7 @@ ipcMain.on('local-update', (event, data) => {
 });
 /** 卸载U盘 */
 ipcMain.on('usb-umount', (event, data) => {
-  const upps = exec(`sudo umount /dev/sd[b-z][0-9]`, { async: true }, (code, stdout, stderr) => {
+  const upps = exec(`sudo umount /dev/sd[b-z]*`, { async: true }, (code, stdout, stderr) => {
     console.log('Exit code:', code);
     console.log('Program output:', stdout);
     console.log('Program stderr:', stderr);
@@ -348,7 +348,7 @@ function moundUSB(filterName, sendName) {
     usb.kill();
     console.log('usb', stdout);
     if (stdout) {
-      const up = exec(`sudo mount -o rw,nosuid,nodev,relatime,uid=1000,utf8 /dev/sd[b-z][0-9] ${updatepath}`,
+      const up = exec(`sudo mount -o rw,nosuid,nodev,relatime,uid=1000,utf8 /dev/sd[b-z]* ${updatepath}`,
                         { async: true }, (code, stdout, stderr) => {
         up.kill();
         console.log('mount code:', code);

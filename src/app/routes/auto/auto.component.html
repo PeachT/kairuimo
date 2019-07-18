@@ -169,11 +169,12 @@
 </nz-modal>
 <div class="kvm-btn-group" *ngIf="modal.state">
   <button nz-button nzType="primary" class="z" nzShape="round" (click)="selfRead()" *ngIf="!auto.pause">张 拉</button>
+  <button nz-button nzType="primary" class="r" nzShape="round" (click)="run()" *ngIf="!auto.pause">直接张拉</button>
   <button nz-button nzType="primary" class="z" nzShape="round" (click)="continue()" *ngIf="auto.pause"
     [disabled]="auto.nowPause || auto.pauseMsg">继续张拉</button>
   <button nz-button nzType="primary" class="r" nzShape="round" (click)="goBackMm()">回 顶</button>
   <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancel()" *ngIf="!auto.runState">取消张拉</button>
   <button nz-button nzType="primary" class="z" nzShape="round" (click)="saveOut()" *ngIf="auto.runState">保存退出</button>
-  <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancelOut()" *ngIf="auto.runState">不保存退出</button>
+  <!-- <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancelOut()" *ngIf="auto.runState">不保存退出</button> -->
   <button nz-button nzType="primary" nzShape="round" (click)="handle=!handle">显示切换</button>
 </div>
