@@ -10,6 +10,8 @@ export interface TensionTask extends IBase {
   steelStrand: string;
   otherInfo: Array<OtherInfo>;
   holeRadio: string;
+  startDate: any;
+  entDate: any;
   groups: Array<GroupItem>;
 }
 export interface GroupItem {

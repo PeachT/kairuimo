@@ -4,6 +4,11 @@
 @import './date.less';
 @import './data-processing.less';
 
+body {
+  user-select: none;
+}
+
+
 .kvm-slider {
   nz-slider{
     .ant-slider-handle{
@@ -46,18 +51,42 @@
   flex-direction: column;
   background-color: white;
   .project {
-    height: 68px;
-    display: flex;
-    align-items: center;
-    position: relative;
+    // height: 68px;
+    // display: flex;
+    // align-items: center;
+    // position: relative;
     background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
     nz-select {
-      height: 100%;
+      // height: 100%;
+      // width: 100%;
+      // position: absolute;
+      // opacity: 0;
+      // .ant-select-selection {
+      //   height: 100%;
+      // }
       width: 100%;
-      position: absolute;
-      opacity: 0;
-      .ant-select-selection {
+      .ant-select-arrow {
+        font-size: 24px;
+        color: white;
         height: 100%;
+        display: flex;
+        top: 0;
+        margin: 0;
+        align-items: center;
+      }
+      .ant-select-selection__placeholder, .ant-select-selection-selected-value {
+        font-size: 24px;
+        color: white;
+        height: 100%;
+        line-height: 49px;
+        margin: 0;
+        top: 0;
+      }
+      .ant-select-selection__rendered, .ant-select-selection {
+        border: 0;
+        border-radius: 0;
+        height: 49px;
+        background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
       }
     }
     .text {
@@ -77,6 +106,8 @@
     i {
       transition: all .6s;
       transform:rotate(0deg);
+      font-size: 24px;
+      color: white;
       &.active {
         transition: all .6s;
           transform:rotate(180deg);
@@ -235,7 +266,7 @@
 /* 表单样式 */
 form {
 
-  .ant-input, .ant-select{
+  .ant-input, .ant-select-selection{
     border-left: 5px solid #40a9ff;
     border-radius: 4px !important;
     &[disabled] {
@@ -244,14 +275,17 @@ form {
     }
   }
   .ant-input {
-    padding: 4px;
+    padding: 2px 4px;
+  }
+  .ant-select-selection__rendered {
+    margin: 0 4px ;
   }
   .ant-input:focus {
     border-color: #40a9ff;
   }
   /* 表单错误*/
   .in-error {
-    .ant-input, .ant-select{
+    .ant-input, .ant-select-selection{
       border: 1px solid #f5222d;
       border-left: 4px solid #F5222d;
     }
@@ -270,12 +304,12 @@ form {
     border-color: #d9d9d9;
   }
   &.form-edit {
-    .ant-input, .in-error .ant-input, .ant-select{
+    .ant-input, .in-error .ant-input, .ant-select-selection{
       border-color: #d9d9d9;
       color: rgba(0, 0, 0, 0.65);
     }
   }
-  .ant-form-item, .ant-input, .ant-cascader-picker-label, .ant-select {
+  .ant-form-item, .ant-input, .ant-cascader-picker-label, .ant-select-selection {
     font-size: 16px;
     font-weight: bold;
   }
@@ -491,5 +525,14 @@ nz-tree {
   .date{
     background-color: #92b3a5;
     color: white;
+  }
+}
+
+
+.filter {
+  nz-range-picker {
+    .ant-calendar-picker-input.ant-input {
+      padding: 4px 15px 4px 4px;
+    }
   }
 }

@@ -128,7 +128,9 @@ export class TaskComponent implements OnInit {
       otherInfo: this.fb.array(this.otherIngoDom.createForm([{key: '浇筑日期', value: null}])),
       holeRadio: [null],
       groups: [null, [Validators.required]],
-      project: []
+      project: [],
+      startDate: [],
+      entDate: []
     });
     this.getJacks();
     this.db.comp.toArray().then((d) => {

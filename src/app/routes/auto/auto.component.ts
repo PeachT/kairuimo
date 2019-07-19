@@ -255,9 +255,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('退出');
     this.PLCS.ipcSend('zF05', PLC_S(10), false);
     this.PLCS.ipcSend('cF05', PLC_S(10), false);
-    clearInterval(this.svgt);
-    clearInterval(this.selfInspectData.zt);
-    clearInterval(this.selfInspectData.ct);
+    try {
+      clearInterval(this.svgt);
+      clearInterval(this.selfInspectData.zt);
+      clearInterval(this.selfInspectData.ct);
+    } catch (error) {
+      console.warn('没有');
+    }
     localStorage.setItem('autoTask', null);
   }
   // tslint:disable-next-line:use-life-cycle-interface
@@ -1027,7 +1031,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.task.record.state = 1;
     }
-    this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
+    this.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
       console.log('查询结果', this.autoS.task.id, d);
       let index = null;
       d.groups.filter((f, i) => {
@@ -1036,6 +1040,24 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
       d.groups[index] = this.task;
+      // const ds = [];
+      // d.groups.map((g, i) => {
+      //   if ('record' in g) {
+      //     ds.push(g.record.time[1]);
+      //   }
+      // });
+      // if (ds.length > 0) {
+      //   const min = Math.min.apply(null, ds);
+      //   const max = Math.max.apply(null, ds);
+      //   d.entDate = max;
+      //   d.startDate = min;
+      // }
+      /** 设置张拉时间 */
+      if (d.startDate) {
+        d.startDate = this.task.record.time[1];
+      }
+      d.entDate = this.task.record.time[1];
+
       console.log('更新数据', d);
       this.db.task.update(this.autoS.task.id, d).then((updata) => {
         this.message.success('保存成功🙂');

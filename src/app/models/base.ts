@@ -155,6 +155,8 @@ const base = {
     steelStrand: null,
     otherInfo: [{key: '浇筑日期', value: null}],
     holeRadio: null,
+    startDate: null,
+    entDate: null,
     groups: [],
   },
 };

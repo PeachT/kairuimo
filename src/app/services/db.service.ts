@@ -158,7 +158,8 @@ export class DbService {
   public async getTaskBridgeMenuData(f: (o1: TensionTask) => boolean, state: boolean = false, p: number = 0, y: number = 0)
   : Promise<Array<Menu>> {
     const r = [];
-    const count =  await this.db.task.count();
+    const count =  await this.db.task.filter(o1 => f(o1)).count();
+    console.log(count);
     y = y || count;
     await this.db.task.filter(o1 => f(o1))
     .reverse() // 按id 反序获取

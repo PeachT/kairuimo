@@ -8,17 +8,17 @@
       <ng-container *ngFor="let item of otherInforFormArr.controls; index as i" [formGroupName]="i">
         <ng-container *ngIf="i === iselect">
           <nz-form-label [nzSm]="3" >浇筑日期</nz-form-label>
-          <nz-form-control [nzSm]="appS.edit ? 21 : 5" [ngClass]="{'in-error': item.get('value').errors}">
+          <nz-form-control [nzSm]="appS.edit ? 21 : 5" [ngClass]="{'in-error': item.get('value').errors}" [nzErrorTip]="item.get('value').errors | ValidatorError">
             <nz-date-picker readonly  class="revise-date" nzFormat="yyyy-MM-dd" formControlName="value"></nz-date-picker>
-            <nz-form-explain *ngIf="appS.edit">{{item.get('value').errors | ValidatorError}}</nz-form-explain>
+            <!-- <nz-form-explain *ngIf="appS.edit">{{item.get('value').errors | ValidatorError}}</nz-form-explain> -->
           </nz-form-control>
         </ng-container>
         <div class="other-edit" *ngIf="appS.edit && i !== iselect">
           <div style="flex: 1;">
-            <nz-form-control [ngClass]="{'in-error': item.get('key').errors}">
+            <nz-form-control [ngClass]="{'in-error': item.get('key').errors}" [nzErrorTip]="item.get('value').errors | ValidatorError">
               <input placeholder="显示名称" nz-input formControlName="key" [nzAutocomplete]="auto" />
               <nz-autocomplete [nzDataSource]="bridgeOtherKeySelect()" #auto> </nz-autocomplete>
-              <nz-form-explain *ngIf="appS.edit">{{item.get('key').errors | ValidatorError}}</nz-form-explain>
+              <!-- <nz-form-explain *ngIf="appS.edit">{{item.get('key').errors | ValidatorError}}</nz-form-explain> -->
             </nz-form-control>
           </div>
           <div style="flex: 1;">

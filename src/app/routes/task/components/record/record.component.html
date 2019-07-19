@@ -12,7 +12,7 @@
         <th *ngIf="GroupData.tensionStage > 3">阶段二</th>
         <th *ngIf="GroupData.tensionStage > 4">阶段三</th>
         <th>终张拉</th> -->
-        <th width="120" colspan="2">力筋回缩量</th>
+        <th width="120" colspan="2">回油至初应力</th>
 
         <th width="120">伸长量mm</th>
         <th width="120">偏差率</th>
@@ -26,8 +26,8 @@
         <td class="text-c" *ngFor="let item of tensionStageArr; index as i;">
           {{GroupData.stage[i]}}
         </td>
-        <td style="font-size: 13px;">回油至初应力</td>
-        <td>回缩值</td>
+        <td style="font-size: 13px;">压力/位移</td>
+        <td>回缩量</td>
       </tr>
       <ng-container  *ngFor="let item of devModeStr; index as i">
         <tr [class]="item">

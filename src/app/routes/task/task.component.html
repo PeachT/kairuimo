@@ -28,9 +28,9 @@
                   请入选择构建！</nz-form-explain> -->
               </nz-form-control>
 
-              <nz-form-label [nzSm]="3" nzRequired>设备</nz-form-label>
-              <nz-form-control [nzSm]="5" nzErrorTip="请入选择设备！">
-                <nz-cascader nzMenuClassName="task-cascader" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
+              <nz-form-label [nzSm]="3" nzRequired>顶</nz-form-label>
+              <nz-form-control [nzSm]="5" nzErrorTip="请入选择顶！">
+                <nz-cascader nzMenuClassName="task-cascader" nzPlaceHolder="选择顶" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
                   (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="selectJackState">
                 </nz-cascader>
                 <!-- <nz-form-explain *ngIf="formData.get('device').dirty && formData.get('device').errors">请入选择设备！

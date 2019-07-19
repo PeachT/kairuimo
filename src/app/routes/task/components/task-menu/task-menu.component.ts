@@ -11,6 +11,9 @@ import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component'
 import { ActivatedRoute } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
+// import endOfMonth from 'date-fns/end_of_month';
+// import * as endOfMonth from 'date-fns/end_of_month';
+import { lastDayOfWeek, lastDayOfMonth, startOfWeek, startOfMonth, getTime} from 'date-fns';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -42,6 +45,21 @@ export class TaskMenuComponent implements OnInit {
   pt20 = 0;
   scrollTop = 0;
   setScrollTop = 0;
+  filter = {
+    ok: false,
+    no: false,
+    tension: {
+      startDate: null,
+      entDate: null,
+      date: [],
+    },
+    pouring: {
+      startDate: null,
+      entDate: null,
+      date: [],
+    },
+  };
+  rangesDate = {本周: [startOfWeek(new Date()), lastDayOfWeek(new Date())], 本月: [startOfMonth(new Date()), lastDayOfMonth(new Date())] };
 
   @Output() menuChange = new EventEmitter();
 
@@ -54,6 +72,13 @@ export class TaskMenuComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
+    const date = new Date();
+    this.filter.tension.date = [startOfWeek(date), lastDayOfWeek(date)];
+    this.filter.tension.startDate = getTime(startOfWeek(date));
+    this.filter.tension.entDate = getTime(lastDayOfWeek(date));
+    this.filter.pouring.date = [startOfWeek(date), lastDayOfWeek(date)];
+    this.filter.pouring.startDate = getTime(startOfWeek(date));
+    this.filter.pouring.entDate = getTime(lastDayOfWeek(date));
     await this.getProject();
     this.activatedRoute.queryParams.subscribe(queryParams => {
       let data = null;
@@ -70,6 +95,7 @@ export class TaskMenuComponent implements OnInit {
       debounceTime(200),
       map(y => console.log(y))
     );
+
   }
 
   res(data) {
@@ -98,6 +124,20 @@ export class TaskMenuComponent implements OnInit {
     }
   }
   async getBridge(id = null) {
+    if (!this.project.select.id ||  !this.component.select) {
+      return;
+    }
+    this.paddingTop = 0;
+    this.pts = [];
+    this.sg = 0;
+    this.sgs = true;
+    this.sgsd = true;
+    this.pt10 = 0;
+    this.pt20 = 0;
+    this.scrollTop = 0;
+    this.setScrollTop = 0;
+    this.bridgeScrollDom.nativeElement.scrollTop = 0;
+    // this.resetScrollTop();
     this.getBridgedb(id, 0, 45);
     // tslint:disable-next-line:max-line-length
     // this.bridge.menu = await this.db.getTaskBridgeMenuData((o1) => o1.project === this.project.select.id && o1.component === this.component.select, false, 0, 50);
@@ -169,7 +209,6 @@ export class TaskMenuComponent implements OnInit {
   }
   async bScroll(event) {
     const data = event.target;
-
     const scrollTop = data.scrollTop;
 
     // const page = Math.floor(scrollTop / (15 * 49)) * 15;
@@ -215,15 +254,6 @@ export class TaskMenuComponent implements OnInit {
 
   }
   async setPadding(target, state) {
-    // if (state === 1) {
-    //   this.sg++;
-    //   this.pts.push(this.pt20);
-    // } else if (state === 2) {
-    //   this.sg--;
-    //   this.pts.pop();
-    // }
-    // await this.getBridgedb(null, this.sg * 15, 45);
-    // this.paddingTop = this.pts.reduce((prev, cur) => prev + cur, 0);
     const children = target.children;
     this.pt20 = 0;
     for (let index = 1; index <= 15; index++) {
@@ -233,11 +263,53 @@ export class TaskMenuComponent implements OnInit {
   }
   async getBridgedb(id = null, p, y) {
     // tslint:disable-next-line:max-line-length
-    this.bridge.menu = await this.db.getTaskBridgeMenuData((o1) => o1.project === this.project.select.id && o1.component === this.component.select, false, p, y);
+    // this.bridge.menu = await this.db.getTaskBridgeMenuData((o1) => o1.project === this.project.select.id && o1.component === this.component.select, false, p, y);
+    this.bridge.menu = await this.db.getTaskBridgeMenuData(
+      (o1) => {
+        if (o1.project !== this.project.select.id || o1.component !== this.component.select) {
+          return false;
+        }
+        if (this.filter.ok) {
+          if (!this.filter.tension.startDate) {
+            return true;
+          } else if ( o1.startDate >= this.filter.tension.startDate && o1.startDate <= this.filter.tension.entDate) {
+            return true;
+          }
+        }
+        if (this.filter.pouring.startDate
+          && (
+            (getTime(o1.otherInfo[0].value) < this.filter.pouring.startDate
+            || getTime(o1.otherInfo[0].value) > this.filter.pouring.entDate)
+          )) {
+          return false;
+        }
+        if (!this.filter.no && !this.filter.ok) {
+          return true;
+        }
+        if (this.filter.no && !o1.startDate) {
+          return true;
+        }
+
+        return false;
+      },
+      false, p, y);
     if (id) {
       this.onBridge(id);
     }
     this.cdr.markForCheck();
     console.log(this.bridge, id);
+  }
+  onFilter() {
+    console.log(this.filter);
+    this.getBridgedb(null, 0, 45);
+    this.paddingTop = 0;
+    this.getBridge();
+  }
+  onFilterDate(e, key) {
+    this.filter[key].startDate = getTime(e[0]);
+    this.filter[key].entDate = getTime(e[1]);
+    this.filter[key].date = e;
+    console.log(e, this.filter);
+    this.getBridge();
   }
 }

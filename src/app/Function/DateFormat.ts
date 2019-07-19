@@ -1,3 +1,5 @@
+import { GroupItem } from '../models/task.models';
+
 /**
  * 时间格式化
  *
@@ -24,4 +26,16 @@ export function DateFormat(date: Date, fmt: string): string { // author: meizz
     }
   }
   return fmt;
+}
+
+export function getTensionDate(groups: Array<GroupItem>): Array<number> {
+  const ds = [];
+  groups.map(g => {
+    if (g.record) {
+      ds.push(g.record.time[1]);
+    }
+  });
+  const max = Math.max.apply(null, ds);
+  const min = Math.min.apply(null, ds);
+  return [min, max];
 }
