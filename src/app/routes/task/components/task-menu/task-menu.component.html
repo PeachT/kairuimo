@@ -22,8 +22,8 @@
       <!-- <nz-range-picker [nzRanges]="rangesDate" [ngModel]="filter.date" (ngModelChange)="onFilterDate($event)"></nz-range-picker> -->
   </div>
   <div class="project">
-    <nz-select nzSize="large" nzPlaceHolder="请选择项目" [(ngModel)]="project.select" (ngModelChange)="onProject()" [nzDisabled]="appS.edit">
-      <nz-option [nzValue]="item" [nzLabel]="item.name" *ngFor="let item of project.menu"></nz-option>
+    <nz-select nzSize="large" nzPlaceHolder="请选择项目" [(ngModel)]="project.sName" (ngModelChange)="onProject()" [nzDisabled]="appS.edit">
+      <nz-option [nzValue]="item" [nzLabel]="item" *ngFor="let item of project.names"></nz-option>
     </nz-select>
     <!-- <h2 class="text">{{project.select?.name || '请选择项目'}}</h2>
     <div style="display: flex; flex-direction: column;">

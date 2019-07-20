@@ -27,6 +27,8 @@ export class TaskMenuComponent implements OnInit {
   project = {
     select: null,
     menu: null,
+    names: [],
+    sName: null,
   };
   component = {
     select: null,
@@ -89,6 +91,8 @@ export class TaskMenuComponent implements OnInit {
       }
       data = Object.assign({ project: null, component: null, selectBridge: null }, data);
       this.project.select = this.project.menu.filter(f => f.id === Number(data.project))[0];
+      this.project.sName = this.project.select.name;
+      console.log(this.project.select);
       this.res(data);
     });
     fromEvent(this.bridgeScrollDom.nativeElement, 'scroll').pipe(
@@ -112,6 +116,9 @@ export class TaskMenuComponent implements OnInit {
 
   async getProject() {
     this.project.menu = await this.db.getMenuData('project');
+    this.project.names = this.project.menu.map(item => {
+      return item.name;
+    });
     console.log(this.project);
   }
   async getComponent() {
@@ -149,6 +156,8 @@ export class TaskMenuComponent implements OnInit {
   }
 
   onProject() {
+    this.project.select = this.project.menu.filter(f => f.name === this.project.sName)[0];
+    console.log(this.project.select, this.project.menu);
     if (this.ifEdit()) { return; }
     this.bridge = { menu: [], select: null };
     this.component = { menu: [], select: null };
