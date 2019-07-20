@@ -13,6 +13,7 @@ import { mpaToPlc, TensionMm, myToFixed, mmToPlc } from 'src/app/Function/device
 import { AutoDate } from 'src/app/models/device';
 import { Elongation } from 'src/app/models/live';
 import { getStageString } from 'src/app/Function/stageString';
+import { Subscription } from 'rxjs';
 import { SelfInspect } from './class/selfInspect';
 
 @Component({
@@ -115,6 +116,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     ct: null,
     zSuccess: false,
     cSuccess: false,
+    error: false,
+    success: false,
+    run: false,
   };
   selfInspectMsg = [null, '自检中', '自检完成', '自检错误'];
   /** 伸长量/偏差率 */
@@ -212,6 +216,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   stepStageStr = [];
   /** 力筋回缩量 */
   reData = {};
+  /** 监听PLC */
+  plcsub: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -239,7 +245,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
-    this.PLCS.plcSubject.subscribe((data) => {
+    this.plcsub = this.PLCS.plcSubject.subscribe((data) => {
+      this.alarmMonitoring();
       this.cdr.markForCheck();
     });
     this.stageStr = getStageString(this.task);
@@ -267,6 +274,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn('没有');
     }
     localStorage.setItem('autoTask', null);
+    if (this.plcsub) {
+      this.plcsub.unsubscribe();
+    }
   }
   // tslint:disable-next-line:use-life-cycle-interface
   ngAfterViewInit() {
@@ -334,20 +344,38 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.alarm.name = `${name}报警状态`;
   }
 
+  startAuto(self = false) {
+    this.setPLCM(520, false);
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      this.PLCS.ipcSend('cF05', PLC_S(10), true);
+      if (self) {
+        this.selfInspectStart('z');
+        this.selfInspectStart('c');
+      }
+    } else {
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      if (self) {
+        this.selfInspectStart('z');
+      }
+    }
+    this.modal.state = false;
+  }
   /**
    * *自检
    */
   selfRead() {
-    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.PLCS.ipcSend('cF05', PLC_S(10), true);
-      this.selfInspectStart('z');
-      this.selfInspectStart('c');
-    } else {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.selfInspectStart('z');
-    }
-    this.modal.state = false;
+    this.startAuto(true);
+    // if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
+    //   this.PLCS.ipcSend('cF05', PLC_S(10), true);
+    //   this.selfInspectStart('z');
+    //   this.selfInspectStart('c');
+    // } else {
+    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
+    //   this.selfInspectStart('z');
+    // }
+    // this.modal.state = false;
   }
   /**
    * *自检
@@ -355,6 +383,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
     let is = 0;
     this.selfInspectData[`${device}t`] = setInterval(() => {
+      if (this.auto.pause) {
+        return;
+      }
       console.log(device, '运行中', address, name, is);
       names.map(n => {
         const subMm = Number(this.PLCS.PD[n].showMm) - Number(this.selfInspectData.mm[n]);
@@ -397,6 +428,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
         this.auto.pauseMsg = `${name}自检错误！切换到手动模式测试设备是否正常！`;
         this.pause();
+        this.selfInspectData.error = true;
       } else if (nameSatate === 2) {
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
         console.log(name, device, '成功');
@@ -419,6 +451,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           });
           if (allState) {
+
             this.run();
           }
         } else {
@@ -466,6 +499,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.auto.msg[name] = msg;
   }
   selfInspectStart(device: string) {
+    this.selfInspectData.run = true;
     const names = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}[device];
     // const name = names[this.selfInspectData.index];
     const tms = {
@@ -508,6 +542,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *启动张拉
    */
   run() {
+    if (!this.selfInspectData.success) {
+      this.startAuto();
+      this.selfInspectData.success = true;
+      this.selfInspectData.run = true;
+    }
     console.log('开始', this.task.record);
     if (this.task.record && this.task.record.tensionStage > 0 && this.task.record.state !== 4) {
       console.log('二次任务');
@@ -853,6 +892,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *报警监控
    */
   alarmMonitoring() {
+    console.log('报警监控');
     this.auto.nowPause = false;
     const names = taskModeStr[this.task.mode];
     let backOk = true;
@@ -905,7 +945,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   ec() {
     this.svgt = setInterval(() => {
-      this.alarmMonitoring();
+      // this.alarmMonitoring();
       if (this.tensionOk) {
         this.unre();
       } else if (!this.auto.pause) {
@@ -992,6 +1032,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.auto.pause = true;
     this.modal.state = true;
     this.auto.nowBack = false;
+    clearInterval(this.selfInspectData.zt);
+    clearInterval(this.selfInspectData.ct);
     this.setPLCM(520, true);
   }
   /**
