@@ -31,7 +31,7 @@
           </td>
 
           <td>
-            {{PLCS.PD[item].state}}·{{auto.runState || auto.twoTension ? PLCS.PD[item].autoState[0] : selfInspectMsg[selfInspectData.state[item]]}}
+            {{PLCS.PD[item].state}}·{{auto.runState || auto.twoTension ? PLCS.PD[item].autoState[0] : selfInspectMsg[selfInspectData?.state[item]]}}
           </td>
           <td>{{PLCS.PD[item].showMpa}}</td>
           <td>{{target[item]}}</td>

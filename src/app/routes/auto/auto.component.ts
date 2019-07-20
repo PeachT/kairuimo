@@ -75,6 +75,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       cC: null,
       cD: null,
     },
+    zModes: [],
+    cModes: [],
   };
   autoData: AutoDate;
   // 张拉完成
@@ -85,33 +87,35 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   // 卸荷完成
   unloading = false;
   /** 自检状态 */
-  selfInspectData: any;
-  // {
-  //   mm: {
-  //     zA: 0,
-  //     zB: 0,
-  //     zC: 0,
-  //     zD: 0,
-  //     cA: 0,
-  //     cB: 0,
-  //     cC: 0,
-  //     cD: 0,
-  //   },
-  //   state: {
-  //     zA: 0,
-  //     zB: 0,
-  //     zC: 0,
-  //     zD: 0,
-  //     cA: 0,
-  //     cB: 0,
-  //     cC: 0,
-  //     cD: 0,
-  //   },
-  //   device: [],
-  //   index: 0,
-  //   zt: null,
-  //   ct: null,
-  // };
+  selfInspectData = {
+    mm: {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    },
+    state: {
+      zA: 0,
+      zB: 0,
+      zC: 0,
+      zD: 0,
+      cA: 0,
+      cB: 0,
+      cC: 0,
+      cD: 0,
+    },
+    device: [],
+    zIndex: 0,
+    cIndex: 0,
+    zt: null,
+    ct: null,
+    zSuccess: false,
+    cSuccess: false,
+  };
   selfInspectMsg = [null, '自检中', '自检完成', '自检错误'];
   /** 伸长量/偏差率 */
   elongation: Elongation = {
@@ -335,49 +339,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   selfRead() {
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      // this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      // this.PLCS.ipcSend('cF05', PLC_S(10), true);
-      // this.selfInspectStart('z');
-      // this.selfInspectStart('c');
-
-      const zSelf = new SelfInspect('z', this.task.mode, this.PLCS);
-      const cSelf = new SelfInspect('c', this.task.mode, this.PLCS);
-      let zsb;
-      let csb;
-      zsb = zSelf.subject.subscribe((state) => {
-        if (state) {
-          if (cSelf.success === 1) {
-            this.run();
-            zsb.unsubscribe();
-            csb.unsubscribe();
-          }
-        } else {
-          cSelf.startSb.unsubscribe();
-        }
-      });
-      csb = cSelf.subject.subscribe((state) => {
-        if (state) {
-          if (zSelf.success === 1) {
-            this.run();
-            zsb.unsubscribe();
-            csb.unsubscribe();
-          }
-        } else {
-          zSelf.startSb.unsubscribe();
-        }
-      });
-      // this.selfInspectData = zSelf.data;
-      // this.auto.msg[name] = '自检完成';
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      this.PLCS.ipcSend('cF05', PLC_S(10), true);
+      this.selfInspectStart('z');
+      this.selfInspectStart('c');
     } else {
-      // this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      // this.selfInspectStart('z');
-
-      const zSelf = new SelfInspect('z', this.task.mode, this.PLCS);
-      zSelf.subject.subscribe((state) => {
-        if (state) {
-          this.run();
-        }
-      });
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      this.selfInspectStart('z');
     }
     this.modal.state = false;
   }
@@ -387,10 +355,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
     let is = 0;
     this.selfInspectData[`${device}t`] = setInterval(() => {
-      // console.log('运行中');
+      console.log(device, '运行中', address, name, is);
       names.map(n => {
         const subMm = Number(this.PLCS.PD[n].showMm) - Number(this.selfInspectData.mm[n]);
-        console.log(n, subMm, is);
+        console.log(device, n, subMm, is);
         if (n === name) {
           if (subMm >= 1) {
             this.selfInspectData.state[name] = 2;
@@ -409,9 +377,18 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.selfInspectData.state[name] = 3;
           this.auto.msg[name] = `压力自检错误${subMm}`;
         }
+
+        // if (n === name && subMm >= 1) {
+        //   this.setData(name, 2, '自检完成');
+        // } else if (subMm > 1 || subMm < -1) {
+        //   this.setData(name, 3, `位移自检错误${subMm}`);
+        // } else if (this.PLCS.PD[n].showMpa > 1.5) {
+        //   this.setData(name, 3, `压力自检错误${this.PLCS.PD[n].showMpa}`);
+        // }
+
       });
       const nameSatate = this.selfInspectData.state[name];
-      if (nameSatate > 2 || is > 30) {
+      if (nameSatate > 2 || is > 15) {
         console.log(name, device, '失败');
         clearInterval(this.selfInspectData[`${device}t`]);
         console.log(this.selfInspectData.state);
@@ -445,12 +422,48 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.run();
           }
         } else {
-          this.selfInspectData.index++;
+          this.selfInspectData[`${device}Index`]++;
           this.selfInspectStart(device);
         }
       }
+      // const state = this.selfInspectData.state[name];
+      // if (state > 2 || is > 15) {
+      //   console.log(name, device, '失败');
+      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
+      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
+      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
+      //   this.auto.pauseMsg = `${name}自检错误！切换到手动模式测试设备是否正常！`;
+      //   this.pause();
+      // } else if (state === 2) {
+      //   this.index ++;
+      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
+      //   console.log(name, device, '成功');
+      //   if (this.index === this.auto[`${device}Modes`].length) {
+      //     this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
+      //     this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
+      //     this.selfInspectData[`${device}Success`] = true;
+      //     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      //       if (this.selfInspectData.zSuccess && this.selfInspectData.cSuccess) {
+      //         // this.run();
+      //         console.log(device, '测试通过', this.selfInspectData);
+      //         this.pause();
+      //       }
+      //     } else {
+      //         if (this.selfInspectData.zSuccess) {
+      //           // this.run();
+      //           this.pause();
+      //         }
+      //     }
+      //   } else {
+      //     this.selfInspectStart(device);
+      //   }
+      // }
       is ++;
     }, 1000);
+  }
+  private setData(name, state, msg) {
+    this.selfInspectData.state[name] = state;
+    this.auto.msg[name] = msg;
   }
   selfInspectStart(device: string) {
     const names = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}[device];
@@ -473,8 +486,15 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         AB8: ['cA', 'cB', 'cC', 'cD']
       },
     };
+    // this.auto.zModes
+    if (this.auto[`${device}Modes`].length === 0) {
+      this.auto[`${device}Modes`] = groupModeStr(this.task.mode).map((k) => {
+        return `${device}${k}`;
+      });
+    }
     // const name = taskModeStr[this.task.mode][this.selfInspectData.index];
-    const name = tms[device][this.task.mode][this.selfInspectData.index];
+    const name = tms[device][this.task.mode][this.selfInspectData[`${device}Index`]];
+    // const name = this.auto[`${device}Modes`][this.selfInspectData.index];
     names.map(n => {
       this.selfInspectData.mm[n] = this.PLCS.PD[n].showMm || 0;
     });
@@ -1053,7 +1073,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       //   d.startDate = min;
       // }
       /** 设置张拉时间 */
-      if (d.startDate) {
+      if (!d.startDate) {
         d.startDate = this.task.record.time[1];
       }
       d.entDate = this.task.record.time[1];

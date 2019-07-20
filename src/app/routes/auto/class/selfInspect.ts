@@ -8,11 +8,38 @@ export class SelfInspect {
   private device: string;
   private names: Array<string>;
   private modes: Array<string>;
-  data: {
-    state: {},
-    msg: {},
-    pauseMsg: any,
-    mm: {[propName: string]: DeviceValue}
+  data = {
+    state: {
+      zA: null,
+      zB: null,
+      zC: null,
+      zD: null,
+      cA: null,
+      cB: null,
+      cC: null,
+      cD: null,
+    },
+    msg: {
+      zA: null,
+      zB: null,
+      zC: null,
+      zD: null,
+      cA: null,
+      cB: null,
+      cC: null,
+      cD: null,
+    },
+    pauseMsg: null,
+    mm: {
+      zA: null,
+      zB: null,
+      zC: null,
+      zD: null,
+      cA: null,
+      cB: null,
+      cC: null,
+      cD: null,
+    }
   };
   private PLCS: PLCService;
   private index = 0;
@@ -29,6 +56,7 @@ export class SelfInspect {
     this.names = groupModeStr('AB8').map((name) => {
       return `${device}${name}`;
     });
+    console.log(this.data);
     this.modes = groupModeStr(mode).map((name) => {
       const key = `${device}${name}`;
       this.data.state[key] = null;
@@ -40,6 +68,7 @@ export class SelfInspect {
   private run() {
     /** 自检前记录位移 */
     groupModeStr('AB8').map(n => {
+      console.log(this.PLCS.PD[n]);
       this.data.mm[n] = this.PLCS.PD[n].showMm || 0;
     });
     this.address = { A: 16, B: 20, C: 24, D: 28}[this.modes[this.index][1]];

@@ -13,7 +13,7 @@ import { fromEvent } from 'rxjs';
 import { debounceTime, map } from 'rxjs/operators';
 // import endOfMonth from 'date-fns/end_of_month';
 // import * as endOfMonth from 'date-fns/end_of_month';
-import { lastDayOfWeek, lastDayOfMonth, startOfWeek, startOfMonth, getTime} from 'date-fns';
+import { lastDayOfWeek, lastDayOfMonth, startOfWeek, startOfMonth, getTime, compareAsc, compareDesc} from 'date-fns';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -276,11 +276,12 @@ export class TaskMenuComponent implements OnInit {
             return true;
           }
         }
+        // 86400000 时间戳24小时 ms
         if (this.filter.pouring.startDate
           && (
-            (getTime(o1.otherInfo[0].value) < this.filter.pouring.startDate
-            || getTime(o1.otherInfo[0].value) > this.filter.pouring.entDate)
-          )) {
+            (getTime(o1.otherInfo[0].value) < this.filter.pouring.startDate + 86400000
+            || getTime(o1.otherInfo[0].value) > this.filter.pouring.entDate + 86400000)
+            )) {
           return false;
         }
         if (!this.filter.no && !this.filter.ok) {

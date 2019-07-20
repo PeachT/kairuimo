@@ -160,11 +160,13 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     clearInterval(this.it);
     this.selectManual('z', [false, false, false, false]);
     this.selectManual('c', [false, false, false, false]);
+    this.PLCS.ipcSend('zF05', PLC_S(0), false);
+    this.PLCS.ipcSend('cF05', PLC_S(0), false);
   }
   /** 切换设备 */
   async onSelectedDevice(id) {
     console.log(id);
-    this.PLCS.ipcSend('zF06', PLC_S(0), id);
+    // this.PLCS.ipcSend('zF06', PLC_S(0), id);
     this.selectJackId = id;
     const jack = await this.PLCS.selectJack(id);
     const devModeStr = [
