@@ -158,7 +158,7 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="卸荷延时s">
-            <input nz-input type="number" nzSize="large" style="width: 100%;" min="5" [nzMax]="999" [(ngModel)]="autoData.unloadingDelay"/>
+            <input nz-input type="number" nzSize="large" style="width: 100%;" min="5" max="999" [(ngModel)]="autoData.unloadingDelay"/>
           <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
             [(ngModel)]="autoData.unloadingDelay"></nz-input-number> -->
         </nz-input-group>

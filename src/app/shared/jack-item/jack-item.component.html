@@ -31,11 +31,11 @@
 
       <nz-form-label [nzSm]="3" nzRequired>标定参数a</nz-form-label>
       <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('a').errors}">
-        <input type="number" nz-input formControlName="a">
+        <input type="number" min="-999" max="999" nz-input formControlName="a">
       </nz-form-control>
       <nz-form-label [nzSm]="3" nzRequired>标定参数b</nz-form-label>
       <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('b').errors}">
-        <input type="number" nz-input formControlName="b">
+        <input type="number" min="-999" max="999" nz-input formControlName="b">
       </nz-form-control>
       <nz-form-label [nzSm]="3" nzRequired>标定日期</nz-form-label>
       <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('date').errors}">

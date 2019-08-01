@@ -117,7 +117,7 @@ export class AppComponent implements OnInit {
       document.body.addEventListener('focus', (event: any) => {
         keyboard = JSON.parse(localStorage.getItem('keyboard'));
         let type = event.target.type;
-        console.log('键盘', type, event);
+        // console.log('键盘', type, event);
         if (type === 'password') {
           type = 'text';
         }
@@ -125,6 +125,10 @@ export class AppComponent implements OnInit {
         // console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
         if ((type === 'number' || type === 'text') && event.target.classList[0] !== 'ant-calendar-picker-input'
         && event.target.classList[0] !== 'ant-calendar-range-picker-input') {
+          let keyType = type;
+          if (type === 'number' && event.target.min < 0) {
+            keyType = 'signed_number';
+          }
           let topmag = type === 'text' ? 130 : 30;
           const kwh = keyboard[type];
           // 获取元素绝对位置
@@ -146,9 +150,9 @@ export class AppComponent implements OnInit {
           }
           y = kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y;
 
-          console.log('focusfocusfocusfocusfocusfocusfocus', type);
+          console.log('打开键盘', keyType);
           event.target.select();
-          this.appService.onKeyboard({type, x, y, w: kwh.w, h: kwh.h});
+          this.appService.onKeyboard({keyType, x, y, w: kwh.w, h: kwh.h});
         }
       }, true);
     }
