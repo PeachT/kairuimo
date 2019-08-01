@@ -21,6 +21,7 @@ export class AppComponent implements OnInit {
   s1 = null;
   s2 = null;
   db: DB;
+  keyboardState = true;
 
   constructor(
     private e: ElectronService,
@@ -114,45 +115,98 @@ export class AppComponent implements OnInit {
       });
       // 更新请求
       // this.e.ipcRenderer.send('update');
-      document.body.addEventListener('focus', (event: any) => {
-        keyboard = JSON.parse(localStorage.getItem('keyboard'));
-        let type = event.target.type;
-        // console.log('键盘', type, event);
-        if (type === 'password') {
-          type = 'text';
-        }
+      // 弹出键盘
+      // document.body.addEventListener('focus', (event: any) => {
+      //   keyboard = JSON.parse(localStorage.getItem('keyboard'));
+      //   let type = event.target.type;
+      //   // console.log('键盘', type, event);
+      //   if (type === 'password') {
+      //     type = 'text';
+      //   }
 
-        // console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
-        if ((type === 'number' || type === 'text') && event.target.classList[0] !== 'ant-calendar-picker-input'
-        && event.target.classList[0] !== 'ant-calendar-range-picker-input') {
-          let keyType = type;
-          if (type === 'number' && event.target.min < 0) {
-            keyType = 'signed_number';
+      //   // console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
+      //   if ((type === 'number' || type === 'text') && event.target.classList[0] !== 'ant-calendar-picker-input'
+      //     && event.target.classList[0] !== 'ant-calendar-range-picker-input') {
+      //     let keyType = type;
+      //     if (type === 'number' && event.target.min < 0) {
+      //       keyType = 'signed_number';
+      //     }
+      //     let topmag = type === 'text' ? 130 : 30;
+      //     const kwh = keyboard[type];
+      //     // 获取元素绝对位置
+      //     const rect = event.target.getBoundingClientRect();
+      //     let x = Math.round(rect.x + window.screenLeft);
+      //     let y = Math.round(rect.y + rect.height + window.screenTop + topmag);
+
+      //     const drx = document.body.clientWidth + window.screenLeft;
+      //     const dry = document.body.clientHeight + window.screenTop;
+
+      //     const krx = x + kwh.w;
+      //     const kry = y + kwh.h;
+
+      //     x = krx - drx > 0 ? drx - kwh.w : x;
+      //     topmag = 0;
+      //     if (type === 'text') {
+      //       topmag = dry - rect.y - rect.height > 150 ? 0 : 130;
+      //       console.log(dry - rect.y - rect.height);
+      //     }
+      //     y = kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y;
+
+      //     console.log('打开键盘', keyType);
+      //     event.target.select();
+      //     this.appService.onKeyboard({ type: keyType, x, y, w: kwh.w, h: kwh.h });
+      //   }
+      // }, true);
+      // 键盘显示|隐藏
+      document.body.addEventListener('click', (event: any) => {
+        if (event.target.localName !== 'input') {
+          if ( this.keyboardState) {
+            this.keyboardState = false;
+            console.log('隐藏键盘', event.target.localName);
+            this.appService.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
           }
-          let topmag = type === 'text' ? 130 : 30;
-          const kwh = keyboard[type];
-          // 获取元素绝对位置
-          const rect = event.target.getBoundingClientRect();
-          let x = Math.round(rect.x + window.screenLeft);
-          let y = Math.round(rect.y + rect.height + window.screenTop + topmag);
-
-          const drx = document.body.clientWidth + window.screenLeft;
-          const dry = document.body.clientHeight + window.screenTop;
-
-          const krx = x + kwh.w;
-          const kry = y + kwh.h;
-
-          x = krx - drx > 0 ? drx - kwh.w : x;
-          topmag = 0;
-          if (type === 'text') {
-            topmag = dry - rect.y - rect.height  > 150 ? 0 : 130;
-            console.log(dry - rect.y - rect.height);
+        } else {
+          console.log('显示键盘', event.target.localName);
+          this.keyboardState = true;
+          keyboard = JSON.parse(localStorage.getItem('keyboard'));
+          let type = event.target.type;
+          // console.log('键盘', type, event);
+          if (type === 'password') {
+            type = 'text';
           }
-          y = kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y;
 
-          console.log('打开键盘', keyType);
-          event.target.select();
-          this.appService.onKeyboard({keyType, x, y, w: kwh.w, h: kwh.h});
+          // console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
+          if ((type === 'number' || type === 'text') && event.target.classList[0] !== 'ant-calendar-picker-input'
+            && event.target.classList[0] !== 'ant-calendar-range-picker-input') {
+            let keyType = type;
+            if (type === 'number' && event.target.min < 0) {
+              keyType = 'signed_number';
+            }
+            let topmag = type === 'text' ? 130 : 30;
+            const kwh = keyboard[type];
+            // 获取元素绝对位置
+            const rect = event.target.getBoundingClientRect();
+            let x = Math.round(rect.x + window.screenLeft);
+            let y = Math.round(rect.y + rect.height + window.screenTop + topmag);
+
+            const drx = document.body.clientWidth + window.screenLeft;
+            const dry = document.body.clientHeight + window.screenTop;
+
+            const krx = x + kwh.w;
+            const kry = y + kwh.h;
+
+            x = krx - drx > 0 ? drx - kwh.w : x;
+            topmag = 0;
+            if (type === 'text') {
+              topmag = dry - rect.y - rect.height > 150 ? 0 : 130;
+              console.log(dry - rect.y - rect.height);
+            }
+            y = kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y;
+
+            console.log('打开键盘', keyType);
+            event.target.select();
+            this.appService.onKeyboard({ type: keyType, x, y, w: kwh.w, h: kwh.h });
+          }
         }
       }, true);
     }
