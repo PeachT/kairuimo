@@ -117,12 +117,14 @@ export class AppComponent implements OnInit {
       document.body.addEventListener('focus', (event: any) => {
         keyboard = JSON.parse(localStorage.getItem('keyboard'));
         let type = event.target.type;
+        console.log('键盘', type, event);
         if (type === 'password') {
           type = 'text';
         }
 
         // console.log('0000111112222233333', event, document.body.clientWidth , document.body.clientHeight );
-        if (type === 'number' || type === 'text' && event.target.classList[0] !== 'ant-calendar-picker-input') {
+        if ((type === 'number' || type === 'text') && event.target.classList[0] !== 'ant-calendar-picker-input'
+        && event.target.classList[0] !== 'ant-calendar-range-picker-input') {
           let topmag = type === 'text' ? 130 : 30;
           const kwh = keyboard[type];
           // 获取元素绝对位置

@@ -33,6 +33,24 @@
       </div>
     </div>
   </div>
+  <div *ngIf="exportMode === 2">
+    <nz-divider nzText="选择导出位置"></nz-divider>
+    <div>
+      <p>导出时的时间文件（例：1970-01-01T12:12:12Data.datakvm）</p>
+      <div *ngIf="e.isLinux">
+        <h2 *ngIf="template.files?.length === 0">没有找到更新文件
+          <button nz-button nzType="primary" (click)="getTemplate()">
+            获取模板文件
+          </button>
+          <p>{{template.fileMsg | json}}</p>
+        </h2>
+      </div>
+      <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
+        <button nz-button nzType="primary" (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
+      </div>
+    </div>
+  </div>
 
   <!-- <nz-divider nzText="选择处理数据"></nz-divider>
   <nz-checkbox-wrapper style="width: 100%;">

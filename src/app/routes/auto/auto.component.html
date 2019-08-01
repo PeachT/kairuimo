@@ -127,26 +127,30 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="压力差Mpa">
-          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [(ngModel)]="autoData.pressureDifference">
-          </nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0" max="55" [(ngModel)]="autoData.pressureDifference"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [(ngModel)]="autoData.pressureDifference">
+          </nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="超伸长量%">
-          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="6" [(ngModel)]="autoData.superElongation">
-          </nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="6" [(ngModel)]="autoData.superElongation"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="6" [(ngModel)]="autoData.superElongation">
+          </nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="张拉平衡mm">
-          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="1" [(ngModel)]="autoData.tensionBalance">
-          </nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="1" [(ngModel)]="autoData.tensionBalance"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="1" [(ngModel)]="autoData.tensionBalance">
+          </nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="回顶位移mm">
-          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="20" [(ngModel)]="autoData.backMm">
-          </nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" [(ngModel)]="autoData.backMm"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="20" [(ngModel)]="autoData.backMm">
+          </nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>
@@ -154,8 +158,9 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="卸荷延时s">
-          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="autoData.unloadingDelay"></nz-input-number>
+            <input nz-input type="number" nzSize="large" style="width: 100%;" min="5" [nzMax]="999" [(ngModel)]="autoData.unloadingDelay"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+            [(ngModel)]="autoData.unloadingDelay"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>

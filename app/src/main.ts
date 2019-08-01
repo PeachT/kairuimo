@@ -42,7 +42,7 @@ function createWindow() {
   Menu.setApplicationMenu(null);
   win = new BrowserWindow(
     {
-      // width: 1920, height: 1080,
+      width: 1920, height: 1080,
       // fullscreen: true,
       webPreferences: {
         nodeIntegration: true,
