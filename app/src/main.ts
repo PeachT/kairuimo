@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { Menu, app, BrowserWindow, ipcMain, dialog } from 'electron';
 const ejsexcel = require('../static/ejsexcel');
 // const ejsexcel = require('../node_modules/ejsexcel/index');
 const fs = require('fs');
@@ -38,16 +38,19 @@ let win: BrowserWindow;
 
 
 function createWindow() {
+  /*隐藏electron创听的菜单栏*/
+  Menu.setApplicationMenu(null);
   win = new BrowserWindow(
     {
-      width: 1920, height: 1080,
+      // width: 1920, height: 1080,
+      // fullscreen: true,
       webPreferences: {
         nodeIntegration: true,
         backgroundThrottling: false
       }
     }
   );
-
+  win.maximize();
   // load the dist folder from Angular
   win.loadURL(winURL);
 

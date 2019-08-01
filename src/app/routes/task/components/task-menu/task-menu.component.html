@@ -8,15 +8,17 @@
         </button>
         <ng-template #contentTemplate>
           <div>
-            已张拉日期: <nz-range-picker [nzDisabled]="!filter.ok" [nzRanges]="rangesDate" [ngModel]="filter.tension.date" (ngModelChange)="onFilterDate($event, 'tension')"></nz-range-picker>
+            已张拉日期: <nz-range-picker readonly [nzDisabled]="!filter.ok" [nzRanges]="rangesDate" [ngModel]="filter.tension.date" (ngModelChange)="onFilterDate($event, 'tension')"></nz-range-picker>
           </div>
           <br>
           <div>
-            &nbsp;&nbsp;&nbsp;&nbsp;浇筑日期: <nz-range-picker [nzRanges]="rangesDate" [ngModel]="filter.pouring.date" (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
+            &nbsp;&nbsp;&nbsp;&nbsp;浇筑日期: <nz-range-picker readonly [nzRanges]="rangesDate" [ngModel]="filter.pouring.date" (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
           </div>
         </ng-template>
       </div>
-      <p style="margin: 0; background-color: #51c4d3; color: white;">&nbsp;已张: {{filter.tension.date[0] | date: 'yyyy-MM-dd'}}~{{filter.tension.date[1] | date: 'yyyy-MM-dd'}}</p>
+      <p style="margin: 0; background-color: #51c4d3; color: white;"
+        [ngStyle]="{'textDecoration': filter.ok ? '' :'line-through'}"
+      >&nbsp;已张: {{filter.tension.date[0] | date: 'yyyy-MM-dd'}}~{{filter.tension.date[1] | date: 'yyyy-MM-dd'}}</p>
       <p style="margin: 0; background-color: #45b787; color: white;">&nbsp;浇筑: {{filter.pouring.date[0] | date: 'yyyy-MM-dd'}}~{{filter.pouring.date[1] | date: 'yyyy-MM-dd'}}</p>
       <!-- {{filter.date | json}} -->
       <!-- <nz-range-picker [nzRanges]="rangesDate" [ngModel]="filter.date" (ngModelChange)="onFilterDate($event)"></nz-range-picker> -->

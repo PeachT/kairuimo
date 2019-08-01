@@ -127,25 +127,25 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="压力差Mpa">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [(ngModel)]="autoData.pressureDifference">
+          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [(ngModel)]="autoData.pressureDifference">
           </nz-input-number>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="超伸长量%">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="6" [(ngModel)]="autoData.superElongation">
+          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="6" [(ngModel)]="autoData.superElongation">
           </nz-input-number>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="张拉平衡mm">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="1" [(ngModel)]="autoData.tensionBalance">
+          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="1" [(ngModel)]="autoData.tensionBalance">
           </nz-input-number>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="回顶位移mm">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="20" [(ngModel)]="autoData.backMm">
+          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="20" [(ngModel)]="autoData.backMm">
           </nz-input-number>
         </nz-input-group>
       </nz-col>
@@ -154,7 +154,7 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="卸荷延时s">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
             [(ngModel)]="autoData.unloadingDelay"></nz-input-number>
         </nz-input-group>
       </nz-col>

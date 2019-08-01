@@ -46,6 +46,12 @@
   <br>
   <br>
   <div>
+    <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskFliter($event)">
+      <label nz-checkbox nzValue="0">已导出</label>
+      <label nz-checkbox nzValue="1">未导出</label>
+    </nz-checkbox-wrapper>
+  </div>
+  <div>
     <div *ngIf="savePath && tempPath">
       <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
         <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
@@ -56,22 +62,19 @@
       </nz-radio-group>
       <hr>
       <div style="display: flex;flex-wrap: wrap;">
-        <div *ngFor="let b of taskData.bridge; index as i" style="margin: 0 15px 15px 0;">
+        <div *ngFor="let b of taskData.bridge; index as i" class="bridge-item" style="">
           <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(b.id) > -1}">
             <input type="checkbox" name="brigeBox" [checked]="taskData.sb.indexOf(b.id) > -1" (click)="setBridge(b)"
               [value]="b.id" />
-            {{b.name}}
+            <p>
+              {{b.name}}
+            </p>
           </label>
         </div>
       </div>
     </div>
   </div>
-  <div>
-    <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskFliter($event)">
-      <label nz-checkbox nzValue="0">已导出</label>
-      <label nz-checkbox nzValue="1">未导出</label>
-    </nz-checkbox-wrapper>
-  </div>
+
   <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;">
     <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.msg === '导出'"
       [disabled]="!(taskData.sb.length > 0)" [nzLoading]="progress.state">{{progress.msg}}</button>
