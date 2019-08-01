@@ -152,7 +152,7 @@ export class AppComponent implements OnInit {
 
           console.log('打开键盘', keyType);
           event.target.select();
-          this.appService.onKeyboard({keyType, x, y, w: kwh.w, h: kwh.h});
+          this.appService.onKeyboard({type: keyType, x, y, w: kwh.w, h: kwh.h});
         }
       }, true);
     }
