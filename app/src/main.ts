@@ -100,6 +100,9 @@ function IPCOn(d: string = 'z', tcp: ModbusTCP) {
   ipcMain.on(`${d}F03`, (e, arg) => {
     tcp.F03(arg.address, arg.value, arg.channel);
   });
+  ipcMain.on(`${d}F03_float`, (e, arg) => {
+    tcp.F03_float(arg.address, arg.value, arg.channel);
+  });
   ipcMain.on(`${d}F05`, (e, arg) => {
     tcp.F05(arg.address, arg.value, arg.channel);
   });

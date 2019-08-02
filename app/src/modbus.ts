@@ -179,6 +179,25 @@ export class ModbusTCP {
     }
   }
   /**
+   * 读取多个寄存器值
+   *
+   * @param {number} address 首地址
+   * @param {number} length 读取数据量
+   * @param {string} channel 通知UI名称
+   * @memberof ModbusTCP
+   */
+  public F03_float(address: number, length: number, channel: string): void {
+    if (this.ifClient()) {
+      this.client.readHoldingRegisters(address, length).then((data) => {
+        const float = bf.bufferToFloat(data.buffer);
+        // const dint16 = bf.bufferTo16int(data.buffer);
+        this.IPCSend(channel, { float });
+      }).catch((err) => {
+        this.IPCSend(channel, err);
+      });
+    }
+  }
+  /**
    * 设置单个线圈
    *
    * @param {number} address 装置地址

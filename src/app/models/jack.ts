@@ -23,6 +23,12 @@ export interface Jack {
   jackModel: string;
   /** 油泵型号 */
   pumpModel: string;
+  /** 保存PLC组 */
+  saveGroup: number;
+  /** 状态 */
+  state: boolean;
+  /** 联机|单机 */
+  link: boolean;
   zA: Dev;
   zB: Dev;
   zC: Dev;
@@ -92,6 +98,8 @@ export function groupModeStr(mode: string) {
       break;
   }
 }
+/** 分组模式字符串 */
+export const numberMode = [[], ['A'], ['A', 'B'], [], ['A', 'B', 'C', 'D']];
 
 /** 顶选择菜单 */
 export function carterJaskMenu(mode: number) {
@@ -167,3 +175,20 @@ export const deviceGroupMode = [
   [],
   ['zA', 'zB', 'zC', 'zD', 'cA', 'cB', 'cC', 'cD']
 ];
+/** 泵顶组模式 */
+export const deviceGroupModeDev = {
+  z: [
+    [],
+    ['zA', ],
+    ['zA', 'zB'],
+    [],
+    ['zA', 'zB', 'zC', 'zD']
+  ],
+  c: [
+    [],
+    ['cA'],
+    ['cA', 'cB'],
+    [],
+    ['cA', 'cB', 'cC', 'cD']
+  ],
+};

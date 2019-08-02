@@ -52,6 +52,9 @@ const base = {
     equation: false,
     jackModel: null,
     pumpModel: null,
+    saveGroup: null,
+    state: true,
+    link: true,
     zA: {
       jackNumber: 'zA',
       pumpNumber: 'Z',

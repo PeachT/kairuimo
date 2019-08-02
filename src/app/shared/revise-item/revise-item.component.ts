@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { ManualItemComponent } from '../manual-item/manual-item.component';
 import { PLCService } from 'src/app/services/PLC.service';
@@ -41,6 +41,7 @@ export class ReviseItemComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public PLCS: PLCService,
+    private cdr: ChangeDetectorRef,
   ) {
   }
 
@@ -62,17 +63,27 @@ export class ReviseItemComponent implements OnInit {
   setMpa(value) {
     this.manualDom.dev[this.reviseName] = value;
   }
-  setMm(i) {
-    this.setIndex = i;
+  async setMm(i) {
     if (this.reviseName === 'mpa') {
       const setMpa = i * 10 + 5;
-      this.manualDom.set(this.manualDom.setAeeress[0], setMpa, 'mpa');
-      this.revise.devValue = setMpa;
+      const s = await this.manualDom.set(this.manualDom.setAeeress[0], setMpa, 'mpa');
+      if (s) {
+        this.revise.devValue = setMpa;
+        this.cdr.markForCheck();
+      } else {
+        return;
+      }
     } else {
       const setMm = i * 40 + 20;
-      this.manualDom.set(this.manualDom.setAeeress[1], setMm);
-      this.revise.devValue = setMm;
+      const s = await this.manualDom.set(this.manualDom.setAeeress[1], setMm);
+      if (s) {
+        this.revise.devValue = setMm;
+        this.cdr.markForCheck();
+      } else {
+        return;
+      }
     }
+    this.setIndex = i;
     this.revise.measureValue = 0;
     this.countRevise();
   }

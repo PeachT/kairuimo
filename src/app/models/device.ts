@@ -10,6 +10,12 @@ export interface MpaRevise {
   cC: Array<number>;
   cD: Array<number>;
 }
+export interface IMpaRevise {
+  A?: Array<number>;
+  B?: Array<number>;
+  C?: Array<number>;
+  D?: Array<number>;
+}
 export function GetMpaRevise(): MpaRevise {
   const r: any = {};
   taskModeStr.AB8.map(key => {

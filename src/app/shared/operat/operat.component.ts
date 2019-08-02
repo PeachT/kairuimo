@@ -5,6 +5,7 @@ import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
 import { FormGroup } from '@angular/forms';
 import { getModelBase } from 'src/app/models/base';
+import { PLCService } from 'src/app/services/PLC.service';
 
 @Component({
   selector: 'app-operat',
@@ -28,6 +29,7 @@ export class OperatComponent implements OnInit {
     private message: NzMessageService,
     private db: DbService,
     public appS: AppService,
+    public PLCS: PLCService,
     private modalService: NzModalService,
   ) { }
 
@@ -39,8 +41,16 @@ export class OperatComponent implements OnInit {
     console.log('保存数据', data);
     let r = null;
     const msg = !data.id ? '添加' : '修改';
+    let state = true;
     // 添加
     if (!data.id) {
+      if (this.dbName === 'jack') {
+        state = await this.PLCS.setPLCMm(data);
+      }
+      if (!state) {
+        this.message.error('添加失败PLC设置错误无法保存');
+        return;
+      }
       delete data.id;
       // r = await this.db.addAsync(this.dbName, data, (p: Project) => p.name === data.name);
       r = await this.db.addAsync(this.dbName, data, (o: any) => this.addFilterFun(o, data));

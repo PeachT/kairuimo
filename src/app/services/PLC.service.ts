@@ -6,8 +6,8 @@ import { Subject, Observable, interval } from 'rxjs';
 import { PLC_D } from '../models/IPCChannel';
 import { PLCLiveData, GetPLCLiveData } from '../models/live';
 import { plcToMpa, plcToMm, mmToPlc } from '../Function/device.date.processing';
-import { MpaRevise, AutoDate, GetMpaRevise } from '../models/device';
-import { Jack, taskModeStr, deviceGroupMode } from '../models/jack';
+import { MpaRevise, AutoDate, GetMpaRevise, IMpaRevise } from '../models/device';
+import { Jack, taskModeStr, deviceGroupMode, groupModeStr, deviceGroupModeDev } from '../models/jack';
 import { DbService } from './db.service';
 
 
@@ -33,7 +33,13 @@ const autoDate: AutoDate = {
 @Injectable({ providedIn: 'root' })
 export class PLCService {
   jack: Jack;
-  mpaRevise: MpaRevise;
+  mpaRevise = {};
+  revise = {
+    zGetMpaState: false,
+    cGetMpaState: false,
+    zMpaRevise: {},
+    cMpaRevise: {},
+  };
 
   public plcState = {
     /** 设备状态 */
@@ -133,12 +139,13 @@ export class PLCService {
     private odb: DbService,
   ) {
     console.log(this.e.isLinux);
-    const revise = JSON.parse(localStorage.getItem('mpaRevise'));
-    if (!revise) {
-      this.setMpaRevise(mpaRevise);
-    } else {
-      this.mpaRevise = revise;
-    }
+
+    // const revise = JSON.parse(localStorage.getItem('mpaRevise'));
+    // if (!revise) {
+    //   this.setMpaRevise(mpaRevise);
+    // } else {
+    //   this.mpaRevise = revise;
+    // }
     const auto = JSON.parse(localStorage.getItem('autoDate'));
     if (!auto) {
       this.setAutoData(autoDate);
@@ -155,6 +162,10 @@ export class PLCService {
       console.log(dev, data);
     });
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
+      if (!this.revise[`${dev}GetMpaState`]) {
+        console.log(this.revise[`${dev}MpaRevise`]);
+        this.getPLCMpa(dev);
+      }
       // console.log(data);
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`];
       this.plcState[`${dev}OT`] = new Date().getTime();
@@ -213,6 +224,11 @@ export class PLCService {
     });
     this.e.ipcRenderer.on(`${dev}error`, (event, data) => {
       console.error(dev, data);
+      try {
+        if (data.client) {
+          this.getPLCMpa(dev);
+        }
+      } catch (error) {}
       this.plcState[`${dev}LT`] = '重新链接...';
       this.PD[`${dev}A`].state = '重新链接中...';
       this.PD[`${dev}B`].state = '重新链接中...';
@@ -220,7 +236,7 @@ export class PLCService {
       this.PD[`${dev}D`].state = '重新链接中...';
     });
   }
-  /** 转换设备状态 */
+  /** 设备状态处理 */
   getState(value: number, auto = false, states = this.stateStr): { state: Array<string>, alarm: Array<string> } {
     const r = {
       state: [],
@@ -256,6 +272,15 @@ export class PLCService {
   }
   /** 在线状态 */
   // tslint:disable-next-line:ban-types
+  /**
+   *
+   *
+   * @param {string} sendChannel
+   * @param {number} address
+   * @param {*} value
+   * @returns
+   * @memberof PLCService
+   */
   public ipcSend(sendChannel: string, address: number, value: any) {
     return new Promise((resolve, reject) => {
       if ((!this.plcState.z && sendChannel.indexOf('z') > -1) || (!this.plcState.c && sendChannel.indexOf('c') > -1)) {
@@ -285,17 +310,17 @@ export class PLCService {
   }
 
 
-  /** 获取压力校正系数 */
-  getMpaRevise(): MpaRevise {
-    this.mpaRevise = JSON.parse(localStorage.getItem('mpaRevise'));
-    return this.mpaRevise;
-  }
+  // /** 获取压力校正系数 */
+  // getMpaRevise(): MpaRevise {
+  //   this.mpaRevise = JSON.parse(localStorage.getItem('mpaRevise'));
+  //   return this.mpaRevise;
+  // }
 
-  /** 设置压力校正系数 */
-  setMpaRevise(revise: MpaRevise) {
-    localStorage.setItem('mpaRevise', JSON.stringify(revise));
-    this.mpaRevise = revise;
-  }
+  // /** 设置压力校正系数 */
+  // setMpaRevise(revise: MpaRevise) {
+  //   localStorage.setItem('mpaRevise', JSON.stringify(revise));
+  //   this.mpaRevise = revise;
+  // }
   /** 获取自动参数 */
   getAutoDate(): AutoDate {
     return JSON.parse(localStorage.getItem('autoDate'));
@@ -329,8 +354,26 @@ export class PLCService {
         }
       }
     });
-    this.ipcSend('zF016', PLC_D(420), z);
-    this.ipcSend('cF016', PLC_D(420), c);
+    await this.ipcSend(`zF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
+      deviceGroupModeDev.z[this.jack.jackMode].map((name, index) => {
+        console.log(name, index);
+        this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6);
+      });
+    }).catch(() => {
+      console.error('获取PLC位移校正错误');
+    });
+    if (this.jack.link) {
+      await this.ipcSend(`cF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
+        deviceGroupModeDev.c[this.jack.jackMode].map((name, index) => {
+          console.log(name, index);
+          this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6);
+        });
+      }).catch(() => {
+        console.error('获取PLC位移校正错误');
+      });
+    }
+    // this.ipcSend('zF016', PLC_D(420), z);
+    // this.ipcSend('cF016', PLC_D(420), c);
     // this.ipcSend('zF016', PLC_D(420), [
     //   mmToPlc(this.jack.zA.upper, this.jack.zA.mm), mmToPlc(this.jack.zA.floot, this.jack.zA.mm),
     //   mmToPlc(this.jack.zB.upper, this.jack.zB.mm), mmToPlc(this.jack.zB.floot, this.jack.zB.mm),
@@ -369,5 +412,57 @@ export class PLCService {
     this.e.ipcRenderer.send('heartbeatRate', delay);
     console.log('设置采集频率', localStorage.getItem('heartbeatRate'));
     this.heartbeatRateValue = delay;
+  }
+
+  getPLCMpa(dev) {
+    this.revise[`${dev}GetMpaState`] = true;
+    this.ipcSend(`${dev}F03_float`, PLC_D(2000), 100).then((data: any) => {
+      console.log(`${dev}返回的结果`, data);
+      groupModeStr('AB8').map((name, index) => {
+        console.log(name, index);
+        this.revise[`${dev}MpaRevise`][`${name}`] = data.float.slice(index * 10, index * 10 + 6);
+        this.mpaRevise[`${dev}${name}`] = data.float.slice(index * 10, index * 10 + 6);
+      });
+      console.log(this.revise[`${dev}MpaRevise`], this.mpaRevise);
+    }).catch(() => {
+      console.error('获取压力校正错误');
+      this.revise[`${dev}GetMpaState`] = false;
+    });
+  }
+  setPLCMpa(dev: string, name: string, data) {
+    const address = {A: 0, B: 1, C: 2, D: 3}[name];
+    this.ipcSend(`${dev}F016_float`, PLC_D(2000 + address * 10), data).then(() => {
+      this.getPLCMpa(dev);
+    });
+  }
+  async setPLCMm(data: Jack): Promise<boolean> {
+    const z = [];
+    const c = [];
+    let state = true;
+    deviceGroupModeDev.z[data.jackMode].map((name, index) => {
+      console.log(name, index);
+      z.push(...data[name].mm, 0, 0, 0, 0);
+    });
+    deviceGroupModeDev.c[data.jackMode].map((name, index) => {
+      console.log(name, index);
+      c.push(...data[name].mm, 0, 0, 0, 0);
+    });
+    console.log(z, c);
+    await this.ipcSend(`zF016_float`, PLC_D(2100 + data.saveGroup * 100), z).then(() => {
+      console.log('主机位移校正设置完成');
+    }).catch(() => {
+      state = false;
+      this.message.error('主机设置错误');
+    });
+    if (data.link) {
+      await this.ipcSend(`cF016_float`, PLC_D(2100 + data.saveGroup * 100), c).then(() => {
+        console.log('副机位移校正设置完成');
+      }).catch(() => {
+        state = false;
+        this.message.error('副机设置错误');
+      });
+    }
+    console.log('位移校正设置完成');
+    return state;
   }
 }
