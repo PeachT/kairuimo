@@ -12,11 +12,9 @@ function floatToBuffer(floats) {
     const n = Number(float);
     buf.writeFloatLE(n, 0); // 浮点数转换位buffer
     let Hint = buf.readInt16LE(0); // 高16位转为整数
-    // tslint:disable-next-line:no-bitwise
-    Hint = Hint < 0 ? Hint >>> 0 : Hint;
+    Hint = Hint < 0 ? unTon(Hint) : Hint;
     let Lint = buf.readInt16LE(2); // 低16位转为整数
-    // tslint:disable-next-line:no-bitwise
-    Lint = Lint < 0 ? Lint >>> 0 : Lint;
+    Lint = Lint < 0 ? unTon(Lint) : Lint;
     console.log('33--', n, ' = ', Hint, '--', Lint);
     ints.push(Hint, Lint);
   });
@@ -53,6 +51,9 @@ function bufferTo16int(buffers) {
     // console.log(b4.readInt16BE(0));
   }
   return ints;
+}
+function unTon(n: number): number {
+  return parseInt((~(n)).toString(2).padStart(16, 'x').replace(/0/g, 'x').replace(/1/g, '0').replace(/x/g, '1'), 2);
 }
 export const bf = {
   floatToBuffer,

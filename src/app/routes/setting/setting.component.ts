@@ -124,7 +124,8 @@ export class SettingComponent implements OnInit, OnDestroy {
     // this.mpaRevise[name] = value;
     // this.PLCS.setMpaRevise(this.mpaRevise);
     const address = {A: 0, B: 1, C: 2, D: 3}[this.revise.name];
-    this.PLCS.ipcSend(`${this.revise.dev}F016_float`, PLC_D(2000 + address * 20), value).then((data) => {
+    const vs = value.map(v => v * 10000);
+    this.PLCS.ipcSend(`${this.revise.dev}F016_float`, PLC_D(2000 + address * 20), vs).then((data) => {
       console.log(data);
       this.PLCS.getPLCMpa(this.revise.dev);
       this.cdr.markForCheck();
