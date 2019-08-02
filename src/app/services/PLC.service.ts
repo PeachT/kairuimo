@@ -356,8 +356,8 @@ export class PLCService {
     });
     await this.ipcSend(`zF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
       deviceGroupModeDev.z[this.jack.jackMode].map((name, index) => {
-        console.log(name, index);
-        this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6);
+        // console.log(name, index);
+        this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6).map(v => (v / 10000).toFixed(5));
       });
     }).catch(() => {
       console.error('获取PLC位移校正错误');
@@ -365,8 +365,8 @@ export class PLCService {
     if (this.jack.link) {
       await this.ipcSend(`cF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
         deviceGroupModeDev.c[this.jack.jackMode].map((name, index) => {
-          console.log(name, index);
-          this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6);
+          // console.log(name, index);
+          this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6).map(v => (v / 10000).toFixed(5));
         });
       }).catch(() => {
         console.error('获取PLC位移校正错误');
@@ -420,8 +420,9 @@ export class PLCService {
       console.log(`${dev}返回的结果`, data);
       groupModeStr('AB8').map((name, index) => {
         console.log(name, index);
-        this.revise[`${dev}MpaRevise`][`${name}`] = data.float.slice(index * 10, index * 10 + 6);
-        this.mpaRevise[`${dev}${name}`] = data.float.slice(index * 10, index * 10 + 6);
+        const m = data.float.slice(index * 10, index * 10 + 6).map(v => (v / 10000).toFixed(5));
+        this.revise[`${dev}MpaRevise`][`${name}`] = m;
+        this.mpaRevise[`${dev}${name}`] = m;
       });
       console.log(this.revise[`${dev}MpaRevise`], this.mpaRevise);
     }).catch(() => {
@@ -441,11 +442,11 @@ export class PLCService {
     let state = true;
     deviceGroupModeDev.z[data.jackMode].map((name, index) => {
       console.log(name, index);
-      z.push(...data[name].mm, 0, 0, 0, 0);
+      z.push(...(data[name].mm.map(v => v * 10000)), 0, 0, 0, 0);
     });
     deviceGroupModeDev.c[data.jackMode].map((name, index) => {
       console.log(name, index);
-      c.push(...data[name].mm, 0, 0, 0, 0);
+      c.push(...(data[name].mm.map(v => v * 10000)), 0, 0, 0, 0);
     });
     console.log(z, c);
     await this.ipcSend(`zF016_float`, PLC_D(2100 + data.saveGroup * 100), z).then(() => {

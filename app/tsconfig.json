@@ -6,7 +6,11 @@
       "sourceMap": false,
       "rootDir":"./src",
       "outDir":"./js",
-      "watch":true
+      "watch":true,
+      "lib": [
+        "es2018",
+        "dom"
+      ]
   },
   "include":[
       "./src/**/*"

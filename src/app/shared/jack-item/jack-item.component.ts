@@ -66,9 +66,10 @@ export class JackItemComponent implements OnInit {
     const fd = this.formGroup.value;
     // this.formGroup.controls[this.name].setValue(value);
     // this.revise.state = false;
+    const vs = value.map(v => v * 10000);
     console.log('保存位移校正', value, this.name, fd);
     const address = {A: 0, B: 1, C: 2, D: 3}[this.name[1]];
-    await this.PLCS.ipcSend(`${this.name[0]}F016_float`, PLC_D(2100 + fd.saveGroup * 100 + address * 20), value).then(() => {
+    await this.PLCS.ipcSend(`${this.name[0]}F016_float`, PLC_D(2100 + fd.saveGroup * 100 + address * 20), vs).then(() => {
       console.log(this.name[0], '主机位移校正设置完成', 2100 + fd.saveGroup * 100 + address * 20);
       fd[this.name].mm = value;
       this.formGroup.controls[this.name].setValue(fd[this.name]);
