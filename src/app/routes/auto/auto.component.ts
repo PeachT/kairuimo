@@ -239,7 +239,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.autoS.task = autoTask;
       this.task = autoTask.groupData;
       console.log('12312313123123131', autoTask);
-      this.PLCS.getMpaRevise();
+      // this.PLCS.getMpaRevise();
       this.tensionStageArrF();
     }
   }

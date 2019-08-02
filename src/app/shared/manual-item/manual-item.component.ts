@@ -152,16 +152,26 @@ export class ManualItemComponent implements OnInit {
   }
 
   /** 设置数据 */
-  set(address: number, value: number, state: string = 'mm') {
+  async set(address: number, value: number, cla: string = 'mm'): Promise<boolean> {
     console.log(value);
+    let state = true;
     // this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]);
-    if (state === 'mpa') {
-      this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mpaToPlc(value, this.PLCS.mpaRevise[this.name]));
-      this.dev.setMpa = value;
+    if (cla === 'mpa') {
+      await this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mpaToPlc(value, this.PLCS.mpaRevise[this.name])).then((d) => {
+        console.log(d);
+        this.dev.setMpa = value;
+      }).catch(() => {
+        state = false;
+      });
     } else {
-      this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mmToPlc(value, this.PLCS.jack[this.name].mm));
-      this.dev.setMm = value;
+      await this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mmToPlc(value, this.PLCS.jack[this.name].mm)).then((d) => {
+        console.log(d);
+        this.dev.setMm = value;
+      }).catch(() => {
+        state = false;
+      });
     }
+    return state;
   }
 
   showAlarm() {

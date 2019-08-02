@@ -142,7 +142,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     await this.onSelectedDevice(this.PLCS.getJackId());
     /** 获取设备压力校正 */
-    await this.PLCS.getMpaRevise();
+    // await this.PLCS.getMpaRevise();
     this.selectManual('z');
     this.selectManual('c');
     this.getManualData('z');

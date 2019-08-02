@@ -11,7 +11,7 @@
     <br>
     <br>
     <nz-input-group nzSize="large" nzAddOnBefore="差值" [nzAddOnAfter]="opt">
-      <input type="number" nz-input [(ngModel)]="revise.measureValue" (input)="countRevise()">
+      <input type="number" nz-input [(ngModel)]="revise.measureValue" min="-0.3" max="0.3" (input)="countRevise()">
       <ng-template #opt>
         <button nz-button (click)="setMeasureValue(0.1)">+</button>
         <button nz-button (click)="setMeasureValue(-0.1)">-</button>
@@ -34,7 +34,7 @@
       <div *ngFor="let item of setStage; index as i">
         <!-- <nz-form-label [nzSm]="1" >{{item}}</nz-form-label> -->
         <nz-form-control [nzSm]="4">
-          <div style="display: flex; align-items: center; margin-right: 8px;"  (click)="setMm(i)">
+          <div style="display: flex; align-items: center; padding: 8px;"  (click)="setMm(i)" [ngStyle]="{backgroundColor: (setIndex === i ? '#40a9ff' : 'white'), color: (setIndex === i ? 'white' : 'rgba(0, 0, 0, 0.65)')}" >
             {{item}}：<input readonly disabled type="number" style="border: 1px solid #d9d9d9;" nz-input [formControlName]="i">
           </div>
         </nz-form-control>

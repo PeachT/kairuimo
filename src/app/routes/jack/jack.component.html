@@ -1,29 +1,39 @@
 <app-left>
-    <!-- {{appS.sss('变更')}} -->
+  <!-- {{appS.sss('变更')}} -->
   <div class="sider sider-menu">
     <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
-    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)" (outDelete)="delete()"></app-operat>
-    <div class="scroll-content" >
+    <app-operat [dbName]="dbName" [formData]="formData" (outEdit)="edit($event)" (outEditOk)="editOk($event)"
+      (outDelete)="delete()"></app-operat>
+    <div class="scroll-content">
       <!-- <button (click)="getForm()">get</button> -->
       <form [ngClass]="{'form-edit': !appS.edit}" nz-form [formGroup]="formData">
         <nz-form-item>
           <nz-form-label [nzSm]="4" nzRequired>千斤顶名称</nz-form-label>
-          <nz-form-control [nzSm]="20" [ngClass]="{'in-error': formData.get('name').errors}" [nzErrorTip]="formData.get('name').errors | ValidatorError">
-            <input type="text" nz-input placeholder="千斤顶名称" formControlName="name" >
+          <nz-form-control [nzSm]="12" [ngClass]="{'in-error': formData.get('name').errors}"
+            [nzErrorTip]="formData.get('name').errors | ValidatorError">
+            <input type="text" nz-input placeholder="千斤顶名称" formControlName="name">
           </nz-form-control>
-          <!-- <nz-form-explain *ngIf="appS.edit">{{formData.get('name').errors | ValidatorError}}</nz-form-explain> -->
-        <!-- </nz-form-item>
-        <nz-form-item> -->
+          <nz-form-label [nzSm]="2">是否使用</nz-form-label>
+          <nz-form-control [nzSm]="2">
+            <nz-switch formControlName="state" nzCheckedChildren="启用" nzUnCheckedChildren="禁用"></nz-switch>
+          </nz-form-control>
+          <nz-form-label [nzSm]="2">联机|单机</nz-form-label>
+          <nz-form-control [nzSm]="2">
+            <nz-switch formControlName="link" nzCheckedChildren="联机" nzUnCheckedChildren="单机"></nz-switch>
+          </nz-form-control>
+
           <nz-form-label [nzSm]="4" nzRequired>泵顶组合</nz-form-label>
           <nz-form-control [nzSm]="20">
-            <nz-radio-group formControlName="jackMode" >
+            <nz-radio-group formControlName="jackMode">
               <label nz-radio [nzValue]="4" (click)="reset(true)">一泵四顶</label>
               <label nz-radio [nzValue]="2" (click)="reset(true)">一泵两顶</label>
               <label nz-radio [nzValue]="1" (click)="reset(true)">一泵一顶</label>
             </nz-radio-group>
           </nz-form-control>
+
+
           <nz-form-label [nzSm]="4" nzRequired>回归方程</nz-form-label>
           <nz-form-control [nzSm]="20">
             <nz-radio-group formControlName="equation">
@@ -31,13 +41,25 @@
               <label nz-radio [nzValue]="false">F=aP+b P张拉控制应力MPa</label>
             </nz-radio-group>
           </nz-form-control>
-          <nz-form-label [nzSm]="4" >千斤顶型号</nz-form-label>
+
+          <nz-form-label [nzSm]="4">千斤顶型号</nz-form-label>
           <nz-form-control [nzSm]="4">
             <input type="text" nz-input formControlName="jackModel">
           </nz-form-control>
-          <nz-form-label [nzSm]="4" >油泵型号</nz-form-label>
+          <nz-form-label [nzSm]="4">油泵型号</nz-form-label>
           <nz-form-control [nzSm]="4">
             <input type="text" nz-input formControlName="pumpModel">
+          </nz-form-control>
+          <nz-form-label [nzSm]="4">保存PLC组</nz-form-label>
+          <nz-form-control [nzSm]="4" [ngClass]="{'in-error': formData.get('name').errors}"
+            [nzErrorTip]="formData.get('saveGroup').errors | ValidatorError">
+            <nz-select style="width: 100%;" formControlName="saveGroup" nzPlaceHolder="选择PLC保存组">
+              <nz-option nzValue="0" nzLabel="第一组"></nz-option>
+              <nz-option nzValue="1" nzLabel="第二组"></nz-option>
+              <nz-option nzValue="2" nzLabel="第三组"></nz-option>
+              <nz-option nzValue="3" nzLabel="第四组"></nz-option>
+              <nz-option nzValue="4" nzLabel="第五组"></nz-option>
+            </nz-select>
           </nz-form-control>
         </nz-form-item>
         <div #device>

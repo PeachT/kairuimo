@@ -1,22 +1,23 @@
 import { Component, OnInit, ViewChild, ViewContainerRef,
   ComponentFactoryResolver, ChangeDetectorRef, ChangeDetectionStrategy,
   DoCheck, OnChanges, AfterViewChecked, AfterContentInit, AfterContentChecked, AfterViewInit } from '@angular/core';
-import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors, AsyncValidatorFn } from '@angular/forms';
+import { Observable, from, observable, of, empty } from 'rxjs';
+import { map, catchError, debounceTime, switchMap, first, distinctUntilChanged } from 'rxjs/operators';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
 import { User } from 'src/app/models/user.models';
 import { Router } from '@angular/router';
 import { GroupItem, TensionTask } from 'src/app/models/task.models';
-import { Observable } from 'rxjs';
-import { Jack, deviceGroupMode } from 'src/app/models/jack';
+import { Jack, deviceGroupMode, deviceGroupModeDev } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { PLC_D } from 'src/app/models/IPCChannel';
 import { ManualComponent } from '../manual/manual.component';
 import { JackItemComponent } from 'src/app/shared/jack-item/jack-item.component';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { copyAny } from 'src/app/models/base';
-import { nameRepetition } from 'src/app/Validator/async.validator';
+// import { nameRepetition } from 'src/app/Validator/async.validator';
 
 @Component({
   selector: 'app-jack',
@@ -33,6 +34,12 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
   data: Jack;
   deleteShow = false;
   delayValidator = null;
+  reviceMm = {
+    z: [],
+    c: [],
+  };
+
+  nameRepetitionFunc = (o1, o2) => (o1.name === o2.name || o1.saveGroup === o2.saveGroup) && o1.id !== o2.id && o2.state;
 
   constructor(
     private fb: FormBuilder,
@@ -74,7 +81,10 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
       equation: [false],
       jackModel: [],
       pumpModel: [],
-      name: [null, [Validators.required], [nameRepetition(this.db, 'jack')]],
+      state: [null, [Validators.required], [this.nameRepetition('state')]],
+      link: [],
+      name: [null, [Validators.required], [this.nameRepetition('name')]],
+      saveGroup: [null, [Validators.required], [this.nameRepetition('saveGroup')]],
       // tslint:disable-next-line: max-line-lengthKU
       // name: [null, { validators: [Validators.required], asyncValidators: [nameRepetition(this.db, 'jack')], updateOn: [ 'submit' ] }]
       // zA: this.createDevGroup(),
@@ -86,6 +96,33 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
       // cC: this.createDevGroup(),
       // cD: this.createDevGroup(),
     });
+  }
+  nameRepetition(nowkey: string = 'name'): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const value = control.root.value;
+      console.log(value);
+      value[nowkey] = control.value;
+      return control.valueChanges.pipe(
+        // 延时防抖
+        debounceTime(400),
+        distinctUntilChanged(),
+        switchMap(() => this.db.repetitionAsync('jack', (o: any) => this.nameRepetitionFunc(o, value))),
+        map(c => {
+          console.log(c, this.formData.valid);
+          if (nowkey === 'name') {
+            return c > 0 ? { reperition: `${control.value} 已存在!!` } : null;
+          } else {
+            return c > 0 ? { reperition: `已被其它顶使用` } : null;
+          }
+        }),
+        catchError(() => {
+          console.log('名称验证查询结果错误');
+          return null;
+        }),
+        // 每次验证的结果是唯一的，截断流
+        first()
+      );
+    };
   }
   reset(state = false) {
     console.log(this.data, this.formData.value);
@@ -110,6 +147,8 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
     this.formData.reset(this.data);
     this.delayValidator = setTimeout(() => {
       this.formData.controls.name.updateValueAndValidity();
+      this.formData.controls.saveGroup.updateValueAndValidity();
+      this.formData.controls.state.updateValueAndValidity();
     }, 1000);
     // this.f5();
     // tslint:disable-next-line:forin
@@ -144,10 +183,13 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
     console.log('添加', name);
   }
 
-  onMneu(data: Jack) {
+  async onMneu(data: Jack) {
     this.data = null;
     console.log('一条数据', data);
-    this.data = data;
+    this.data = await this.PLCS.selectJack(data.id);
+    // this.data = data;
+    // this.getPLCData('z', this.data.saveGroup);
+    // this.getPLCData('c', this.data.saveGroup);
     this.reset();
   }
 
@@ -161,6 +203,8 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
       data.id = null;
     }
     this.data = data;
+    // this.getPLCData('z', this.data.saveGroup);
+    // this.getPLCData('c', this.data.saveGroup);
     this.reset();
     this.leftMenu.markForCheck();
   }
@@ -204,34 +248,41 @@ export class JackComponent implements OnInit, DoCheck, OnChanges, AfterViewCheck
 
   /** 获取顶设置数据 */
   getPLCData(dev: string = 'z', address: number) {
-    this.PLCS.ipcSend(`${dev}F03`, PLC_D(2000 + address), 100).then((data: any) => {
+    this.PLCS.ipcSend(`${dev}F03_float`, PLC_D(2100 + address * 100), 100).then((data: any) => {
       console.log(`${dev}返回的结果`, data);
-      this.data.jackMode = Math.round(data.float[0]);
-      this.data.equation = Math.round(data.float[1]);
+      this.reviceMm[dev] = data.float;
+      deviceGroupModeDev[dev][this.data.jackMode].map((name, index) => {
+        this.data[name].mm = data.float.slice(index * 10, index * 10 + 6);
+      });
+      // // this.data.jackMode = Math.round(data.float[0]);
+      // // this.data.equation = Math.round(data.float[1]);
 
-      this.data[`${dev}A`].mm = data.float.slice(5, 11);
-      this.data[`${dev}A`].a = data.float[11];
-      this.data[`${dev}A`].b = data.float[12];
-      this.data[`${dev}A`].date = this.nd(data.float[13]);
+      // this.data[`${dev}A`].mm = data.float.slice(5, 11);
+      // // this.data[`${dev}A`].a = data.float[11];
+      // // this.data[`${dev}A`].b = data.float[12];
+      // // this.data[`${dev}A`].date = this.nd(data.float[13]);
 
-      this.data[`${dev}B`].mm = data.float.slice(15, 21);
-      this.data[`${dev}B`].a = data.float[21];
-      this.data[`${dev}B`].b = data.float[22];
-      this.data[`${dev}B`].date = this.nd(data.float[23]);
+      // this.data[`${dev}B`].mm = data.float.slice(15, 21);
+      // // this.data[`${dev}B`].a = data.float[21];
+      // // this.data[`${dev}B`].b = data.float[22];
+      // // this.data[`${dev}B`].date = this.nd(data.float[23]);
 
-      this.data[`${dev}C`].mm = data.float.slice(25, 31);
-      this.data[`${dev}C`].a = data.float[31];
-      this.data[`${dev}C`].b = data.float[32];
-      this.data[`${dev}C`].date = this.nd(data.float[33]);
+      // this.data[`${dev}C`].mm = data.float.slice(25, 31);
+      // // this.data[`${dev}C`].a = data.float[31];
+      // // this.data[`${dev}C`].b = data.float[32];
+      // // this.data[`${dev}C`].date = this.nd(data.float[33]);
 
-      this.data[`${dev}D`].mm = data.float.slice(35, 41);
-      this.data[`${dev}D`].a = data.float[41];
-      this.data[`${dev}D`].b = data.float[42];
-      this.data[`${dev}D`].date = this.nd(data.float[43]);
+      // this.data[`${dev}D`].mm = data.float.slice(35, 41);
+      // // this.data[`${dev}D`].a = data.float[41];
+      // // this.data[`${dev}D`].b = data.float[42];
+      // // this.data[`${dev}D`].date = this.nd(data.float[43]);
 
       console.log(this.data);
       this.formData.reset(this.data);
     });
+  }
+  setPLCData() {
+
   }
   /** 获取手动数据 */
   savePLC(dev: string = 'z', address: number, value) {

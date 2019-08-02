@@ -1,29 +1,33 @@
 <main class="setting">
   <div [ngClass]="{'form-edit': !PLCS.plcState.z}">
-    <nz-divider style="min-width: auto;" nzText="系统参数" nzOrientation="left"></nz-divider>
+    <nz-divider style="min-width: auto;" nzText="主机系统参数" nzOrientation="left"></nz-divider>
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="压力上限Mpa">
-          <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="systenDate[0]" (ngModelChange)="setF06(410, mpaToPlc($event, null))"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0" max="55" [(ngModel)]="systenDate.z[0]" (ngModelChange)="setF06(410, mpaToPlc($event, null))"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+            [(ngModel)]="systenDate.z[0]" (ngModelChange)="setF06(410, mpaToPlc($event, null))"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="回程压力Mpa">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate[1]"
-            (ngModelChange)="setF06(411, mpaToPlc($event, null))"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="1.0" max="10.0" [(ngModel)]="systenDate.z[1]" (ngModelChange)="setF06(411, mpaToPlc($event, null))"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate.z[1]"
+            (ngModelChange)="setF06(411, mpaToPlc($event, null))"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="超设置压力Mpa">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate[2]"
-            (ngModelChange)="setF06(412, mpaToPlc($event, null))"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0.5" max="5" [(ngModel)]="systenDate.z[2]" (ngModelChange)="setF06(412, mpaToPlc($event, null))"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate.z[2]"
+            (ngModelChange)="setF06(412, mpaToPlc($event, null))"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="油泵延时s">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate[3]"
-            (ngModelChange)="setF06(413, $event * 10)"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" max="9999" [(ngModel)]="systenDate.z[3]" (ngModelChange)="setF06(413, $event * 10)"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate.z[3]"
+            (ngModelChange)="setF06(413, $event * 10)"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>
@@ -31,7 +35,7 @@
       <nz-col nz-col nzSpan="18">
         <nz-input-group nzAddOnBefore="设备模式" nzSize="large">
           <nz-input-number nzSize="large" style="width: 1px"></nz-input-number>
-          <nz-radio-group [(ngModel)]="systenDate[4]" (ngModelChange)="setF06(408, $event)" nzSize="large">
+          <nz-radio-group [(ngModel)]="systenDate.z[4]" (ngModelChange)="setF06(408, $event)" nzSize="large">
             <label nz-radio [nzValue]="4">一泵四顶</label>
             <label nz-radio [nzValue]="2">一泵两顶</label>
             <label nz-radio [nzValue]="1">一泵一顶</label>
@@ -40,8 +44,9 @@
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="采集频率ms">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="100" [nzMax]="1000"
-            [(ngModel)]="heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="100" max="1000" [(ngModel)]="heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="100" [nzMax]="1000"
+            [(ngModel)]="heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>
@@ -49,6 +54,51 @@
     <br>
     <div> -->
 
+    <div class="edit" *ngIf="!PLCS.plcState.c">设备未连接无法设置参数！！</div>
+  </div>
+  <div [ngClass]="{'form-edit': !PLCS.plcState.c}">
+    <nz-divider style="min-width: auto;" nzText="副机系统参数" nzOrientation="left"></nz-divider>
+    <nz-row>
+      <nz-col nz-col nzSpan="6">
+        <nz-input-group nzAddOnBefore="压力上限Mpa">
+          <input disabled nz-input type="number" nzSize="large" style="width: 100%;" [(ngModel)]="systenDate.c[0]"/>
+          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;"></nz-input-number> -->
+        </nz-input-group>
+      </nz-col>
+      <nz-col nz-col nzSpan="6">
+        <nz-input-group nzAddOnBefore="回程压力Mpa">
+          <input disabled nz-input type="number" nzSize="large" style="width: 100%;" [(ngModel)]="systenDate.c[1]"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate.c[1]"
+            (ngModelChange)="setF06(411, mpaToPlc($event, null))"></nz-input-number> -->
+        </nz-input-group>
+      </nz-col>
+      <nz-col nz-col nzSpan="6">
+        <nz-input-group nzAddOnBefore="超设置压力Mpa">
+          <input disabled nz-input type="number" nzSize="large" style="width: 100%;" [(ngModel)]="systenDate.c[2]"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate.c[2]"
+            (ngModelChange)="setF06(412, mpaToPlc($event, null))"></nz-input-number> -->
+        </nz-input-group>
+      </nz-col>
+      <nz-col nz-col nzSpan="6">
+        <nz-input-group nzAddOnBefore="油泵延时s">
+          <input disabled nz-input type="number" nzSize="large" style="width: 100%;" [(ngModel)]="systenDate.c[3]"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="systenDate.c[3]"
+            (ngModelChange)="setF06(413, $event * 10)"></nz-input-number> -->
+        </nz-input-group>
+      </nz-col>
+    </nz-row>
+    <nz-row>
+      <!-- <nz-col nz-col nzSpan="18">
+        <nz-input-group nzAddOnBefore="设备模式" nzSize="large">
+          <nz-input-number nzSize="large" style="width: 1px"></nz-input-number>
+          <nz-radio-group [(ngModel)]="systenDate.c[4]" (ngModelChange)="setF06(408, $event)" nzSize="large">
+            <label nz-radio [nzValue]="4">一泵四顶</label>
+            <label nz-radio [nzValue]="2">一泵两顶</label>
+            <label nz-radio [nzValue]="1">一泵一顶</label>
+          </nz-radio-group>
+        </nz-input-group>
+      </nz-col> -->
+    </nz-row>
     <div class="edit" *ngIf="!PLCS.plcState.z">设备未连接无法设置参数！！</div>
   </div>
   <div>
@@ -136,13 +186,19 @@
         <th>操 作</th>
       </tr>
 
-      <tr *ngFor="let name of revise.dev; index as i" height="60" [class]="name">
-        <!-- <td width="56">{{name}}</td> -->
+      <tr *ngFor="let name of revise.zMode; index as i" height="60" [class]="name">
         <td *ngFor="let item of revise.mpaStage; index as i">
-          <input nzSize="large" readonly disabled type="number" nz-input [value]="mpaRevise[name][i]">
+          <input nzSize="large" readonly disabled type="number" nz-input [value]="PLCS.revise.zMpaRevise[name][i]">
         </td>
-        <td><button nzSize="large" nz-button nzType="default" (click)="onRevise(name)"
-            [disabled]="!PLCS.plcState.z">{{name | nameConvert}}校 正</button></td>
+        <td><button nzSize="large" nz-button nzType="default" (click)="onRevise('z', name)"
+            [disabled]="!PLCS.plcState.z">主{{name | nameConvert}}校 正</button></td>
+      </tr>
+      <tr *ngFor="let name of revise.cMode; index as i" height="60" [class]="name">
+        <td *ngFor="let item of revise.mpaStage; index as i">
+          <input nzSize="large" readonly disabled type="number" nz-input [value]="PLCS.revise.cMpaRevise[name][i]">
+        </td>
+        <td><button nzSize="large" nz-button nzType="default" (click)="onRevise('c', name)"
+            [disabled]="!PLCS.plcState.z">副{{name | nameConvert}}校 正</button></td>
       </tr>
     </table>
   </div>
@@ -150,7 +206,7 @@
 
 
 <nz-modal *ngIf="revise.state" nzWidth="95%" [(nzVisible)]="revise.state" nzMaskClosable="false" nzClosable="false"
-  [nzTitle]="revise.name + '·压力校正'" (nzOnCancel)="cancel()" (nzOnOk)="ok()" nzOkText="保 存">
-  <app-revise-item #reviseDom [name]="revise.name" reviseName="mpa" [reviseData]="mpaRevise[revise.name]">
+  [nzTitle]="(revise.name + revise.dev | nameConvert) + '·压力校正'" (nzOnCancel)="cancel()" (nzOnOk)="ok()" nzOkText="保 存">
+  <app-revise-item #reviseDom [name]="revise.devName" reviseName="mpa" [reviseData]="PLCS.revise[revise.dev + 'MpaRevise'][revise.name]">
   </app-revise-item>
 </nz-modal>
