@@ -186,8 +186,8 @@ export class AppComponent implements OnInit {
             const kwh = keyboard[type];
             // 获取元素绝对位置
             const rect = event.target.getBoundingClientRect();
-            let x = Math.round(rect.x + window.screenLeft);
-            let y = Math.round(rect.y + rect.height + window.screenTop + topmag);
+            let x = Math.floor(rect.x + window.screenLeft);
+            let y = Math.floor(rect.y + rect.height + window.screenTop + topmag);
 
             const drx = document.body.clientWidth + window.screenLeft;
             const dry = document.body.clientHeight + window.screenTop;
@@ -195,13 +195,13 @@ export class AppComponent implements OnInit {
             const krx = x + kwh.w;
             const kry = y + kwh.h;
 
-            x = krx - drx > 0 ? drx - kwh.w : x;
+            x = Math.floor(krx - drx > 0 ? drx - kwh.w : x);
             topmag = 0;
             if (type === 'text') {
               topmag = dry - rect.y - rect.height > 150 ? 0 : 130;
               console.log(dry - rect.y - rect.height);
             }
-            y = kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y;
+            y = Math.floor(kry - dry > 0 ? rect.y + window.screenTop - kwh.h - topmag : y);
 
             console.log('打开键盘', keyType);
             event.target.select();
