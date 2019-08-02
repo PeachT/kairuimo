@@ -160,7 +160,7 @@ export class AppComponent implements OnInit {
       // 键盘显示|隐藏
       document.body.addEventListener('click', (event: any) => {
         if (event.target.localName !== 'input') {
-          if ( this.keyboardState) {
+          if (this.keyboardState) {
             this.keyboardState = false;
             console.log('隐藏键盘', event.target.localName);
             this.appService.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
