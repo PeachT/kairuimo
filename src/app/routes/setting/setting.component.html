@@ -111,26 +111,30 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="压力差Mpa">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="autoData.pressureDifference" (ngModelChange)="setAuto()"></nz-input-number>
+          <input type="number" nz-input nzSize="large" style="width: 100%;" min="1" max="55" [(ngModel)]="autoData.pressureDifference" (ngModelChange)="setAuto()" />
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+            [(ngModel)]="autoData.pressureDifference" (ngModelChange)="setAuto()"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="超伸长量%">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="autoData.superElongation" (ngModelChange)="setAuto()"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="5" [(ngModel)]="autoData.superElongation" (ngModelChange)="setAuto()"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+            [(ngModel)]="autoData.superElongation" (ngModelChange)="setAuto()"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="张拉平衡mm">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="autoData.tensionBalance" (ngModelChange)="setAuto()"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0" max="55" [(ngModel)]="autoData.tensionBalance" (ngModelChange)="setAuto()"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+            [(ngModel)]="autoData.tensionBalance" (ngModelChange)="setAuto()"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="回顶位移mm">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="autoData.backMm"
-            (ngModelChange)="setAuto()"></nz-input-number>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" max="100" [(ngModel)]="autoData.backMm" (ngModelChange)="setAuto()"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="autoData.backMm"
+            (ngModelChange)="setAuto()"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>
@@ -138,8 +142,9 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="卸荷延时s">
-          <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="autoData.unloadingDelay" (ngModelChange)="setAuto()"></nz-input-number>
+            <input nz-input type="number" nzSize="large" style="width: 100%;" min="5" max="999" [(ngModel)]="autoData.unloadingDelay" (ngModelChange)="setAuto()"/>
+          <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
+            [(ngModel)]="autoData.unloadingDelay" (ngModelChange)="setAuto()"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>
