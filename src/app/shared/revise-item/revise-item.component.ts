@@ -11,12 +11,11 @@ import { PLCService } from 'src/app/services/PLC.service';
 export class ReviseItemComponent implements OnInit {
   @ViewChild('manual', null) manualDom: ManualItemComponent;
 
-  @Input()
-    name: string;
-  @Input()
-    reviseName: string;
-  @Input()
-    reviseData = [0, 1, 2, 3, 4, 5];
+  @Input() name: string;
+  @Input() reviseName: string;
+  @Input() reviseData = [0, 1, 2, 3, 4, 5];
+  @Input() upper = 0;
+  @Input() floot = 0;
 
   revise = {
     state: false,
@@ -29,6 +28,8 @@ export class ReviseItemComponent implements OnInit {
 
   setForm = this.fb.group({
     setValue: this.fb.array([0, 1, 2, 3, 4, 5]),
+    upper: [225, [Validators.required]],
+    floot: [10, [Validators.required]],
   });
 
   setData = {
@@ -54,6 +55,8 @@ export class ReviseItemComponent implements OnInit {
     console.log(this.reviseData);
     this.setForm = this.fb.group({
       setValue: this.fb.array(this.reviseData),
+      upper: [this.upper, [Validators.required]],
+      floot: [this.floot, [Validators.required]],
     });
   }
 

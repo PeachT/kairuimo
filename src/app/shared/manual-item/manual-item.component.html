@@ -24,7 +24,7 @@
         <nz-col nz-col nzXl="8" nzMd="12">
           <nz-input-group nzAddOnBefore="设置压力 Mpa" nzSize="large">
             <input nz-input type="number" min="0" max="60" [(ngModel)]="dev.setMpa"
-              (change)="set(setAeeress[0], $event)" />
+              (change)="set(setAeeress[0], $event, 'mpa')" />
             <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="dev.setMpa"
               (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-input-number> -->
           </nz-input-group>
@@ -54,14 +54,14 @@
         <nz-col nz-col nzXl="8" nzMd="12">
           <nz-input-group nzAddOnBefore="设置位移 Mm" nzSize="large">
             <input nz-input type="number" min="0" max="220" [(ngModel)]="dev.setMm"
-              (change)="set(setAeeress[1], $event)" />
+              (change)="set(setAeeress[1], $event, 'mm')" />
             <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="220" [(ngModel)]="dev.setMm"
               (ngModelChange)="set(setAeeress[1], $event)"></nz-input-number> -->
           </nz-input-group>
         </nz-col>
         <nz-col nzXl="16" nzMd="12">
           <nz-slider [nzMarks]="mmMarks" [nzMin]="0" [nzMax]="220" [nzStep]="1" [(ngModel)]="dev.setMm"
-            (ngModelChange)="set(setAeeress[1], $event)"></nz-slider>
+            (ngModelChange)="set(setAeeress[1], $event, 'mm')"></nz-slider>
         </nz-col>
       </nz-row>
       <nz-row>

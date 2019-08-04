@@ -62,19 +62,24 @@ export class JackItemComponent implements OnInit {
     this.revise.state = false;
   }
   async handleOk() {
-    const value = this.reviseDom.setForm.value.setValue;
+    const value = this.reviseDom.setForm.value;
+    // console.log('保存修改校正数据', value);
     const fd = this.formGroup.value;
     // this.formGroup.controls[this.name].setValue(value);
     // this.revise.state = false;
-    const vs = value.map(v => v * 10000);
-    console.log('保存位移校正', value, this.name, fd);
+    const upper = value.upper;
+    const floot = value.floot;
+    const vs = [...(value.setValue), upper, floot];
+    console.log('保存位移校正', value.setValue, this.name, fd);
     const address = {A: 0, B: 1, C: 2, D: 3}[this.name[1]];
     await this.PLCS.ipcSend(`${this.name[0]}F016_float`, PLC_D(2100 + fd.saveGroup * 100 + address * 20), vs).then(() => {
       console.log(this.name[0], '主机位移校正设置完成', 2100 + fd.saveGroup * 100 + address * 20);
-      fd[this.name].mm = value;
+      fd[this.name].mm = value.setValue;
+      fd[this.name].upper = value.upper;
+      fd[this.name].floot = value.floot;
       this.formGroup.controls[this.name].setValue(fd[this.name]);
       // 设置全局位移校正
-      this.PLCS.jack[this.name].mm = value;
+      this.PLCS.jack[this.name].mm = value.setValue;
       this.revise.state = false;
 
     }).catch(() => {

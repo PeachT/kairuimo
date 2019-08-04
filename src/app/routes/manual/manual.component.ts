@@ -113,6 +113,8 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.PLCS.ipcSend('zF05', PLC_S(0), true);
+    this.PLCS.ipcSend('cF05', PLC_S(0), true);
     this.PLCS.plcSubject.subscribe((data) => {
       if (this.PLCS.PD.zA.alarm.indexOf('急停') > -1) {
         this.zmsg = '急停！！';
@@ -188,13 +190,13 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   /** 获取手动数据 */
   getManualData(dev: string = 'z', ) {
     console.log(this.PLCS.jack, this.PLCS.mpaRevise);
-    this.PLCS.ipcSend(`${dev}F03`, PLC_D(100), 20).then((data: any) => {
+    this.PLCS.ipcSend(`${dev}F03`, PLC_D(100), 24).then((data: any) => {
       console.log('手动数据', data);
       let i = 0;
       this.devModeStr[dev].map(name => {
-        this.setDev[name].setMpa = plcToMpa(data.int16[i], this.PLCS.mpaRevise[name]);
-        this.setDev[name].setMm = plcToMpa(data.int16[i + 1], this.PLCS.jack[name]);
-        this.setDev[name].setUn = plcToMpa(data.int16[i + 2], this.PLCS.mpaRevise[name]);
+        this.setDev[name].setMpa = data.float[i];
+        this.setDev[name].setMm = data.float[i + 1];
+        this.setDev[name].setUn = data.float[i + 2];
         i += 3;
       });
     });

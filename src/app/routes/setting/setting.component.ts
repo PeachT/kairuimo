@@ -34,7 +34,6 @@ export class SettingComponent implements OnInit, OnDestroy {
     mpaStage: ['5Mpa', '15Mpa', '25Mpa', '35Mpa', '45Mpa', '55Mpa'],
   };
   // mpaRevise: MpaRevise;
-  mpaToPlc = mpaToPlc;
   autoData: AutoDate;
   heartbeatRateValue = null;
   keyboard = {
@@ -70,18 +69,20 @@ export class SettingComponent implements OnInit, OnDestroy {
   }
   /** 获取设置数据 */
   getData(dev) {
+    this.PLCS.getPLCMpa(dev);
     console.log('123123123123123123132132');
     // this.PLCS.ipcSend(`zF03`, PLC_D(410), 6);
-    this.PLCS.ipcSend(`${dev}F03`, PLC_D(408), 8).then((data: any) => {
+    this.PLCS.ipcSend(`${dev}F03`, PLC_D(408), 12).then((data: any) => {
       if (data) {
+        console.log(data);
         /** 设备模式 */
-        this.systenDate[`${dev}`][4] = data.int16[0];
+        this.systenDate[`${dev}`][4] = data.uint16[0];
 
-        this.systenDate[`${dev}`][0] = plcToMpa(data.int16[2], null);
-        this.systenDate[`${dev}`][1] = plcToMpa(data.int16[3], null);
-        this.systenDate[`${dev}`][2] = plcToMpa(data.int16[4], null);
-        this.systenDate[`${dev}`][3] = data.int16[5] / 10;
-        this.revise[`${dev}Mode`] = numberMode[ data.int16[0]];
+        this.systenDate[`${dev}`][0] = data.float[2];
+        this.systenDate[`${dev}`][1] = data.float[3];
+        this.systenDate[`${dev}`][2] = data.float[4];
+        this.systenDate[`${dev}`][3] = data.uint16[10] / 10;
+        this.revise[`${dev}Mode`] = numberMode[data.uint16[0]];
         console.log(this.revise[`${dev}Mode`]);
         this.cdr.markForCheck();
       }
@@ -91,13 +92,13 @@ export class SettingComponent implements OnInit, OnDestroy {
     });
   }
 
-  setF16(address: number, value: number) {
+  setF016(dev = 'z', address: number, value: number) {
     console.log(value);
-    this.PLCS.ipcSend('zF016_float', PLC_D(address), [value]);
+    this.PLCS.ipcSend(`${dev}F016_float`, PLC_D(address), [value]);
   }
-  setF06(address: number, value: number) {
+  setF06(dev = 'z', address: number, value: number) {
     console.log(value);
-    this.PLCS.ipcSend('zF06', PLC_D(address), value);
+    this.PLCS.ipcSend(`${dev}F06`, PLC_D(address), value);
   }
   ref() {
     this.refState = true;
@@ -124,8 +125,7 @@ export class SettingComponent implements OnInit, OnDestroy {
     // this.mpaRevise[name] = value;
     // this.PLCS.setMpaRevise(this.mpaRevise);
     const address = {A: 0, B: 1, C: 2, D: 3}[this.revise.name];
-    const vs = value.map(v => v * 10000);
-    this.PLCS.ipcSend(`${this.revise.dev}F016_float`, PLC_D(2000 + address * 20), vs).then((data) => {
+    this.PLCS.ipcSend(`${this.revise.dev}F016_float`, PLC_D(2000 + address * 20), value).then((data) => {
       console.log(data);
       this.PLCS.getPLCMpa(this.revise.dev);
       this.cdr.markForCheck();

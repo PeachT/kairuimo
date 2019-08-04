@@ -165,7 +165,8 @@ export class AppComponent implements OnInit {
             this.appService.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
           }
         } else {
-          if (event.target.disabled || event.target.readonly) {
+          console.log('键盘', event, event.target.disabled, event.target.readOnly);
+          if (event.target.disabled || event.target.readOnly) {
             if (this.keyboardState) {
               this.keyboardState = false;
               console.log('隐藏键盘', event.target.localName);
@@ -173,7 +174,6 @@ export class AppComponent implements OnInit {
             }
             return;
           }
-          console.log('显示键盘', event);
           this.keyboardState = true;
           keyboard = JSON.parse(localStorage.getItem('keyboard'));
           let type = event.target.type;
