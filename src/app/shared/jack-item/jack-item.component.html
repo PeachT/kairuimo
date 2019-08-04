@@ -17,18 +17,6 @@
         &nbsp;
       </nz-form-control>
 
-      <nz-form-label [nzSm]="3" nzRequired>位移上限</nz-form-label>
-      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('upper').errors}">
-        <input type="number" min="2" max="220" nz-input formControlName="upper">
-      </nz-form-control>
-      <nz-form-label [nzSm]="3" nzRequired>位移下限</nz-form-label>
-      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('floot').errors}">
-        <input type="number" min="2" max="220" nz-input formControlName="floot">
-      </nz-form-control>
-      <nz-form-control [nzSm]="8">
-        &nbsp;
-      </nz-form-control>
-
       <nz-form-label [nzSm]="3" nzRequired>标定参数a</nz-form-label>
       <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('a').errors}">
         <input type="number" min="-999" max="999" nz-input formControlName="a">
@@ -40,6 +28,18 @@
       <nz-form-label [nzSm]="3" nzRequired>标定日期</nz-form-label>
       <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('date').errors}">
         <nz-date-picker readonly [nzAllowClear]="false" class="revise-date" nzFormat="yyyy-MM-dd" formControlName="date"></nz-date-picker>
+      </nz-form-control>
+
+      <nz-form-label [nzSm]="3" nzRequired>位移上限</nz-form-label>
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('upper').errors}">
+        <input type="number" readonly noinput min="2" max="220" nz-input formControlName="upper">
+      </nz-form-control>
+      <nz-form-label [nzSm]="3" nzRequired>位移下限</nz-form-label>
+      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('floot').errors}">
+        <input type="number" readonly noinput min="2" max="220" nz-input formControlName="floot">
+      </nz-form-control>
+      <nz-form-control [nzSm]="8">
+        &nbsp;
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
@@ -55,7 +55,7 @@
   </div>
 </div>
 
-<nz-modal nzWidth="90%" *ngIf="revise.state" [(nzVisible)]="revise.state" nzMaskClosable="false"
+<nz-modal nzWidth="96%" *ngIf="revise.state" [(nzVisible)]="revise.state" nzMaskClosable="false" [nzStyle]="{ top: '20px' }"
   nzClosable="false" [nzTitle]="name + '·位移校正'" (nzOnCancel)="cancel()" (nzOnOk)="handleOk()" nzOkText="保 存">
-  <app-revise-item [name]="name" reviseName="mm" [reviseData]="formGroup.value[name].mm" #reviseDom></app-revise-item>
+  <app-revise-item [name]="name" reviseName="mm" [reviseData]="formGroup.value[name].mm" [upper]="formGroup.value[name].upper" [floot]="formGroup.value[name].floot" #reviseDom></app-revise-item>
 </nz-modal>

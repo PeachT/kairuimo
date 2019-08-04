@@ -162,10 +162,10 @@ export class PLCService {
       console.log(dev, data);
     });
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
-      if (!this.revise[`${dev}GetMpaState`]) {
-        console.log(this.revise[`${dev}MpaRevise`]);
-        this.getPLCMpa(dev);
-      }
+      // if (!this.revise[`${dev}GetMpaState`]) {
+      //   console.log(this.revise[`${dev}MpaRevise`]);
+      //   this.getPLCMpa(dev);
+      // }
       // console.log(data);
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`];
       this.plcState[`${dev}OT`] = new Date().getTime();
@@ -175,44 +175,16 @@ export class PLCService {
         let i = 0;
         [[], ['A'], ['A', 'B'], [], ['A', 'B', 'C', 'D']][this.jack.jackMode].forEach(k => {
           // console.log(this.jack);
-
+          // console.log(dev, k, data);
           const key = `${dev}${k}`;
-          this.PD[key].showMpa = plcToMpa(data.int16[i], this.mpaRevise[key]);
-          this.PD[key].showMm = plcToMm(data.int16[i + 1], this.jack[key].mm);
-          const state = this.getState(data.int16[i + 2]);
+          this.PD[key].showMpa = data.float[i].toFixed(2);
+          this.PD[key].showMm = data.float[i + 1].toFixed(2);
+          const state = this.getState(data.uint16[i * 2 + 4]);
           this.PD[key].state = state.state.join('·');
           this.PD[key].alarm = state.alarm;
-          this.PD[key].autoState = this.getState(data.int16[i + 3], true, this.stateAutoStr).alarm;
-          i += 5;
+          this.PD[key].autoState = this.getState(data.uint16[i * 2 + 5], true, this.stateAutoStr).alarm;
+          i += 3;
         });
-        // console.log(data);
-        // this.PD[`${dev}A`].showMpa = plcToMpa(data.int16[0], this.mpaRevise[`${dev}A`]);
-        // this.PD[`${dev}A`].showMm = plcToMm(data.int16[1], this.jack[`${dev}A`].mm);
-        // const astate = this.getState(data.int16[2]);
-        // this.PD[`${dev}A`].state = astate.state.join('·');
-        // this.PD[`${dev}A`].alarm = astate.alarm;
-        // this.PD[`${dev}A`].autoState = this.getState(data.int16[3], true, this.stateAutoStr).alarm;
-
-        // this.PD[`${dev}B`].showMpa = plcToMpa(data.int16[5], this.mpaRevise[`${dev}B`]);
-        // this.PD[`${dev}B`].showMm = plcToMm(data.int16[6], this.jack[`${dev}B`].mm);
-        // const bstate = this.getState(data.int16[7]);
-        // this.PD[`${dev}B`].state = bstate.state.join('·');
-        // this.PD[`${dev}B`].alarm = bstate.alarm;
-        // this.PD[`${dev}B`].autoState = this.getState(data.int16[8], true, this.stateAutoStr).alarm;
-
-        // this.PD[`${dev}C`].showMpa = plcToMpa(data.int16[10], this.mpaRevise[`${dev}C`]);
-        // this.PD[`${dev}C`].showMm = plcToMm(data.int16[11], this.jack[`${dev}C`].mm);
-        // const cstate = this.getState(data.int16[12]);
-        // this.PD[`${dev}C`].state = cstate.state.join('·');
-        // this.PD[`${dev}C`].alarm = cstate.alarm;
-        // this.PD[`${dev}C`].autoState = this.getState(data.int16[13], true, this.stateAutoStr).alarm;
-
-        // this.PD[`${dev}D`].showMpa = plcToMpa(data.int16[15], this.mpaRevise[`${dev}D`]);
-        // this.PD[`${dev}D`].showMm = plcToMm(data.int16[16], this.jack[`${dev}D`].mm);
-        // const dstate = this.getState(data.int16[17]);
-        // this.PD[`${dev}D`].state = dstate.state.join('·');
-        // this.PD[`${dev}D`].alarm = dstate.alarm;
-        // this.PD[`${dev}D`].autoState = this.getState(data.int16[18], true, this.stateAutoStr).alarm;
       }
       // this.onPlcSub(data);
       this.plcSub.next(data);
@@ -225,9 +197,9 @@ export class PLCService {
     this.e.ipcRenderer.on(`${dev}error`, (event, data) => {
       console.error(dev, data);
       try {
-        if (data.client) {
-          this.getPLCMpa(dev);
-        }
+        // if (data.client) {
+        //   this.getPLCMpa(dev);
+        // }
       } catch (error) {}
       this.plcState[`${dev}LT`] = '重新链接...';
       this.PD[`${dev}A`].state = '重新链接中...';
@@ -337,27 +309,31 @@ export class PLCService {
     await this.odb.db.jack.filter(f => f.id === id).first(d => {
       this.jack = d;
     });
-    const z = [];
-    const c = [];
-    deviceGroupMode[4].map((key) => {
-      if (key.indexOf('z') > -1) {
-        if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
-          z.push(mmToPlc(this.jack[key].upper, this.jack[key].mm), mmToPlc(this.jack[key].floot, this.jack[key].mm));
-        } else {
-          z.push(0, 0);
-        }
-      } else {
-        if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
-          c.push(mmToPlc(this.jack[key].upper, this.jack[key].mm), mmToPlc(this.jack[key].floot, this.jack[key].mm));
-        } else {
-          c.push(0, 0);
-        }
-      }
-    });
+    // const z = [];
+    // const c = [];
+    // deviceGroupMode[4].map((key) => {
+    //   if (key.indexOf('z') > -1) {
+    //     if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
+    //       z.push(this.jack[key].upper, this.jack[key].floot);
+    //     } else {
+    //       z.push(0, 0);
+    //     }
+    //   } else {
+    //     if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
+    //       c.push(this.jack[key].upper, this.jack[key].floot);
+    //     } else {
+    //       c.push(0, 0);
+    //     }
+    //   }
+    // });
     await this.ipcSend(`zF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
+      console.log(data);
       deviceGroupModeDev.z[this.jack.jackMode].map((name, index) => {
         // console.log(name, index);
-        this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6).map(v => (v / 10000).toFixed(5));
+        const startIndex = index * 10;
+        this.jack[name].mm = data.float.slice(startIndex, startIndex + 6).map(v => v.toFixed(5));
+        this.jack[name].upper = data.float[startIndex + 6];
+        this.jack[name].floot = data.float[startIndex + 7];
       });
     }).catch(() => {
       console.error('获取PLC位移校正错误');
@@ -366,14 +342,21 @@ export class PLCService {
       await this.ipcSend(`cF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
         deviceGroupModeDev.c[this.jack.jackMode].map((name, index) => {
           // console.log(name, index);
-          this.jack[name].mm = data.float.slice(index * 10, index * 10 + 6).map(v => (v / 10000).toFixed(5));
+          const startIndex = index * 10;
+          this.jack[name].mm = data.float.slice(startIndex, startIndex + 6).map(v => v.toFixed(5));
+          this.jack[name].upper = data.float[startIndex + 6];
+          this.jack[name].floot = data.float[startIndex + 7];
         });
       }).catch(() => {
         console.error('获取PLC位移校正错误');
       });
     }
-    // this.ipcSend('zF016', PLC_D(420), z);
-    // this.ipcSend('cF016', PLC_D(420), c);
+    // 设置泵顶组
+    this.ipcSend('zF06', PLC_D(407), this.jack.saveGroup);
+    this.ipcSend('cF06', PLC_D(407), this.jack.saveGroup);
+
+    // this.ipcSend('zF016_float', PLC_D(420), z);
+    // this.ipcSend('cF016_float', PLC_D(420), c);
     // this.ipcSend('zF016', PLC_D(420), [
     //   mmToPlc(this.jack.zA.upper, this.jack.zA.mm), mmToPlc(this.jack.zA.floot, this.jack.zA.mm),
     //   mmToPlc(this.jack.zB.upper, this.jack.zB.mm), mmToPlc(this.jack.zB.floot, this.jack.zB.mm),
@@ -415,12 +398,16 @@ export class PLCService {
   }
 
   getPLCMpa(dev) {
+    // await this.ipcSend(`cF03`, PLC_D(2100), 20).then((data: any) => {
+    //   console.log(data);
+    // });
     this.revise[`${dev}GetMpaState`] = true;
     this.ipcSend(`${dev}F03_float`, PLC_D(2000), 100).then((data: any) => {
       console.log(`${dev}返回的结果`, data);
       groupModeStr('AB8').map((name, index) => {
         console.log(name, index);
-        const m = data.float.slice(index * 10, index * 10 + 6).map(v => (v / 10000).toFixed(5));
+        const m = (data.float.slice(index * 10, index * 10 + 6)).map(v => v.toFixed(5));
+        // m = m.map(v => v.toFixed(5));
         this.revise[`${dev}MpaRevise`][`${name}`] = m;
         this.mpaRevise[`${dev}${name}`] = m;
       });
@@ -442,11 +429,11 @@ export class PLCService {
     let state = true;
     deviceGroupModeDev.z[data.jackMode].map((name, index) => {
       console.log(name, index);
-      z.push(...(data[name].mm.map(v => v * 10000)), 0, 0, 0, 0);
+      z.push(...(data[name].mm), data[name].upper, data[name].floot, 0, 0);
     });
     deviceGroupModeDev.c[data.jackMode].map((name, index) => {
       console.log(name, index);
-      c.push(...(data[name].mm.map(v => v * 10000)), 0, 0, 0, 0);
+      c.push(...(data[name].mm), data[name].upper, data[name].floot, 0, 0);
     });
     console.log(z, c);
     await this.ipcSend(`zF016_float`, PLC_D(2100 + data.saveGroup * 100), z).then(() => {

@@ -332,9 +332,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   setF06(address: number, value: number) {
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      this.PLCS.ipcSend('cF06', PLC_D(address), value);
+      this.PLCS.ipcSend('cF016_float', PLC_D(address), [value]);
     }
-    this.PLCS.ipcSend('zF06', PLC_D(address), value);
+    this.PLCS.ipcSend('zF016_float', PLC_D(address), [value]);
     console.log(value);
   }
   /** 报警查看 */
@@ -602,7 +602,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     };
     /** 数据转换 */
     taskModeStr[this.task.mode].map(name => {
-      pMpa[name] = mpaToPlc(this.task[name].kn[stage], this.PLCS.mpaRevise[name]);
+      pMpa[name] = this.task[name].kn[stage];
       this.target[name] = this.task[name].kn[stage];
     });
     this.setPLCMpa(pMpa);
@@ -629,7 +629,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     const stage = this.task.record.tensionStage;
     /** 数据转换 */
     taskModeStr[this.task.mode].map(name => {
-      pMpa[name] = mpaToPlc(this.task.record[name].mpa[stage], this.PLCS.mpaRevise[name]);
+      pMpa[name] = this.task.record[name].mpa[stage];
       this.target[name] = this.task.record[name].mpa[stage]
       this.twoMm.record[name] = this.task.record[name].mm[stage];
     });
@@ -671,10 +671,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         };
         for (const name of taskModeStr[this.task.mode]) {
           /** 数据转换 */
-          pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task[name].kn[0], this.PLCS.mpaRevise[name]) : 0;
+          pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? this.task[name].kn[0] : 0;
           this.target[name] = this.task[name].kn[0];
         }
-        this.setPLCD(454, pMpa); // 设置卸荷压力
+        this.setPLCD(458, pMpa); // 设置卸荷压力
         this.setPLCM(523, true); // 启动卸荷阀
       }
       if (unok) {
@@ -763,10 +763,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       for (const name of taskModeStr[this.task.mode]) {
         this.reData[name] = this.PLCS.PD[name].showMm;
         /** 数据转换 */
-        pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? mpaToPlc(this.task[name].kn[0], this.PLCS.mpaRevise[name]) : 0;
+        pMpa[name] = taskModeStr[this.task.mode].indexOf(name) > -1 ? this.task[name].kn[0] : 0;
         this.target[name] = this.task[name].kn[0];
       }
-      this.setPLCD(454, pMpa); // 设置卸荷压力
+      this.setPLCD(458, pMpa); // 设置卸荷压力
       this.setPLCM(523, true); // 启动卸荷阀
     }
     /** 卸荷完成/回程 */
@@ -803,15 +803,17 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   setPLCD(address: number, data) {
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      this.PLCS.ipcSend('cF016', PLC_D(address), [data.cA, data.cB, data.cC, data.cD]);
+      this.PLCS.ipcSend('cF016_float', PLC_D(address), [data.cA, data.cB, data.cC, data.cD]);
     }
-    this.PLCS.ipcSend('zF016', PLC_D(address), [data.zA, data.zB, data.zC, data.zD]);
+    this.PLCS.ipcSend('zF016_float', PLC_D(address), [data.zA, data.zB, data.zC, data.zD]);
   }
   setPLCMpa(mpa) {
-    this.PLCS.ipcSend(`zF016`, PLC_D(450), [mpa.zA, mpa.zB, mpa.zC, mpa.zD]);
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      this.PLCS.ipcSend(`cF016`, PLC_D(450), [mpa.cA, mpa.cB, mpa.cC, mpa.cD]);
+      this.PLCS.ipcSend(`cF016_float`, PLC_D(450), [mpa.cA, mpa.cB, mpa.cC, mpa.cD]);
     }
+    this.PLCS.ipcSend(`zF016_float`, PLC_D(450), [mpa.zA, mpa.zB, mpa.zC, mpa.zD]).then((d) => {
+      console.log('PLC下载结果', d);
+    });
   }
   /**
    * *张拉平衡
@@ -1021,7 +1023,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *手动回顶
    */
   goBackMm() {
-    this.setF06(460, mmToPlc(this.autoData.backMm, null));
+    this.setF06(466, this.autoData.backMm);
     this.setPLCM(522, true);
     this.auto.nowBack = true;
     this.continue();

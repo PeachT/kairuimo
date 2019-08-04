@@ -109,19 +109,19 @@ export class ManualItemComponent implements OnInit {
     // this.setAeeress = this.name.indexOf('A') > -1 ? [100, 102] : [106, 108];
     switch (true) {
       case this.name.indexOf('A') > -1:
-        this.setAeeress = [100, 101];
+        this.setAeeress = [100, 102];
         this.setM = [20, 21, 22, 23];
         break;
         case this.name.indexOf('B') > -1:
-        this.setAeeress = [105, 106];
+        this.setAeeress = [106, 108];
         this.setM = [24, 25, 26, 27];
         break;
         case this.name.indexOf('C') > -1:
-        this.setAeeress = [110, 111];
+        this.setAeeress = [112, 114];
         this.setM = [30, 31, 32, 33];
         break;
         case this.name.indexOf('D') > -1:
-        this.setAeeress = [115, 116];
+        this.setAeeress = [118, 120];
         this.setM = [34, 35, 36, 37];
         break;
       default:
@@ -157,14 +157,16 @@ export class ManualItemComponent implements OnInit {
     let state = true;
     // this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]);
     if (cla === 'mpa') {
-      await this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mpaToPlc(value, this.PLCS.mpaRevise[this.name])).then((d) => {
+      await this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]).then((d: any) => {
         console.log(d);
-        this.dev.setMpa = value;
+        if (d.success) {
+          this.dev.setMpa = value;
+        }
       }).catch(() => {
         state = false;
       });
     } else {
-      await this.PLCS.ipcSend(`${this.devName}F06`, PLC_D(address), mmToPlc(value, this.PLCS.jack[this.name].mm)).then((d) => {
+      await this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]).then((d) => {
         console.log(d);
         this.dev.setMm = value;
       }).catch(() => {

@@ -32,7 +32,7 @@ function bufferToFloat(buffers) {
   for (let index = 0; index < buffers.length; index += 4) {
     const b4 = buffers.slice(index, index + 4);
     b4.swap16(); // 16位整数高低位交换
-    fs.push(Number((b4.readFloatLE(0)).toFixed(2))); // 32位转为浮点数
+    fs.push(Number(b4.readFloatLE(0))); // 32位转为浮点数
   }
   return fs;
 }

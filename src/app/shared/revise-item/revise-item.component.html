@@ -29,16 +29,27 @@
 </div>
 <br><br>
 <form nz-form [formGroup]="setForm">
+  <nz-form-item *ngIf="reviseName === 'mm'">
+    <nz-form-label [nzSm]="3" nzRequired>位移上限</nz-form-label>
+    <nz-form-control [nzSm]="5" [ngClass]="{'in-error': setForm.get('upper').errors}">
+      <input type="number" min="2" max="220" nz-input formControlName="upper">
+    </nz-form-control>
+    <nz-form-label [nzSm]="3" nzRequired>位移下限</nz-form-label>
+    <nz-form-control [nzSm]="5" [ngClass]="{'in-error': setForm.get('floot').errors}">
+      <input type="number" min="2" max="220" nz-input formControlName="floot">
+    </nz-form-control>
+  </nz-form-item>
   <nz-form-item>
     <div formArrayName="setValue">
       <div *ngFor="let item of setStage; index as i">
         <!-- <nz-form-label [nzSm]="1" >{{item}}</nz-form-label> -->
         <nz-form-control [nzSm]="4">
-          <div style="display: flex; align-items: center; padding: 8px;"  (click)="setMm(i)" [ngStyle]="{backgroundColor: (setIndex === i ? '#40a9ff' : 'white'), color: (setIndex === i ? 'white' : 'rgba(0, 0, 0, 0.65)')}" >
+          <div style="display: flex; align-items: center; padding: 4px;"  (click)="setMm(i)" [ngStyle]="{backgroundColor: (setIndex === i ? '#40a9ff' : 'white'), color: (setIndex === i ? 'white' : 'rgba(0, 0, 0, 0.65)')}" >
             {{item}}：<input readonly disabled type="number" style="border: 1px solid #d9d9d9;" nz-input [formControlName]="i">
           </div>
         </nz-form-control>
       </div>
     </div>
   </nz-form-item>
+
 </form>

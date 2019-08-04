@@ -125,10 +125,10 @@ export class ModbusTCP {
     // }, this.heartbeatRate);
     setTimeout(() => {
       if (this.ifClient()) {
-        this.client.readHoldingRegisters(4096, 20).then((data) => {
-          // const float = bf.bufferToFloat(data.buffer);
+        this.client.readHoldingRegisters(4096, 24).then((data) => {
+          const float = bf.bufferToFloat(data.buffer);
           const dint16 = bf.bufferTo16int(data.buffer);
-          this.IPCSend(`${this.dev}heartbeat`, { uint16: data.data, int16: dint16 });
+          this.IPCSend(`${this.dev}heartbeat`, { uint16: data.data, int16: dint16, float });
           this.heartbeat();
         }).catch((err) => {
           console.log('129----', err);
@@ -170,9 +170,9 @@ export class ModbusTCP {
   public F03(address: number, length: number, channel: string): void {
     if (this.ifClient()) {
       this.client.readHoldingRegisters(address, length).then((data) => {
-        // const float = bf.bufferToFloat(data.buffer);
+        const float = bf.bufferToFloat(data.buffer);
         const dint16 = bf.bufferTo16int(data.buffer);
-        this.IPCSend(channel, { int16: dint16, uint16: data.data });
+        this.IPCSend(channel, { int16: dint16, uint16: data.data, float });
       }).catch((err) => {
         this.IPCSend(channel, err);
       });
