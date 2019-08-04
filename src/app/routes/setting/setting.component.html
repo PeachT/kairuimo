@@ -4,22 +4,22 @@
     <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="压力上限Mpa">
-          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0" max="55" [(ngModel)]="systenDate.z[0]" (ngModelChange)="setF016(412, $event)"/>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0" max="55" [(ngModel)]="systenDate.z[0]" (ngModelChange)="setF016('z', 412, $event)"/>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="回程压力Mpa">
-          <input nz-input type="number" nzSize="large" style="width: 100%;" min="1.0" max="10.0" [(ngModel)]="systenDate.z[1]" (ngModelChange)="setF016(414, $event)"/>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="1.0" max="10.0" [(ngModel)]="systenDate.z[1]" (ngModelChange)="setF016('z', 414, $event)"/>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="超设置压力Mpa">
-          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0.5" max="5" [(ngModel)]="systenDate.z[2]" (ngModelChange)="setF016(416, $event)"/>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="0.5" max="5" [(ngModel)]="systenDate.z[2]" (ngModelChange)="setF016('z', 416, $event)"/>
         </nz-input-group>
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="油泵延时s">
-          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" max="9999" [(ngModel)]="systenDate.z[3]" (ngModelChange)="setF06(418, $event * 10)"/>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" max="9999" [(ngModel)]="systenDate.z[3]" (ngModelChange)="setF06('z', 418, $event * 10)"/>
         </nz-input-group>
       </nz-col>
     </nz-row>
@@ -27,7 +27,7 @@
       <nz-col nz-col nzSpan="18">
         <nz-input-group nzAddOnBefore="设备模式" nzSize="large">
           <nz-input-number nzSize="large" style="width: 1px"></nz-input-number>
-          <nz-radio-group [(ngModel)]="systenDate.z[4]" (ngModelChange)="setF06(408, $event)" nzSize="large">
+          <nz-radio-group [(ngModel)]="systenDate.z[4]" (ngModelChange)="setF06('z', 408, $event)" nzSize="large">
             <label nz-radio [nzValue]="4">一泵四顶</label>
             <label nz-radio [nzValue]="2">一泵两顶</label>
             <label nz-radio [nzValue]="1">一泵一顶</label>
