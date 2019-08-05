@@ -102,9 +102,15 @@ export class LoginComponent implements OnInit {
             nameId: `${user.name}-${user.id}`,
             operation: user.operation || []
           };
+          const stateTension = localStorage.getItem('stateTension');
+          console.log('stateTension', stateTension, localStorage.getItem('stateTension'));
           this.message.success('登录成功🙂');
-          this.router.navigate(['/task']);
-          this.appS.menus = menus.filter(menu => menu.jurisdiction <= user.jurisdiction);
+          if (stateTension) {
+            this.router.navigate(['/auto']);
+          } else {
+            this.router.navigate(['/task']);
+            this.appS.menus = menus.filter(menu => menu.jurisdiction <= user.jurisdiction);
+          }
         } else {
           this.message.error('登录失败😔');
         }

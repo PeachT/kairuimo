@@ -29,17 +29,17 @@ export interface Jack {
   state: boolean;
   /** 联机|单机 */
   link: boolean;
-  zA: Dev;
-  zB: Dev;
-  zC: Dev;
-  zD: Dev;
-  cA: Dev;
-  cB: Dev;
-  cC: Dev;
-  cD: Dev;
+  zA: JackItem;
+  zB: JackItem;
+  zC: JackItem;
+  zD: JackItem;
+  cA: JackItem;
+  cB: JackItem;
+  cC: JackItem;
+  cD: JackItem;
 }
 
-export interface Dev {
+export interface JackItem {
   /** 千斤顶编号 */
   jackNumber: string;
   /** 油泵编号 */

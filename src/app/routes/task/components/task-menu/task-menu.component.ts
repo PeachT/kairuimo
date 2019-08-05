@@ -75,12 +75,12 @@ export class TaskMenuComponent implements OnInit {
 
   async ngOnInit() {
     const date = new Date();
-    this.filter.tension.date = [startOfWeek(date), lastDayOfWeek(date)];
-    this.filter.tension.startDate = getTime(startOfWeek(date));
-    this.filter.tension.entDate = getTime(lastDayOfWeek(date));
-    this.filter.pouring.date = [startOfWeek(date), lastDayOfWeek(date)];
-    this.filter.pouring.startDate = getTime(startOfWeek(date));
-    this.filter.pouring.entDate = getTime(lastDayOfWeek(date));
+    // this.filter.tension.date = [startOfWeek(date), lastDayOfWeek(date)];
+    // this.filter.tension.startDate = getTime(startOfWeek(date));
+    // this.filter.tension.entDate = getTime(lastDayOfWeek(date));
+    // this.filter.pouring.date = [startOfWeek(date), lastDayOfWeek(date)];
+    // this.filter.pouring.startDate = getTime(startOfWeek(date));
+    // this.filter.pouring.entDate = getTime(lastDayOfWeek(date));
     await this.getProject();
     this.activatedRoute.queryParams.subscribe(queryParams => {
       let data = null;

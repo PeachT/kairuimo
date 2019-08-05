@@ -65,6 +65,7 @@ export class DbService {
             t.groups[i].record = g.record;
           }
         });
+        t.jack = d.jack;
         data = t;
       }
       console.log('处理', data);

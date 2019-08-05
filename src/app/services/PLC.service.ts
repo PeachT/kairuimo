@@ -117,7 +117,7 @@ export class PLCService {
   // };
   private stateStr = ['张拉', '回程', '卸荷', '压力上限', '压力未连接', '位移上限',
                       '位移下限', '位移未连接', '超设置压力', '超设置位移', '模块错误',
-                      '急停', '自动暂停', '通信错误', '相序错误'];
+                      '急停', '自动暂停', '通信错误', '相序错误', 'PLC停止'];
   private stateAutoStr = ['等待保压', '卸荷完成', '回顶完成', '超工作位移上限', '平衡暂停', '压力差报警', '伸长量偏差报警', '张拉完成'];
   // 0压力确认 1回程 2卸荷 3 卸荷完成 4回顶 5回顶完成 6超工作位移上限
   /** 设置采集频率 */
@@ -132,7 +132,11 @@ export class PLCService {
   // public onPlcSub(data) {
   //   this.plcSub.next(data);
   // }
-
+  /** 手动模式 */
+  public manualMode = {
+    z: null,
+    c: null,
+  };
   constructor(
     private e: ElectronService,
     private message: NzMessageService,
@@ -166,7 +170,9 @@ export class PLCService {
       //   console.log(this.revise[`${dev}MpaRevise`]);
       //   this.getPLCMpa(dev);
       // }
-      // console.log(data);
+      this.manualMode[dev] = data.uint16[25].toString(2);
+      // console.log(data, this.manualMode[dev]);
+
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`];
       this.plcState[`${dev}OT`] = new Date().getTime();
       clearTimeout(this.plcState[`${dev}T`]);
@@ -179,10 +185,10 @@ export class PLCService {
           const key = `${dev}${k}`;
           this.PD[key].showMpa = data.float[i].toFixed(2);
           this.PD[key].showMm = data.float[i + 1].toFixed(2);
-          const state = this.getState(data.uint16[i * 2 + 4]);
+          const state = this.getState(data.uint16[i * 2 + 4], data.uint16[24]);
           this.PD[key].state = state.state.join('·');
           this.PD[key].alarm = state.alarm;
-          this.PD[key].autoState = this.getState(data.uint16[i * 2 + 5], true, this.stateAutoStr).alarm;
+          this.PD[key].autoState = this.getState(data.uint16[i * 2 + 5], data.uint16[24], true, this.stateAutoStr).alarm;
           i += 3;
         });
       }
@@ -209,11 +215,15 @@ export class PLCService {
     });
   }
   /** 设备状态处理 */
-  getState(value: number, auto = false, states = this.stateStr): { state: Array<string>, alarm: Array<string> } {
+  getState(value: number, PLCstate: number, auto = false, states = this.stateStr): { state: Array<string>, alarm: Array<string> } {
     const r = {
       state: [],
       alarm: [],
     };
+    if (PLCstate === 0) {
+      r.alarm.push('PLC停机');
+      return r;
+    }
     const s = value.toString(2).padStart(16, '0');
     // tslint:disable-next-line:prefer-for-of
     let i = 0;
