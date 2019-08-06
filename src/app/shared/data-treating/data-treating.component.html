@@ -7,7 +7,7 @@
   </nz-radio-group>
 
   <div *ngIf="exportMode === 1">
-    <nz-divider nzText="选择导出位置"></nz-divider>
+    <nz-divider nzText="导出位置"></nz-divider>
     <div>
       <p>导出会在模板所在的文件夹下创建一个导出时的时间文件夹（例：1970-01-01T12:12:12导出）</p>
       <div *ngIf="e.isLinux">
@@ -34,20 +34,16 @@
     </div>
   </div>
   <div *ngIf="exportMode === 2">
-    <nz-divider nzText="选择导出位置"></nz-divider>
+    <nz-divider nzText="导出位置"></nz-divider>
     <div>
-      <p>导出时的时间文件（例：1970-01-01T12:12:12Data.datakvm）</p>
+      <p>导出时的时间文件（例：1970-01-01T12:12:12Data.db</p>
       <div *ngIf="e.isLinux">
-        <h2 *ngIf="template.files?.length === 0">没有找到更新文件
-          <button nz-button nzType="primary" (click)="getTemplate()">
-            获取模板文件
-          </button>
-          <p>{{template.fileMsg | json}}</p>
-        </h2>
+        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;" *ngIf="upanState.path">保存u盘</span>&nbsp;&nbsp;&nbsp;
+        <h2 *ngIf="!upanState.path">{{upanState.state ? '没有检测U盘' : '正在检测U盘...'}}</h2>
       </div>
       <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
         <button nz-button nzType="primary" (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
-        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;" *ngIf="e.isWindows">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
       </div>
     </div>
   </div>
@@ -70,7 +66,7 @@
     </nz-checkbox-wrapper>
   </div>
   <div>
-    <div *ngIf="savePath && tempPath">
+    <div *ngIf="savePath && ((tempPath && exportMode === 1) || exportMode === 2)">
       <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
         <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
       </nz-radio-group>

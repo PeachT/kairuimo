@@ -11,6 +11,7 @@ import { TensionMm, mpaToKN, mpaToKNSingle } from 'src/app/Function/device.date.
 import { taskModeStr } from 'src/app/models/jack';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DateFormat } from 'src/app/Function/DateFormat';
+import { utf8_to_b64 } from 'src/app/Function/stringToBase64';
 
 @Component({
   selector: 'app-data-treating',
@@ -31,11 +32,15 @@ export class DataTreatingComponent implements OnInit {
   };
 
   taskData = {
+    /** 项目列表 */
     project: [],
     sp: null,
+    /** 构建列表 */
     component: [],
     sc: null,
+    /** 梁列表 */
     bridge: [],
+    /** 已选择的梁id */
     sb: []
   };
   template = {
@@ -44,6 +49,11 @@ export class DataTreatingComponent implements OnInit {
     selectFile: null,
     start: false,
     fileMsg: null,
+  };
+  upanState = {
+    path: null,
+    msg: null,
+    state: false,
   };
 
   constructor(
@@ -77,13 +87,28 @@ export class DataTreatingComponent implements OnInit {
         this.getTaskProject();
         break;
       case 2:
-        this.message.warning('功能没有实现');
+        this.getUpan();
+        this.getTaskProject();
         break;
       case 3:
         this.message.warning('功能没有实现');
         break;
       default:
         break;
+    }
+  }
+  /** 获取U盘 */
+  getUpan() {
+    if (this.e.isLinux) {
+      this.e.ipcRenderer.send('get-upan', 'get-upan-back');
+      this.upanState.state = true;
+      this.e.ipcRenderer.once('get-upan-back', (event, data) => {
+        this.upanState.path = data.stdout;
+        this.savePath = data.stdout;
+        this.upanState.msg = data;
+        this.upanState.state = false;
+        this.cdr.markForCheck();
+      });
     }
   }
   /** 获取模板 */
@@ -93,6 +118,7 @@ export class DataTreatingComponent implements OnInit {
       this.e.ipcRenderer.once('get-template-back', (event, data) => {
         console.log(data);
         this.template.files = data.stdout;
+        this.savePath = data.stdout;
         this.template.fileMsg = data;
         this.cdr.markForCheck();
       });
@@ -198,9 +224,23 @@ export class DataTreatingComponent implements OnInit {
   }
 
   exportOk() {
-    this.derivedExcel();
+    console.log(this.exportMode);
+    switch (this.exportMode) {
+      case 1:
+        this.derivedExcel();
+        break;
+      case 2:
+        this.dataEX();
+        break;
+      case 3:
+        this.message.warning('功能没有实现');
+        break;
+      default:
+        break;
+    }
   }
 
+  /** 导出表格 */
   async derivedExcel() {
     const id = this.taskData.sb[this.progress.now];
     if (this.progress.now === 0) {
@@ -295,5 +335,29 @@ export class DataTreatingComponent implements OnInit {
     // this.taskData.sb.map(async id => {
 
     // });
+  }
+  /** 导出数据 */
+  async dataEX() {
+    const datas = await this.db.db.task.filter(t => this.taskData.sb.indexOf(t.id) > -1).toArray();
+    const strb64 = utf8_to_b64(JSON.stringify(datas));
+    console.log('导出数据', datas, strb64);
+
+    this.savePath = `${this.savePath}/${DateFormat(new Date(), 'yyyy年MM月dd日hh时mm分ss秒')}.db`;
+    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    this.e.ipcRenderer.send('dateEX', {
+      channel,
+      outPath: this.savePath,
+      data: strb64,
+    });
+    this.e.ipcRenderer.once(channel, (event, data) => {
+      if (data.success) {
+        this.progress.msg = '导出完成';
+      } else {
+        this.progress.msg = '导出错误';
+        console.log(data);
+      }
+      this.cdr.markForCheck();
+      console.log('导出', data);
+    });
   }
 }

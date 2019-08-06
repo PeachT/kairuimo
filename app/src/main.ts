@@ -200,8 +200,13 @@ ipcMain.on('get-template', async (event, data) => {
   moundUSB('*.kvmt', 'get-template-back');
   // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
 });
+/** 获取U盘 */
+ipcMain.on('get-upan', async (event, data) => {
+  moundUSB('*.kvmt', 'get-upan-back');
+  // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
+});
 
-// 开始导出
+// 导出表格
 ipcMain.on('derivedExcel', async (event, data) => {
   // console.log('123456789', path);
   // 获得Excel模板的buffer对象
@@ -227,6 +232,28 @@ ipcMain.on('derivedExcel', async (event, data) => {
     event.sender.send(data.channel, { success: true, filePath, savePath });
   } catch (error) {
     event.sender.send(data.channel, { success: false, filePath, savePath, error });
+  }
+});
+// 导出数据
+ipcMain.on('dateEX', async (event, data) => {
+  try {
+    console.log(data.outPath);
+    fs.writeFile(data.outPath, data.data, (err) => {
+      if (err) {
+        console.log('写入错误');
+        event.sender.send(data.channel, { success: false, mgs: '写入错误', error: err });
+      } else {
+        console.log('写文件操作成功');
+        event.sender.send(data.channel, { success: true, mgs: '写入完成' });
+      }
+    });
+    // const exlBuf = await readFileAsync(filePath);
+    // // 用数据源(对象)data渲染Excel模板
+    // const exlBuf2 = await ejsexcel.renderExcel(exlBuf, data.data);
+    // await writeFileAsync(savePath, exlBuf2);
+    // event.sender.send(data.channel, { success: true, filePath, savePath });
+  } catch (error) {
+    // event.sender.send(data.channel, { success: false, filePath, savePath, error });
   }
 });
 
@@ -339,7 +366,7 @@ ipcMain.on('openDevTools', () => {
 });
 
 /** 挂载U盘 */
-function moundUSB(filterName, sendName) {
+function moundUSB(filterName, sendName, state = false) {
   console.log('select-file');
   let updatepath = '/media';
   // 获取用户名
@@ -363,14 +390,18 @@ function moundUSB(filterName, sendName) {
         if (stderr.indexOf('不存在') !== -1) {
           win.webContents.send(sendName, { stdout, stderr: '加载U盘失败！' });
         } else {
-          const upps = exec(`find ${updatepath} -name ${filterName}`, { async: true }, (code, stdout, stderr) => {
-            stdout = stdout.split('\n').filter(t => t !== '');
-            console.log('Exit code:', code);
-            console.log('Program output:', stdout);
-            console.log('Program stderr:', stderr);
-            upps.kill();
-            win.webContents.send(sendName, { stdout, stderr });
-          });
+          if (state) {
+            win.webContents.send(sendName, {stdout: updatepath});
+          } else {
+            const upps = exec(`find ${updatepath} -name ${filterName}`, { async: true }, (code, stdout, stderr) => {
+              stdout = stdout.split('\n').filter(t => t !== '');
+              console.log('Exit code:', code);
+              console.log('Program output:', stdout);
+              console.log('Program stderr:', stderr);
+              upps.kill();
+              win.webContents.send(sendName, { stdout, stderr });
+            });
+          }
         }
       });
     } else {
