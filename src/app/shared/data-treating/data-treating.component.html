@@ -39,7 +39,8 @@
       <p>导出时的时间文件（例：1970-01-01T12:12:12Data.db</p>
       <div *ngIf="e.isLinux">
         <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;" *ngIf="upanState.path">保存u盘</span>&nbsp;&nbsp;&nbsp;
-        <h2 *ngIf="!upanState.path">{{upanState.state ? '没有检测U盘' : '正在检测U盘...'}}</h2>
+        <h2 *ngIf="!upanState.msg">正在检测U盘...</h2>
+        <h2 *ngIf="upanState.msg">{{upanState.msg.stderr}}</h2>
       </div>
       <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
         <button nz-button nzType="primary" (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;

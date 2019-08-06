@@ -202,7 +202,7 @@ ipcMain.on('get-template', async (event, data) => {
 });
 /** 获取U盘 */
 ipcMain.on('get-upan', async (event, data) => {
-  moundUSB('*.kvmt', 'get-upan-back');
+  moundUSB('', 'get-upan-back',  true);
   // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
 });
 

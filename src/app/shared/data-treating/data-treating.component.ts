@@ -107,6 +107,7 @@ export class DataTreatingComponent implements OnInit {
         this.savePath = data.stdout;
         this.upanState.msg = data;
         this.upanState.state = false;
+        console.log('获取U盘返回', data);
         this.cdr.markForCheck();
       });
     }
