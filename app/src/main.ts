@@ -205,6 +205,11 @@ ipcMain.on('get-upan', async (event, data) => {
   moundUSB('', 'get-upan-back', true);
   // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
 });
+/** 获取U盘 */
+ipcMain.on('get-dbfile', async (event, data) => {
+  moundUSB('*.db', 'get-dbfile-back');
+  // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
+});
 
 // 导出表格
 ipcMain.on('derivedExcel', async (event, data) => {
