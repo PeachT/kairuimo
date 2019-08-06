@@ -125,7 +125,11 @@ export class ModbusTCP {
     // }, this.heartbeatRate);
     setTimeout(() => {
       if (this.ifClient()) {
-        this.client.readHoldingRegisters(4096, 24).then((data) => {
+        const d = new Date().getSeconds();
+        // this.F06(4195, d)
+        this.client.writeRegister(4195, d).then((data) => {
+        });
+        this.client.readHoldingRegisters(4096, 30).then((data) => {
           const float = bf.bufferToFloat(data.buffer);
           const dint16 = bf.bufferTo16int(data.buffer);
           this.IPCSend(`${this.dev}heartbeat`, { uint16: data.data, int16: dint16, float });

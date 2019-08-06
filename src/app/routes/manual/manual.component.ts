@@ -202,13 +202,9 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  setF15(index: number, dev: string = 'z') {
-    const channel = `${dev}F15`;
-    const array = [false, false, false];
-    array[index] = !this[`${dev}MarginMode`][index];
-    console.log(array);
-    this.PLCS.ipcSend(`${dev}F15`, PLC_M(101), array).then(() => {
-      this[`${dev}MarginMode`] = array;
+  setF15(dev: string, address: number, state) {
+    state = !(state === '1');
+    this.PLCS.ipcSend(`${dev}F05`, PLC_M(address), state).then(() => {
     });
   }
   /** 查看报警 */

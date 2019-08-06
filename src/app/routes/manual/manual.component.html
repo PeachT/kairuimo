@@ -22,8 +22,8 @@
           <nz-anchor [nzAffix]="false" [nzTarget]="dz" *ngIf="anchor.z.length > 0">
             <nz-link *ngFor="let name of anchor.z; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
           </nz-anchor>
-        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[0]}" (click)="setF15(0)">点动</button>
-        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[1]}" (click)="setF15(1)">强制运行</button>
+        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': PLCS.manualMode.z[1] === '1'}" (click)="setF15('z', 101, PLCS.manualMode.z[1])">点动</button>
+        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': PLCS.manualMode.z[2] === '1'}" (click)="setF15('z', 102, PLCS.manualMode.z[2])">强制运行</button>
         <!-- <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': zMarginMode[2]}" (click)="setF15(2)">自动补压</button> -->
       </div>
       <div class="manual-data scroll-content" #dz>
@@ -42,8 +42,8 @@
           <nz-anchor [nzAffix]="false" [nzTarget]="dc" *ngIf="anchor.z.length > 0">
             <nz-link *ngFor="let name of anchor.c; index as i" [nzHref]="'#' + name" [nzTitle]="name"></nz-link>
           </nz-anchor>
-        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[0]}" (click)="setF15(0, 'c')">点动</button>
-        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[1]}" (click)="setF15(1, 'c')">强制运行</button>
+        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': PLCS.manualMode.c[1] === '1'}" (click)="setF15('c', 101, PLCS.manualMode.c[1])">点动</button>
+        <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': PLCS.manualMode.c[2] === '1'}" (click)="setF15('c', 102, PLCS.manualMode.c[2])">强制运行</button>
         <!-- <button nzSize="large" nz-button nzType="default" [ngClass]="{'on': cMarginMode[2]}" (click)="setF15(2, 'c')">自动补压</button> -->
       </div>
 

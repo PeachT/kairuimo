@@ -178,12 +178,13 @@ export class TaskComponent implements OnInit {
   }
 
   /** 选择梁 */
-  async onBridge(data) {
+  async onBridge(data: TensionTask) {
     if (!data) {
       return;
     }
     this.data = data;
     console.log('梁梁梁梁', this.data);
+    this.jackData = data.jack;
     this.holeMneuData = {
       name: null,
       names: [],
@@ -216,6 +217,7 @@ export class TaskComponent implements OnInit {
     if (!data) {
       data = copyAny(this.data);
       data.id = null;
+      data.otherInfo[0].value = null;
       for (const c of data.groups) {
         delete c.record;
       }
@@ -310,8 +312,12 @@ export class TaskComponent implements OnInit {
       this.holeMneuData.name = name;
       this.holeMneuData.data = this.data.groups[i];
       console.log('切换张拉组', this.data, name, i);
-      if (!this.jackData || this.data.device[0] !== this.jackData.id) {
-        this.jackData = await this.db.jack.filter(j => j.id === this.data.device[0]).first();
+      if (this.data && this.data.jack) {
+        this.jackData = this.data.jack;
+      } else {
+        if (!this.jackData || this.data.device[0] !== this.jackData.id) {
+          this.jackData = await this.db.jack.filter(j => j.id === this.data.device[0]).first();
+        }
       }
       this.taskDataDom.createHoleform(this.holeMneuData.data, this.jackData);
     }

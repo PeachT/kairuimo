@@ -1,5 +1,6 @@
 import { OtherInfo } from './common';
 import { IBase } from './base';
+import { JackItem, Jack } from './jack';
 
 export interface TensionTask extends IBase {
   // id?: any;
@@ -13,6 +14,7 @@ export interface TensionTask extends IBase {
   startDate: any;
   entDate: any;
   groups: Array<GroupItem>;
+  jack?: Jack;
 }
 export interface GroupItem {
   name: string;
@@ -75,6 +77,17 @@ export interface AB {
   kn: Array<number>;
   wordMm: number;
   theoryMm?: number;
+}
+
+export interface TaskJack {
+  zA?: JackItem;
+  zB?: JackItem;
+  zC?: JackItem;
+  zD?: JackItem;
+  cA?: JackItem;
+  cB?: JackItem;
+  cC?: JackItem;
+  cD?: JackItem;
 }
 
 /** 用户索引 */

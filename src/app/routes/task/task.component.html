@@ -72,7 +72,7 @@
         <app-record *ngIf="holeMneuData.data && holeMneuData.data?.record" [GroupData]="holeMneuData.data" ></app-record>
       </nz-tab>
       <nz-tab nzTitle="设备信息" [nzDisabled]="!jackData">
-        <task-jack [data]="jackData" *ngIf="tabsetShow === 1"></task-jack>
+        <task-jack [taskJack]="jackData" [mode]="data.device" *ngIf="tabsetShow === 1"></task-jack>
       </nz-tab>
       <nz-tab nzTitle="其他">
         <p>创建者：{{data?.user}}</p>

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { taskModeStr, tableDev, groupModeStr } from 'src/app/models/jack';
+import { taskModeStr, tableDev, groupModeStr, JackItem } from 'src/app/models/jack';
 import { DB, DbService } from 'src/app/services/db.service';
 import { FormBuilder } from '@angular/forms';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 import { PLCService } from 'src/app/services/PLC.service';
 import { AutoService } from 'src/app/services/auto.service';
 import { PLC_D, PLC_S, PLC_M, PLC_Y } from 'src/app/models/IPCChannel';
-import { GroupItem } from 'src/app/models/task.models';
+import { GroupItem, TensionTask, TaskJack } from 'src/app/models/task.models';
 import { mpaToPlc, TensionMm, myToFixed, mmToPlc } from 'src/app/Function/device.date.processing';
 import { AutoDate } from 'src/app/models/device';
 import { Elongation } from 'src/app/models/live';
@@ -219,6 +219,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   /** 监听PLC */
   plcsub: Subscription;
 
+  /** 保存状态 */
+  saveState = false;
+  /** 自动张拉数据 */
+  autoTask: any;
+  /** stateTension */
+  stateTension = false;
+
   constructor(
     private fb: FormBuilder,
     private odb: DbService,
@@ -231,14 +238,15 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     private cdr: ChangeDetectorRef
   ) {
     this.autoData = this.PLCS.getAutoDate();
-    const autoTask = JSON.parse(localStorage.getItem('autoTask'));
-    if (!autoTask) {
+    this.stateTension = localStorage.getItem('stateTension') ? true : false;
+    this.autoTask = JSON.parse(localStorage.getItem('autoTask'));
+    if (!this.autoTask) {
       this.router.navigate(['/task']);
     } else {
       this.db = this.odb.db;
-      this.autoS.task = autoTask;
-      this.task = autoTask.groupData;
-      console.log('12312313123123131', autoTask);
+      this.autoS.task = this.autoTask;
+      this.task = this.autoTask.groupData;
+      console.log('12312313123123131', this.autoTask);
       // this.PLCS.getMpaRevise();
       this.tensionStageArrF();
     }
@@ -274,6 +282,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn('没有');
     }
     localStorage.setItem('autoTask', null);
+    localStorage.setItem('stateTension', '');
     if (this.plcsub) {
       this.plcsub.unsubscribe();
     }
@@ -983,6 +992,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             /** 模拟数据 */
             // item.push(value - Math.random() * 10);
             // this.svgData.mm[i].push(value - Math.random() * 10);
+            // 实时保存张拉记录
+            localStorage.setItem('autoTask', JSON.stringify(this.autoTask));
+
+            localStorage.setItem('stateTension', 'true');
           }
         });
       }
@@ -1054,6 +1067,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   cancel() {
     this.go();
     localStorage.setItem('autoTask', null);
+    localStorage.setItem('stateTension', '');
     this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
       console.log('查询结果', this.autoS.task.id, d);
     });
@@ -1070,6 +1084,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   outOk() {
     this.go();
     localStorage.setItem('autoTask', null);
+    localStorage.setItem('stateTension', '');
   }
   /** 暂定 */
   sotp() {
@@ -1079,6 +1094,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   /** 保存数据 */
   save(out = false) {
+    this.saveState = true;
     if (this.tensionOk) {
       if (this.task.twice && this.task.record.tensionStage === 2) {
         this.task.record.state = 4;
@@ -1095,15 +1111,15 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.task.record.state = 1;
     }
-    this.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
-      console.log('查询结果', this.autoS.task.id, d);
+    this.db.task.filter(f => f.id === this.autoS.task.id).first((taskDbData: TensionTask) => {
+      console.log('查询结果', this.autoS.task.id, taskDbData);
       let index = null;
-      d.groups.filter((f, i) => {
+      taskDbData.groups.filter((f, i) => {
         if (f.name === this.task.name) {
           index = i;
         }
       });
-      d.groups[index] = this.task;
+      taskDbData.groups[index] = this.task;
       // const ds = [];
       // d.groups.map((g, i) => {
       //   if ('record' in g) {
@@ -1117,16 +1133,22 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       //   d.startDate = min;
       // }
       /** 设置张拉时间 */
-      if (!d.startDate) {
-        d.startDate = this.task.record.time[1];
+      if (!taskDbData.startDate) {
+        taskDbData.startDate = this.task.record.time[1];
       }
-      d.entDate = this.task.record.time[1];
-
-      console.log('更新数据', d);
-      this.db.task.update(this.autoS.task.id, d).then((updata) => {
+      taskDbData.entDate = this.task.record.time[1];
+      const jackItems = {};
+      // 设置张拉顶
+      taskModeStr[this.task.mode].map(name => {
+        jackItems[name] = this.PLCS.jack[name];
+      });
+      taskDbData.jack = this.PLCS.jack;
+      console.log('更新数据', taskDbData);
+      this.db.task.update(this.autoS.task.id, taskDbData).then((updata) => {
         this.message.success('保存成功🙂');
         if (out) {
           localStorage.setItem('autoTask', null);
+          localStorage.setItem('stateTension', '');
           this.go();
         }
       }).catch((err) => {

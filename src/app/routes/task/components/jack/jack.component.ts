@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Jack, taskModeStr } from 'src/app/models/jack';
+import { Jack, taskModeStr, modeName } from 'src/app/models/jack';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -9,47 +9,14 @@ import { Jack, taskModeStr } from 'src/app/models/jack';
   styleUrls: ['./jack.component.less']
 })
 export class JackComponent implements OnInit {
-  @Input()
-    data: Jack;
+  @Input() taskJack: Jack;
+  @Input() mode: string;
+  devModeStr = [];
 
-  jackForm: FormGroup;
-  taskModeStr = [];
-
-  constructor(private fb: FormBuilder,) { }
+  constructor() { }
 
   ngOnInit() {
-    console.log(this.data);
-    this.jackForm = this.fb.group({
-      name: ['1'],
-      jackMode: [2],
-      equation: [1],
-      jackModel: [],
-      pumpModel: [],
-      zA: this.createDevGroup(),
-      zB: this.createDevGroup(),
-      zC: this.createDevGroup(),
-      zD: this.createDevGroup(),
-      cA: this.createDevGroup(),
-      cB: this.createDevGroup(),
-      cC: this.createDevGroup(),
-      cD: this.createDevGroup(),
-    });
-    this.taskModeStr = taskModeStr.AB8;
-    this.jackForm.reset(this.data);
-    this.jackForm.disable();
+    this.devModeStr = taskModeStr[this.mode[1]];
+    console.log(this.taskJack);
   }
-
-  /** 创建设备标定from */
-  createDevGroup() {
-    return this.fb.group({
-      jackNumber: [],
-      pumpNumber: [],
-      a: [],
-      b: [],
-      date: [],
-      mpa: this.fb.array([0, 1, 2, 3, 4, 5]),
-      mm: this.fb.array([0, 1, 2, 3, 4, 5]),
-    });
-  }
-
 }

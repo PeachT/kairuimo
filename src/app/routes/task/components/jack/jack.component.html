@@ -1,42 +1,31 @@
-<div class="main">
-  <form nz-form [formGroup]="jackForm">
-    <nz-form-item>
-      <nz-form-label [nzSm]="3" nzRequired>千斤顶名称</nz-form-label>
-      <nz-form-control [nzSm]="21">
-        <input type="text" nz-input formControlName="name">
-      </nz-form-control>
-      <nz-form-label [nzSm]="3" nzRequired>张拉模式</nz-form-label>
-      <nz-form-control [nzSm]="21">
-        <nz-radio-group formControlName="jackMode" #jackModeV>
-          <label nz-radio [nzValue]="4">一泵四顶</label>
-          <label nz-radio [nzValue]="2">一泵两顶</label>
-          <label nz-radio [nzValue]="1">一泵一顶</label>
-        </nz-radio-group>
-      </nz-form-control>
-      <nz-form-label [nzSm]="3" nzRequired>回归方程</nz-form-label>
-      <nz-form-control [nzSm]="21">
-        <nz-radio-group formControlName="equation">
-          <label nz-radio [nzValue]="1">P=aF+b F张拉控制应力KN</label>
-          <label nz-radio [nzValue]="0">F=aP+b P张拉控制应力MPa</label>
-        </nz-radio-group>
-      </nz-form-control>
-      <nz-form-label [nzSm]="3" nzRequired>千斤顶型号</nz-form-label>
-      <nz-form-control [nzSm]="5">
-        <input type="text" nz-input formControlName="jackModel">
-      </nz-form-control>
-      <nz-form-label [nzSm]="3" nzRequired>油泵型号</nz-form-label>
-      <nz-form-control [nzSm]="5">
-        <input type="text" nz-input formControlName="pumpModel">
-      </nz-form-control>
-    </nz-form-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="zA"></app-jack-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="zB" *ngIf="jackForm.value.jackMode > 1"></app-jack-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="zC" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="zD" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
+<div class="main" *ngIf="taskJack">
+  <h2>回归方程：
+    <span *ngIf="taskJack.equation">P=aF+b F张拉控制应力KN</span>
+    <span *ngIf="!taskJack.equation">F=aP+b P张拉控制应力MPa</span>
+  </h2>
+  <table class="gridtable">
 
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="cA"></app-jack-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="cB" *ngIf="jackForm.value.jackMode > 1"></app-jack-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="cC" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
-    <app-jack-item [formGroup]="jackForm" [reviseBtnShow]="false" name="cD" *ngIf="jackForm.value.jackMode > 2"></app-jack-item>
-  </form>
+    <thead>
+      <tr>
+        <th>顶</th>
+        <th>千斤顶编号</th>
+        <th>油泵编号</th>
+        <th>标定系数a</th>
+        <th>标定系数b</th>
+        <th>标定日期</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let name of devModeStr; index as i">
+        <tr>
+          <td>{{name}}</td>
+          <td>{{taskJack[name].jackNumber}}</td>
+          <td>{{taskJack[name].pumpNumber}}</td>
+          <td>{{taskJack[name].a}}</td>
+          <td>{{taskJack[name].b}}</td>
+          <td>{{taskJack[name].date | date: 'yyyy-MM-dd' }}</td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
 </div>
