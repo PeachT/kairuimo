@@ -51,6 +51,20 @@ export class DbService {
       return {success: false, msg: error};
     }
   }
+  public async inAddTaskAsync(data: TensionTask, filterFunction: (o1: TensionTask) => boolean) {
+    const tName = 'task';
+    if (await this.repetitionAsync(tName, filterFunction) > 0) {
+      return {success: false, msg: '已存在'};
+    }
+    try {
+      const r = await this.db[tName].add(data);
+      console.log('保存结果', r);
+      return {success: true, id: r};
+    } catch (error) {
+      console.log('错误', error);
+      return {success: false, msg: error};
+    }
+  }
 
   public async updateAsync(tName: string, data: IBase, filterFunction: (obj: any) => boolean) {
     if (await this.repetitionAsync(tName, filterFunction) > 0) {

@@ -24,12 +24,12 @@
         </nz-radio-group>
       </div>
       <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
-        <button nz-button nzType="primary"
-          (click)="selectTemp()">选择导出模板</button>&nbsp;&nbsp;&nbsp;
-        <button nz-button nzType="primary"
-          (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
-        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
-        <span style="background-color: #96c24e; color: white; display: flex; align-items: center; padding: 0 15px;">模板路径：{{tempPath}}</span>
+        <button nz-button nzType="primary" (click)="selectTemp()">选择导出模板</button>&nbsp;&nbsp;&nbsp;
+        <button nz-button nzType="primary" (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
+        <span
+          style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
+        <span
+          style="background-color: #96c24e; color: white; display: flex; align-items: center; padding: 0 15px;">模板路径：{{tempPath}}</span>
       </div>
     </div>
   </div>
@@ -38,26 +38,39 @@
     <div>
       <p>导出时的时间文件（例：1970-01-01T12:12:12Data.db</p>
       <div *ngIf="e.isLinux">
-        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;" *ngIf="upanState.path">保存u盘</span>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;"
+          *ngIf="upanState.path">保存u盘</span>&nbsp;&nbsp;&nbsp;
         <h2 *ngIf="!upanState.msg">正在检测U盘...</h2>
         <h2 *ngIf="upanState.msg">{{upanState.msg.stderr}}</h2>
       </div>
       <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
         <button nz-button nzType="primary" (click)="selectSavePath()">选择保存位置</button>&nbsp;&nbsp;&nbsp;
-        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;" *ngIf="e.isWindows">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
+        <span style="background-color: #12a182; color: white; display: flex;align-items: center; padding: 0 15px;"
+          *ngIf="e.isWindows">保存路径：{{savePath}}</span>&nbsp;&nbsp;&nbsp;
       </div>
     </div>
   </div>
 
-  <!-- <nz-divider nzText="选择处理数据"></nz-divider>
-  <nz-checkbox-wrapper style="width: 100%;">
-    <label nz-checkbox [(ngModel)]="dataProcessing.task" (ngModelChange)="onSelectClass($event, 'task')">任 务</label>
-    <label nz-checkbox [(ngModel)]="dataProcessing.project"
-      (ngModelChange)="onSelectClass($event, 'project')">项目</label>
-    <label nz-checkbox [(ngModel)]="dataProcessing.component"
-      (ngModelChange)="onSelectClass($event, 'component')">构建</label>
-    <label nz-checkbox [(ngModel)]="dataProcessing.jack" (ngModelChange)="onSelectClass($event, 'jack')">顶</label>
-  </nz-checkbox-wrapper> -->
+
+  <div *ngIf="exportMode === 3">
+    <nz-divider nzText="导出位置"></nz-divider>
+    <div>
+      <div *ngIf="e.isLinux">
+        <h2 *ngIf="inData.files?.length === 0">没有找到数据文件
+          <p>{{inData.fileMsg | json}}</p>
+        </h2>
+        <nz-radio-group [(ngModel)]="inData.selsectPath" [nzDisabled]="inData.start" (ngModelChange)="radioSelectDb()">
+          <label nzSize="large" class="radio-item" nz-radio [nzValue]="item"
+            *ngFor="let item of inData.files">{{item | GetPathName}}</label>
+        </nz-radio-group>
+      </div>
+      <div style="display: flex;flex-wrap: wrap;" *ngIf="e.isWindows || apps.userInfo?.jurisdiction > 8">
+        <button nz-button nzType="primary" (click)="selectDb()">选择数据文件</button>&nbsp;&nbsp;&nbsp;
+        <h2>{{inData.selsectPath | GetPathName}}</h2>
+        <h2>{{inData.msg}}</h2>
+      </div>
+    </div>
+  </div>
   <br>
   <br>
   <div>
@@ -66,6 +79,7 @@
       <label nz-checkbox nzValue="1">未导出</label>
     </nz-checkbox-wrapper>
   </div>
+  <hr>
   <div>
     <div *ngIf="savePath && ((tempPath && exportMode === 1) || exportMode === 2)">
       <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
@@ -77,7 +91,7 @@
       </nz-radio-group>
       <hr>
       <div style="display: flex;flex-wrap: wrap;">
-        <div *ngFor="let b of taskData.bridge; index as i" class="bridge-item" style="">
+        <div *ngFor="let b of taskData.bridge; index as i" class="bridge-item">
           <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(b.id) > -1}">
             <input type="checkbox" name="brigeBox" [checked]="taskData.sb.indexOf(b.id) > -1" (click)="setBridge(b)"
               [value]="b.id" />
@@ -89,6 +103,49 @@
       </div>
     </div>
   </div>
+
+  <div *ngIf="indatas">
+    项目选择：
+    <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
+      <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
+    </nz-radio-group>
+    <hr>
+    顶选择：
+    <nz-radio-group [(ngModel)]="taskData.sj" (ngModelChange)="selectTaskComponent($event)">
+      <label nz-radio [nzValue]="j.key" *ngFor="let j of taskData.jack">{{j.title}}</label>
+    </nz-radio-group>
+    <hr>
+    <table class="gridtable">
+      <thead>
+        <tr>
+          <th>选择</th>
+          <th>梁号</th>
+          <th>张拉孔道</th>
+          <!-- <th>油泵编号</th>
+            <th>标定系数a</th>
+            <th>标定系数b</th>
+            <th>标定日期</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let task of indatas; index as i">
+          <tr>
+            <td>
+              <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(task.id) > -1}">
+                <input type="checkbox" [checked]="taskData.sb.indexOf(task.id) > -1" (click)="setBridge(task.id)" [value]="task.id" />
+              </label>
+            </td>
+            <td>{{task.name}}</td>
+            <td>
+              <span class="record" [ngClass]="{'ok': item.record }"
+                *ngFor="let item of task.groups">{{item.name}}</span>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
 
   <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;">
     <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.msg === '导出'"

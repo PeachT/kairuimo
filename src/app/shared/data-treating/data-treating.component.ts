@@ -11,7 +11,8 @@ import { TensionMm, mpaToKN, mpaToKNSingle } from 'src/app/Function/device.date.
 import { taskModeStr } from 'src/app/models/jack';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DateFormat } from 'src/app/Function/DateFormat';
-import { utf8_to_b64 } from 'src/app/Function/stringToBase64';
+import { utf8_to_b64, b64_to_utf8 } from 'src/app/Function/stringToBase64';
+import { TensionTask } from 'src/app/models/task.models';
 
 @Component({
   selector: 'app-data-treating',
@@ -41,7 +42,9 @@ export class DataTreatingComponent implements OnInit {
     /** 梁列表 */
     bridge: [],
     /** 已选择的梁id */
-    sb: []
+    sb: [],
+    jack: [],
+    sj: null,
   };
   template = {
     state: false,
@@ -50,6 +53,16 @@ export class DataTreatingComponent implements OnInit {
     start: false,
     fileMsg: null,
   };
+  inData = {
+    state: false,
+    files: null,
+    selectFile: null,
+    selsectPath: null,
+    start: false,
+    fileMsg: null,
+    msg: null
+  };
+  indatas: Array<TensionTask>;
   upanState = {
     path: null,
     msg: null,
@@ -91,7 +104,7 @@ export class DataTreatingComponent implements OnInit {
         this.getTaskProject();
         break;
       case 3:
-        this.message.warning('功能没有实现');
+        this.getDbFile();
         break;
       default:
         break;
@@ -125,6 +138,17 @@ export class DataTreatingComponent implements OnInit {
       });
     }
   }
+  getDbFile() {
+    if (this.e.isLinux) {
+      this.e.ipcRenderer.send('get-dbfile', 'get-dbfile-back');
+      this.e.ipcRenderer.once('get-dbfile-back', (event, data) => {
+        console.log(data);
+        this.inData.files = data.stdout;
+        this.inData.fileMsg = data;
+        this.cdr.markForCheck();
+      });
+    }
+  }
   /** 选择保存路径 */
   selectSavePath() {
     this.savePath = this.e.remote.dialog.showOpenDialog({properties: ['openDirectory']})[0];
@@ -135,30 +159,37 @@ export class DataTreatingComponent implements OnInit {
     this.tempPath = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
       filters: [{ name: '模板', extensions: ['kvmt'] }]
     })[0];
-    this.createSavePath();
-    // let obj = null;
-    // if (this.e.isWindows) {
-    //   obj = this.tempPath.lastIndexOf(`\\`);
-    // } else if (this.e.isLinux) {
-    //   obj = this.tempPath.lastIndexOf(`/`);
-    // }
-    // this.savePath = this.tempPath.substr(0, obj);
-    // console.log(obj, this.savePath);
+    this.savePath = this.createSavePath(this.tempPath);
   }
+  /** 选择模板文件 */
   radioSelectTemp() {
     console.log(this.template.selectFile);
     this.tempPath = this.template.selectFile;
-    this.createSavePath();
+    this.savePath = this.createSavePath(this.tempPath);
   }
-  createSavePath() {
+  /** 获取数据文件 */
+  selectDb() {
+    this.inData.selectFile = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
+      filters: [{ name: '数据文件', extensions: ['db'] }]
+    })[0];
+    this.inData.selsectPath = this.inData.selectFile;
+    if (this.e.isWindows) {
+      this.inData.selsectPath = this.inData.selectFile.replace(/\\/g, '/');
+    }
+    this.inDb();
+  }
+  /** 选择数据文件 */
+  radioSelectDb() {
+    this.inDb();
+  }
+  createSavePath(path: string): string {
     let obj = null;
     if (this.e.isWindows) {
-      obj = this.tempPath.lastIndexOf(`\\`);
+      obj = path.lastIndexOf(`\\`);
     } else if (this.e.isLinux) {
-      obj = this.tempPath.lastIndexOf(`/`);
+      obj = path.lastIndexOf(`/`);
     }
-    this.savePath = this.tempPath.substr(0, obj);
-    console.log(obj, this.savePath);
+    return path.substr(0, obj);
   }
   /** 获取项目数据 */
   async getTaskProject() {
@@ -204,8 +235,9 @@ export class DataTreatingComponent implements OnInit {
   }
   /** 选择梁 */
   setBridge(b) {
-    const {id} = b;
+    const id = b;
     const index = this.taskData.sb.indexOf(id);
+    console.log(id, index);
     if (index > -1) {
         // 有则移出
        this.taskData.sb.splice(index, 1);
@@ -225,7 +257,6 @@ export class DataTreatingComponent implements OnInit {
   }
 
   exportOk() {
-    console.log(this.exportMode);
     switch (this.exportMode) {
       case 1:
         this.derivedExcel();
@@ -235,6 +266,7 @@ export class DataTreatingComponent implements OnInit {
         break;
       case 3:
         this.message.warning('功能没有实现');
+        this.inDataRun();
         break;
       default:
         break;
@@ -359,6 +391,63 @@ export class DataTreatingComponent implements OnInit {
       }
       this.cdr.markForCheck();
       console.log('导出', data);
+    });
+  }
+  async inDb() {
+    console.log(this.inData.selsectPath);
+    const channel = `ecxel${this.PLCS.constareChannel()}`;
+    this.e.ipcRenderer.send('indb', {
+      channel,
+      inPath: this.inData.selsectPath,
+    });
+    this.e.ipcRenderer.once(channel, async (event, data) => {
+      console.log(data);
+      if (data.success) {
+        this.taskData.project = await this.db.getTaskDataTreatingProject();
+        console.log(this.taskData.project);
+        if (this.taskData.project.length === 1) {
+          this.taskData.sp = this.taskData.project[0].key;
+        }
+        this.taskData.jack = [];
+        await this.db.db.jack.toArray().then(j => {
+          j.map(jack => {
+            this.taskData.jack.push({ title: jack.name, key: jack.id });
+          });
+        });
+
+
+        this.indatas = JSON.parse(b64_to_utf8(data.data));
+        console.log('导入的文件', data, this.indatas);
+        this.cdr.markForCheck();
+      } else {
+        console.log(data);
+        this.inData.msg = data.msg;
+        this.message.error('获取数据错误');
+      }
+    });
+  }
+  inDataRun() {
+    if (!this.taskData.sp) {
+      this.message.error('请选择项目');
+      return;
+    }
+    if (!this.taskData.sj) {
+      this.message.error('请选择顶');
+      return;
+    }
+    this.taskData.sb.map(id => {
+      const task = this.indatas.filter(t => t.id === id)[0];
+      delete task.id;
+      task.project = this.taskData.sp;
+      console.log(task);
+      this.db.inAddTaskAsync(
+          task,
+          (o1: TensionTask) => o1.name === task.name && task.project === o1.project && task.component === o1.component)
+        .then(data => {
+        console.log('导入结果', data);
+        this.progress.now++;
+        this.cdr.markForCheck();
+      });
     });
   }
 }

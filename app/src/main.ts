@@ -202,7 +202,7 @@ ipcMain.on('get-template', async (event, data) => {
 });
 /** 获取U盘 */
 ipcMain.on('get-upan', async (event, data) => {
-  moundUSB('', 'get-upan-back',  true);
+  moundUSB('', 'get-upan-back', true);
   // event.sender.send('get-template-back', moundUSB('*.kvmt', 'get-template-back'));
 });
 
@@ -253,6 +253,27 @@ ipcMain.on('dateEX', async (event, data) => {
     // await writeFileAsync(savePath, exlBuf2);
     // event.sender.send(data.channel, { success: true, filePath, savePath });
   } catch (error) {
+    // event.sender.send(data.channel, { success: false, filePath, savePath, error });
+  }
+});
+// 导入数据
+ipcMain.on('indb', async (event, data) => {
+  console.log(data);
+  try {
+    fs.readFile(data.inPath, 'utf8', (err, fileData) => {
+      console.log(err, fileData);
+      if (err) {
+        event.sender.send(data.channel, { success: false, mgs: '读取文件错误', error: err });
+      } else {
+        if (fileData.length > 0) {
+          event.sender.send(data.channel, { success: true, data: fileData });
+        } else {
+          event.sender.send(data.channel, { success: false, mgs: '没有数据' });
+        }
+      }
+    });
+  } catch (error) {
+    event.sender.send(data.channel, { success: false, mgs: '读取文件错误' });
     // event.sender.send(data.channel, { success: false, filePath, savePath, error });
   }
 });
@@ -382,28 +403,28 @@ function moundUSB(filterName, sendName, state = false) {
     console.log('usb', stdout);
     if (stdout) {
       const up = exec(`sudo mount -o rw,nosuid,nodev,relatime,uid=1000,utf8 /dev/sd[b-z]* ${updatepath}`,
-                        { async: true }, (code, stdout, stderr) => {
-        up.kill();
-        console.log('mount code:', code);
-        console.log('mount output:', stdout);
-        console.log('mount stderr:', stderr);
-        if (stderr.indexOf('不存在') !== -1) {
-          win.webContents.send(sendName, { stdout, stderr: '加载U盘失败！' });
-        } else {
-          if (state) {
-            win.webContents.send(sendName, {stdout: updatepath});
+        { async: true }, (code, stdout, stderr) => {
+          up.kill();
+          console.log('mount code:', code);
+          console.log('mount output:', stdout);
+          console.log('mount stderr:', stderr);
+          if (stderr.indexOf('不存在') !== -1) {
+            win.webContents.send(sendName, { stdout, stderr: '加载U盘失败！' });
           } else {
-            const upps = exec(`find ${updatepath} -name ${filterName}`, { async: true }, (code, stdout, stderr) => {
-              stdout = stdout.split('\n').filter(t => t !== '');
-              console.log('Exit code:', code);
-              console.log('Program output:', stdout);
-              console.log('Program stderr:', stderr);
-              upps.kill();
-              win.webContents.send(sendName, { stdout, stderr });
-            });
+            if (state) {
+              win.webContents.send(sendName, { stdout: updatepath });
+            } else {
+              const upps = exec(`find ${updatepath} -name ${filterName}`, { async: true }, (code, stdout, stderr) => {
+                stdout = stdout.split('\n').filter(t => t !== '');
+                console.log('Exit code:', code);
+                console.log('Program output:', stdout);
+                console.log('Program stderr:', stderr);
+                upps.kill();
+                win.webContents.send(sendName, { stdout, stderr });
+              });
+            }
           }
-        }
-      });
+        });
     } else {
       win.webContents.send(sendName, { stdout, stderr: '未检测到U盘！！' });
     }
