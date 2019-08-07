@@ -8,7 +8,7 @@
         看</button>
     </div>
   </div>
-  <div class="kvm-btn-group">
+  <div class="kvm-btn-group" *ngIf="PLCS.manualMode[name[0]][4] === '1'">
     <button nz-button nzType="primary" class="z" nzShape="circle" (mousedown)="onDown(0)" (mouseup)="onUp(0)"
       (mouseleave)="onUp(0)" (touchstart)="onDown(0)" (touchend)="onUp(0)">张拉</button>
     <button nz-button nzType="primary" class="r" nzShape="circle" (mousedown)="onDown(1)" (mouseup)="onUp(1)"
@@ -18,7 +18,8 @@
     <button nz-button nzType="danger" class="s" nzShape="circle" (mousedown)="onDown(3)" (mouseup)="onUp(3)"
       (mouseleave)="onUp(3)" (touchstart)="onDown(3)" (touchend)="onUp(3)">停止</button>
   </div>
-  <div style="margin: 0 25px;">
+  <div class="kvm-btn-group" *ngIf="!(PLCS.manualMode[name[0]][4] === '1')" style="color: red; font-size: 24px; background-color: #eee;"> 不允许主站控制</div>
+  <div style="margin: 0 25px; position: relative;">
     <div>
       <nz-row style="margin-bottom: 4px;">
         <nz-col nz-col nzXl="8" nzMd="12">
@@ -92,28 +93,33 @@
         </ng-template>
       </nz-row>
     </div>
-  </div>
-  <div class="debug">
-    <div class="select">
-      <span>调试项：</span>
-      <nz-select nzSize="large" style="width: 100px;" [(ngModel)]="debugItem" nzPlaceHolder="选择调试项目"
-        (ngModelChange)="selectDebug($event)">
-        <nz-option [nzValue]="{key: item, i: i}" [nzLabel]="debugNames[i]" *ngFor="let item of debugItems; index as i"></nz-option>
-      </nz-select>
-      &nbsp;
-      &nbsp;
-      <button nz-button nzSize="large" nzType="default" (click)="runDebug()" [disabled]="!debugItem">测试</button>
+    <div class="debug" *ngIf="appS?.userInfo?.jurisdiction >= 8">
+      <div class="select">
+        <span>调试项：</span>
+        <nz-select nzSize="large" style="width: 100px;" [(ngModel)]="debugItem" nzPlaceHolder="选择调试项目"
+          (ngModelChange)="selectDebug($event)">
+          <nz-option [nzValue]="{key: item, i: i}" [nzLabel]="debugNames[i]" *ngFor="let item of debugItems; index as i"></nz-option>
+        </nz-select>
+        &nbsp;
+        &nbsp;
+        <button nz-button nzSize="large" nzType="default" (click)="runDebug()" [disabled]="!debugItem">测试</button>
+      </div>
+      <div class="debug-item" *ngIf="debugItem">
+        <span [class]="'state' + debugData[debugItem.key].state">{{debugNames[debugItem.i]}}:</span>
+        <span class="time" >时间:{{debugData[debugItem.key].time}}s</span>
+        <span class="start" >开始值:{{debugData[debugItem.key].start}}</span>
+        <span class="end" >结束值:{{debugData[debugItem.key].end}}</span>
+        <span class="name" >{{debugData[debugItem.key].name}}</span>
+        <span class="date" style="flex: auto;">
+          日期:{{debugData[debugItem.key].date | date: 'yyyy-MM-dd hh:mm'}}2019-07-07 24
+        </span>
+      </div>
     </div>
-    <div class="debug-item" *ngIf="debugItem">
-      <span [class]="'state' + debugData[debugItem.key].state">{{debugNames[debugItem.i]}}:</span>
-      <span class="time" >时间:{{debugData[debugItem.key].time}}s</span>
-      <span class="start" >开始值:{{debugData[debugItem.key].start}}</span>
-      <span class="end" >结束值:{{debugData[debugItem.key].end}}</span>
-      <span class="name" >{{debugData[debugItem.key].name}}</span>
-      <span class="date" style="flex: auto;">
-        日期:{{debugData[debugItem.key].date | date: 'yyyy-MM-dd hh:mm'}}2019-07-07 24
-      </span>
-    </div>
+    <div *ngIf="!(PLCS.manualMode[name[0]][4] === '1')" style="position: absolute;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(0,0,0,0.07);"></div>
   </div>
 </div>
 

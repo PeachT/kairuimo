@@ -16,8 +16,7 @@ import { DebugData } from 'src/app/models/debug';
 export class ManualItemComponent implements OnInit {
   [x: string]: any;
   /** 设备名称 */
-  @Input()
-    name: any;
+  @Input() name: any;
   /** 设备设置数据 */
   @Input()
     dev = {
@@ -92,6 +91,7 @@ export class ManualItemComponent implements OnInit {
   debugData: DebugData;
 
   constructor(
+    public appS: AppService,
     private e: ElectronService,
     private odb: DbService,
     public appService: AppService,

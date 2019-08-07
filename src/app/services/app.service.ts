@@ -8,6 +8,8 @@ import { NzMessageService } from 'ng-zorro-antd';
 
 @Injectable({ providedIn: 'root' })
 export class AppService {
+  /** 平台 */
+  platform = localStorage.getItem('platform');
   /** 软件信息 */
   public info = {
     version: '0.0.32',

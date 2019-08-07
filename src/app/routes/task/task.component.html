@@ -24,8 +24,6 @@
                   <button nz-button nzType="primary" nzSearch (click)="groupDom.onShow()"
                     type="button" *ngIf="!data?.id" style="z-index: 1">分组</button>
                 </div>
-                <!-- <nz-form-explain *ngIf="formData.get('component').dirty && formData.get('component').errors">
-                  请入选择构建！</nz-form-explain> -->
               </nz-form-control>
 
               <nz-form-label [nzSm]="3" nzRequired>顶</nz-form-label>
@@ -73,29 +71,17 @@
         [addFilterFun] = "addFilterFun"
         [updateFilterFun] = "updateFilterFun"
         [saveState]="taskDataDom?.holeForm?.valid"
+        [coprState]="true"
         (outDelete)="delete()">
-        <!-- <button nz-button nzType="primary" nzGhost nzSearch (click)="selectTemplate()" type="button" >选择导出</button>
-        <button nz-button nzType="primary" nzGhost nzSearch (click)="derivedExcel()" type="button" >导 出</button> -->
-        <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button" *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3) && !appS.edit)">张 拉</button>
+        <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button"
+          *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3) && !appS.edit)">
+          张 拉
+        </button>
       </app-operat>
     </div>
   </div>
-
 </app-left>
 
 <task-group (outGroup)="okGroup($event)" #groupDom></task-group>
 <task-tension #tension></task-tension>
-<!-- <nz-modal [nzVisible]="tensionDevice.state" nzTitle="设备状态错误！" nzOkText="张拉" nzWidth="80%"
-  (nzOnCancel)="cleanTension()"
-  (nzOnOk)="tension()">
-  <div nz-row nzGutter="25">
-    <div nz-col nzSm="24" nzLg="12" class="title" *ngFor="let name of tensionDevice.names; index as i">
-      <nz-divider style="min-width: auto;" [nzText]="name + '：设备状态'" nzOrientation="left"></nz-divider>
-      <h1>{{name}}·{{PLCS.PD.zA.state}}</h1>
-      <h1 *ngIf="tensionDevice[name]"> {{tensionDevice[name]}} </h1>
-      <nz-alert nzType="error" *ngFor="let item of PLCS.PD[name].alarm" [nzMessage]="item" nzShowIcon>
-      </nz-alert>
-    </div>
-  </div>
-</nz-modal> -->
 <app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>

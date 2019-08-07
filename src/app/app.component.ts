@@ -31,6 +31,7 @@ export class AppComponent implements OnInit {
     private router: Router,
     public PLCS: PLCService,
   ) {
+
     // 采集频率
     this.PLCS.heartbeatRate();
     // 判断运行环境适合是 Electron

@@ -16,14 +16,17 @@ export class OperatComponent implements OnInit {
   @Input() dbName: string;
   @Input() formData: FormGroup;
   @Input() saveState = true;
+  @Input() coprState = false;
 
   @Output() outEditOk = new EventEmitter();
   @Output() outEdit = new EventEmitter();
   @Output() outModification = new EventEmitter();
   @Output() outDelete = new EventEmitter();
 
+
   @Input() addFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name;
   @Input() updateFilterFun: (o1: any, o2: any) => boolean = (o1: any, o2: any) => o1.name === o2.name && o1.id !== o2.id;
+
 
   constructor(
     private message: NzMessageService,

@@ -7,7 +7,7 @@ import { PLC_D } from '../models/IPCChannel';
 import { PLCLiveData, GetPLCLiveData } from '../models/live';
 import { plcToMpa, plcToMm, mmToPlc } from '../Function/device.date.processing';
 import { MpaRevise, AutoDate, GetMpaRevise, IMpaRevise } from '../models/device';
-import { Jack, taskModeStr, deviceGroupMode, groupModeStr, deviceGroupModeDev } from '../models/jack';
+import { Jack, taskModeStr, deviceGroupMode, groupModeStr, deviceGroupModeDev, numberMode } from '../models/jack';
 import { DbService } from './db.service';
 
 
@@ -172,8 +172,8 @@ export class PLCService {
       //   console.log(this.revise[`${dev}MpaRevise`]);
       //   this.getPLCMpa(dev);
       // }
-      this.manualMode[dev] = data.uint16[25].toString(2);
-      // console.log(data, this.manualMode[dev]);
+      this.manualMode[dev] = data.uint16[25].toString(2).padStart(16, '0');
+      // console.log(data, this.manualMode[dev], this.manualMode[dev][4] === '1');
 
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`];
       this.plcState[`${dev}OT`] = new Date().getTime();
@@ -181,7 +181,8 @@ export class PLCService {
       this.plcState[dev] = true;
       if (this.mpaRevise && this.jack) {
         let i = 0;
-        [[], ['A'], ['A', 'B'], [], ['A', 'B', 'C', 'D']][this.jack.jackMode].forEach(k => {
+        // [[], ['A'], ['A', 'B'], [], ['A', 'B', 'C', 'D']]
+        numberMode[this.jack.jackMode].forEach(k => {
           // console.log(this.jack);
           // console.log(dev, k, data);
           const key = `${dev}${k}`;
