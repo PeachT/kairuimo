@@ -39,6 +39,8 @@ export class PLCService {
     cGetMpaState: false,
     zMpaRevise: {},
     cMpaRevise: {},
+    zVirtualHeight: [],
+    cVirtualHeight: [],
   };
 
   public plcState = {
@@ -414,6 +416,7 @@ export class PLCService {
     this.revise[`${dev}GetMpaState`] = true;
     this.ipcSend(`${dev}F03_float`, PLC_D(2000), 100).then((data: any) => {
       console.log(`${dev}返回的结果`, data);
+      this.revise[`${dev}VirtualHeight`] = data.float.slice(41, 47).map(v => v.toFixed(2));
       groupModeStr('AB8').map((name, index) => {
         console.log(name, index);
         const m = (data.float.slice(index * 10, index * 10 + 6)).map(v => v.toFixed(5));

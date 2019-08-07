@@ -124,6 +124,7 @@ export class TaskComponent implements OnInit {
       device: [null, [Validators.required]],
       component: [null, [Validators.required]],
       steelStrand: [null],
+      jack: [],
       // otherInfo: this.fb.array(this.otherInfoForm()),
       otherInfo: this.fb.array(this.otherIngoDom.createForm([{key: '浇筑日期', value: null}])),
       holeRadio: [null],
@@ -214,6 +215,7 @@ export class TaskComponent implements OnInit {
    * *编辑
    */
   onEdit(data: TensionTask) {
+    /** 复制 */
     if (!data) {
       data = copyAny(this.data);
       data.id = null;
@@ -221,7 +223,9 @@ export class TaskComponent implements OnInit {
       for (const c of data.groups) {
         delete c.record;
       }
+      this.jackData = data.jack;
       this.holeMneu();
+    /** 添加 */
     } else {
       this.selectJackState = false;
       data.project = this.taskMneu.project.select.id;
@@ -251,6 +255,7 @@ export class TaskComponent implements OnInit {
       this.taskMneu.onMneu();
     }
   }
+  /** 测试用 */
   async save100() {
     const data = copyAny(this.formData.value);
     this.save100Count ++;
@@ -335,15 +340,21 @@ export class TaskComponent implements OnInit {
     console.log(event);
     if (event && this.appS.edit) {
       this.groupDom.holes = this.componentOptions.menu.filter(f => f.name === event)[0].holes;
-      this.groupDom.autoGroup();
+      if (this.formData.value.device) {
+        this.groupDom.autoGroup();
+      }
     }
   }
   /** 选择设备 */
-  deviceOnChanges(value) {
-    console.log('选择设备', value);
+  async deviceOnChanges(value) {
     if (value && this.appS.edit) {
       this.groupDom.deviceMode = value[1];
-      this.groupDom.autoGroup();
+      if (this.formData.value.component) {
+        this.jackData = await this.db.jack.filter(j => j.id === value[0]).first();
+        this.formData.controls.jack.setValue(this.jackData);
+        console.log('选择设备', value, this.jackData);
+        this.groupDom.autoGroup();
+      }
     }
   }
 

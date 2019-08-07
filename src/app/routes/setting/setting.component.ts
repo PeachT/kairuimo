@@ -148,4 +148,14 @@ export class SettingComponent implements OnInit, OnDestroy {
   setKeyboard() {
     localStorage.setItem('keyboard', JSON.stringify(this.keyboard));
   }
+  setVirtualHeight(dev) {
+    this.PLCS.ipcSend(`${dev}F016_float`, PLC_D(2080), this.PLCS.revise[`${dev}VirtualHeight`]).then((data) => {
+      console.log(data);
+      this.message.success('更新虚高压力完成');
+      this.PLCS.getPLCMpa(dev);
+      this.cdr.markForCheck();
+    }).catch(() => {
+      this.message.error('设置错误');
+    });
+  }
 }

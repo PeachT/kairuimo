@@ -247,7 +247,7 @@ export class TaskDataComponent implements OnInit {
     // this.devModeStr = taskModeStr[mode];
     this.holeNames = this.holeForm.value.name.split('/');
     console.log('011445445456456456456', this.theoryIf, mode);
-    this.show = true;
+    // this.show = true;
     this.inputKn();
   }
 }

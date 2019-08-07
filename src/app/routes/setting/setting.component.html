@@ -34,11 +34,11 @@
           </nz-radio-group>
         </nz-input-group>
       </nz-col>
-      <!-- <nz-col nz-col nzSpan="6">
+      <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="采集频率ms">
           <input nz-input type="number" nzSize="large" style="width: 100%;" min="100" max="1000" [(ngModel)]="heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"/>
         </nz-input-group>
-      </nz-col> -->
+      </nz-col>
     </nz-row>
     <div class="edit" *ngIf="!PLCS.plcState.z">设备未连接无法设置参数！！</div>
   </div>
@@ -79,11 +79,11 @@
           </nz-radio-group>
         </nz-input-group>
       </nz-col>
-      <nz-col nz-col nzSpan="6">
+      <!-- <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="采集频率ms">
           <input nz-input type="number" nzSize="large" style="width: 100%;" min="100" max="1000" [(ngModel)]="heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"/>
         </nz-input-group>
-      </nz-col>
+      </nz-col> -->
     </nz-row>
     <div class="edit" *ngIf="!PLCS.plcState.c">设备未连接无法设置参数！！</div>
   </div>
@@ -177,13 +177,25 @@
         <th *ngFor="let item of revise.mpaStage; index as i">{{item  | nameConvert}}</th>
         <th>操 作</th>
       </tr>
-
+      <tr height="60">
+        <td *ngFor="let item of revise.mpaStage; index as i">
+          <input nzSize="large" type="number" nz-input min="0" max="0.5"  [(ngModel)]="PLCS.revise.zVirtualHeight[i]">
+        </td>
+        <td><button nzSize="large" nz-button nzType="default" [disabled]="!PLCS.plcState.z" (click)="setVirtualHeight('z')">保存主机虚高压力</button></td>
+      </tr>
       <tr *ngFor="let name of revise.zMode; index as i" height="60" [class]="name">
         <td *ngFor="let item of revise.mpaStage; index as i">
           <input nzSize="large" readonly disabled type="number" nz-input [value]="PLCS.revise.zMpaRevise[name][i]">
         </td>
         <td><button nzSize="large" nz-button nzType="default" (click)="onRevise('z', name)"
             [disabled]="!PLCS.plcState.z">主{{name | nameConvert}}校 正</button></td>
+      </tr>
+
+      <tr>
+        <td *ngFor="let item of revise.mpaStage; index as i">
+          <input nzSize="large" type="number" nz-input min="0" max="0.5" [(ngModel)]="PLCS.revise.cVirtualHeight[i]">
+        </td>
+        <td><button nzSize="large" nz-button nzType="default" [disabled]="!PLCS.plcState.c" (click)="setVirtualHeight('c')">保存副机虚高压力</button></td>
       </tr>
       <tr *ngFor="let name of revise.cMode; index as i" height="60" [class]="name">
         <td *ngFor="let item of revise.mpaStage; index as i">
@@ -195,7 +207,6 @@
     </table>
   </div>
 </main>
-
 
 <nz-modal *ngIf="revise.state" nzWidth="95%" [(nzVisible)]="revise.state" nzMaskClosable="false" nzClosable="false" [nzStyle]="{ top: '20px' }"
   [nzTitle]="(revise.name + revise.dev | nameConvert) + '·压力校正'" (nzOnCancel)="cancel()" (nzOnOk)="ok()" nzOkText="保 存">

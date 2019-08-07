@@ -1,4 +1,4 @@
-<form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="holeForm" *ngIf="show !== null">
+<form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="holeForm" *ngIf="show">
   {{updateHole.emit(holeForm.value)}}
   <nz-form-item>
     <nz-form-label [nzSm]="3" nzRequired>孔名称</nz-form-label>

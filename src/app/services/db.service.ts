@@ -37,7 +37,7 @@ export class DbService {
 
   public async addAsync<T>(tName: string, data: IBase, filterFunction: (o1: T) => boolean) {
     if (await this.repetitionAsync(tName, filterFunction) > 0) {
-      return {success: false, msg: '已存在'};
+      return { success: false, msg: '已存在' };
     }
     try {
       data.createdDate = new Date().getTime();
@@ -45,30 +45,24 @@ export class DbService {
       data.user = this.apps.userInfo.name || 'sys';
       const r = await this.db[tName].add(data);
       console.log('保存结果', r);
-      return {success: true, id: r};
+      return { success: true, id: r };
     } catch (error) {
       console.log('错误', error);
-      return {success: false, msg: error};
+      return { success: false, msg: error };
     }
   }
-  public async inAddTaskAsync(data: TensionTask, filterFunction: (o1: TensionTask) => boolean) {
-    const tName = 'task';
-    if (await this.repetitionAsync(tName, filterFunction) > 0) {
-      return {success: false, msg: '已存在'};
-    }
-    try {
-      const r = await this.db[tName].add(data);
-      console.log('保存结果', r);
-      return {success: true, id: r};
-    } catch (error) {
-      console.log('错误', error);
-      return {success: false, msg: error};
-    }
-  }
-
+  /**
+   * 修改数据
+   *
+   * @param {string} tName 名库称
+   * @param {IBase} data 修改的数据
+   * @param {(obj: any) => boolean} filterFunction 重复查询
+   * @returns
+   * @memberof DbService
+   */
   public async updateAsync(tName: string, data: IBase, filterFunction: (obj: any) => boolean) {
     if (await this.repetitionAsync(tName, filterFunction) > 0) {
-      return {success: false, msg: '已存在'};
+      return { success: false, msg: '已存在' };
     }
     try {
       if (tName === 'task') {
@@ -86,19 +80,47 @@ export class DbService {
       data.modificationDate = new Date().getTime();
       const r = await this.db[tName].update(data.id, data);
       console.log('保存结果', r);
-      return {success: true, id: data.id};
+      return { success: true, id: data.id };
     } catch (error) {
       console.log('错误', error);
-      return {success: false, msg: error};
+      return { success: false, msg: error };
     }
   }
+  /** 导入主句查询 */
+  public async inRepetitionAsync(filterFunction: (o1: TensionTask) => boolean): Promise<TensionTask> {
+    const task = await this.db.task.filter(filterFunction).first();
+    return task;
+  }
+  /** 导入数据添加 */
+  public async inAddTaskAsync(data: TensionTask) {
+    try {
+      const r = await this.db.task.add(data);
+      console.log('保存结果', r);
+      return { success: true, id: r };
+    } catch (error) {
+      console.log('错误', error);
+      return { success: false, msg: error };
+    }
+  }
+  public async inUpdateAsync(data: TensionTask) {
+    try {
+      // data.modificationDate = new Date().getTime();
+      const r = await this.db.task.update(data.id, data);
+      console.log('保存结果', r);
+      return { success: true, id: data.id };
+    } catch (error) {
+      console.log('错误', error);
+      return { success: false, msg: error };
+    }
+  }
+
   /** 判断数据是否重复 */
   // tslint:disable-next-line:max-line-length
   public repetition(tName: string, filterFunction: (obj: Project | TensionTask | Comp | User) => boolean): Observable<boolean> {
     return from(this.db[tName].filter(filterFunction).count()).pipe(
       map(item => {
-          return item > 0;
-        }),
+        return item > 0;
+      }),
     );
   }
   /**
@@ -111,18 +133,18 @@ export class DbService {
    * @memberof DbService
    */
   public add(tName: string, data: Project | TensionTask | Comp | User,
-             filterFunction: (obj: any) => boolean): Observable<number | null> {
+    filterFunction: (obj: any) => boolean): Observable<number | null> {
     return this.repetition(tName, filterFunction).pipe(
       map(item => {
-        return item ?  Observable.create(_ => null) : from(this.db[tName].add(data));
+        return item ? Observable.create(_ => null) : from(this.db[tName].add(data));
       })
     );
   }
   public update(tName: string, data: Project | TensionTask | Comp | User,
-                filterFunction: (obj: any) => boolean): Observable<number | null> {
+    filterFunction: (obj: any) => boolean): Observable<number | null> {
     return this.repetition(tName, filterFunction).pipe(
       map(item => {
-        return item ?  Observable.create(_ => null) : from(this.db[tName].update(data.id, data));
+        return item ? Observable.create(_ => null) : from(this.db[tName].update(data.id, data));
       })
     );
   }
@@ -171,44 +193,44 @@ export class DbService {
   }
   /** 获取梁菜单 */
   public async getTaskBridgeMenuData(f: (o1: TensionTask) => boolean, state: boolean = false, p: number = 0, y: number = 0)
-  : Promise<Array<Menu>> {
+    : Promise<Array<Menu>> {
     const r = [];
-    const count =  await this.db.task.filter(o1 => f(o1)).count();
+    const count = await this.db.task.filter(o1 => f(o1)).count();
     console.log(count);
     y = y || count;
     await this.db.task.filter(o1 => f(o1))
-    .reverse() // 按id 反序获取
-    .offset(p) // 第几条开始
-    .limit(y) // 获取几条
-    .each(v => {
-      if (state) {
-        r.push({ title: v.name, key: v.id, isLeaf: true });
-      } else {
-        const cls = {
-          a: false,
-          b: false,
-          c: false,
-          d: false,
-          e: false,
-        };
-        for (const g of v.groups) {
-          if (g.record) {
-            if (g.record.state === 2) {
-              cls.a = true;
-            } else if (g.record.state === 1) {
-              cls.b = true;
-            } else if (g.record.state === 3) {
-              cls.c = true;
-            } else if (g.record.state === 4) {
-              cls.d = true;
+      .reverse() // 按id 反序获取
+      .offset(p) // 第几条开始
+      .limit(y) // 获取几条
+      .each(v => {
+        if (state) {
+          r.push({ title: v.name, key: v.id, isLeaf: true });
+        } else {
+          const cls = {
+            a: false,
+            b: false,
+            c: false,
+            d: false,
+            e: false,
+          };
+          for (const g of v.groups) {
+            if (g.record) {
+              if (g.record.state === 2) {
+                cls.a = true;
+              } else if (g.record.state === 1) {
+                cls.b = true;
+              } else if (g.record.state === 3) {
+                cls.c = true;
+              } else if (g.record.state === 4) {
+                cls.d = true;
+              }
+            } else {
+              cls.e = true;
             }
-          } else {
-            cls.e = true;
           }
+          r.push({ name: v.name, id: v.id, cls });
         }
-        r.push({ name: v.name, id: v.id, cls });
-      }
-    });
+      });
     // await this.db.task.filter(o1 => f(o1)).each(v => {
     //   if (state) {
     //     r.push({ title: v.name, key: v.id, isLeaf: true });
@@ -252,7 +274,7 @@ export class DbService {
   public async getTaskDataTreatingBredge(f: (o1: TensionTask) => boolean) {
     const r = [];
     await this.db.task.filter(t => f(t)).each(t => {
-      r.push({title: t.name, key: t.id});
+      r.push({ title: t.name, key: t.id });
     });
     return r;
   }

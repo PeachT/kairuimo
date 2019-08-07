@@ -93,7 +93,7 @@
       <div style="display: flex;flex-wrap: wrap;">
         <div *ngFor="let b of taskData.bridge; index as i" class="bridge-item">
           <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(b.id) > -1}">
-            <input type="checkbox" name="brigeBox" [checked]="taskData.sb.indexOf(b.id) > -1" (click)="setBridge(b)"
+            <input type="checkbox" name="brigeBox" [checked]="taskData.sb.indexOf(b.id) > -1" (click)="setBridge(b.id)"
               [value]="b.id" />
             <p>
               {{b.name}}
@@ -104,6 +104,12 @@
     </div>
   </div>
 
+  <nz-spin nzTip="正在处理数据..." *ngIf="inData.state">
+    <nz-alert
+      nzType="info"
+    >
+    </nz-alert>
+  </nz-spin>
   <div *ngIf="indatas">
     项目选择：
     <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
@@ -111,8 +117,8 @@
     </nz-radio-group>
     <hr>
     顶选择：
-    <nz-radio-group [(ngModel)]="taskData.sj" (ngModelChange)="selectTaskComponent($event)">
-      <label nz-radio [nzValue]="j.key" *ngFor="let j of taskData.jack">{{j.title}}</label>
+    <nz-radio-group [(ngModel)]="taskData.sj" (ngModelChange)="selectTaskJack($event)">
+      <label nz-radio [nzValue]="j.title" *ngFor="let j of taskData.jack">{{j.title}}</label>
     </nz-radio-group>
     <hr>
     <table class="gridtable">
@@ -120,6 +126,7 @@
         <tr>
           <th>选择</th>
           <th>梁号</th>
+          <th>顶</th>
           <th>张拉孔道</th>
           <!-- <th>油泵编号</th>
             <th>标定系数a</th>
@@ -128,7 +135,10 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let task of indatas; index as i">
+        <tr *ngIf="selectIndatas?.length === 0">
+          <td colspan="4" style="color: red; text-align: center;">{{taskData.sj}}顶 没有数据</td>
+        </tr>
+        <ng-container *ngFor="let task of selectIndatas; index as i">
           <tr>
             <td>
               <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(task.id) > -1}">
@@ -136,6 +146,7 @@
               </label>
             </td>
             <td>{{task.name}}</td>
+            <td>{{task.jack?.name}} / {{modeName[task.device[1]]}}</td>
             <td>
               <span class="record" [ngClass]="{'ok': item.record }"
                 *ngFor="let item of task.groups">{{item.name}}</span>
@@ -148,10 +159,34 @@
 
 
   <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;">
-    <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.msg === '导出'"
-      [disabled]="!(taskData.sb.length > 0)" [nzLoading]="progress.state">{{progress.msg}}</button>
-    <span *ngIf="progress.msg === '导出完成'">{{progress.msg}}{{progress.now}}条</span>
-    <nz-progress [nzPercent]="progress.now / progress.length * 100" style="flex: 1; margin-left: 15px;"></nz-progress>
-    <span>{{progress.length}} / {{progress.now}}</span>
+    <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.btnTitle && !progress.success"
+      [disabled]="!(taskData.sb.length > 0)" [nzLoading]="progress.state">{{progress.btnTitle}}</button>
+      <div *ngIf="exportMode !== 2" style="flex: 1; display: flex;">
+        <h2 *ngIf="progress.success">{{progress.msg}}{{progress.now}}条</h2>
+        <nz-progress [nzPercent]="progress.now / progress.length * 100" style="flex: 1; margin-left: 15px;"></nz-progress>
+        <span>{{progress.length}} / {{progress.now}}</span>
+      </div>
+      <h2 *ngIf="exportMode === 2 && progress.success">{{progress.msg}}</h2>
+  </div>
+  <div *ngIf="exportMode === 3">
+    <div>
+      添加：{{inResult.add?.length}}条
+      <span *ngFor="let item of inResult.add">{{item}} </span>
+    </div>
+    <div>
+      覆盖：{{inResult.merge?.length}}条
+      <span *ngFor="let item of inResult.merge">{{item}} </span>
+    </div>
+    <div>
+      跳过：{{inResult.jump?.length}}条
+      <span *ngFor="let item of inResult.jump; index as i">{{item}} {{inResult.jump?.length === i ? '|' : ''}} </span>
+    </div>
   </div>
 </nz-modal>
+
+<ng-template #tplTitle>
+  <div>
+    <input nz-input [(ngModel)]="nowBridgeName"/>
+    <h1>梁号重复，请修改梁号</h1>
+  </div>
+</ng-template>

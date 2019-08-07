@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input, ViewChild, TemplateRef } from '@angular/core';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DbService } from 'src/app/services/db.service';
@@ -8,8 +8,8 @@ import { ElectronService } from 'ngx-electron';
 import { PLCService } from 'src/app/services/PLC.service';
 import { Elongation } from 'src/app/models/live';
 import { TensionMm, mpaToKN, mpaToKNSingle } from 'src/app/Function/device.date.processing';
-import { taskModeStr } from 'src/app/models/jack';
-import { NzMessageService } from 'ng-zorro-antd';
+import { taskModeStr, modeName } from 'src/app/models/jack';
+import { NzMessageService, NzModalRef, NzModalService } from 'ng-zorro-antd';
 import { DateFormat } from 'src/app/Function/DateFormat';
 import { utf8_to_b64, b64_to_utf8 } from 'src/app/Function/stringToBase64';
 import { TensionTask } from 'src/app/models/task.models';
@@ -21,15 +21,18 @@ import { TensionTask } from 'src/app/models/task.models';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DataTreatingComponent implements OnInit {
+  @ViewChild('tplTitle', null) tplTitle: TemplateRef<{}>;
   @ViewChild('taskTerr', null) taskTerr: NzTreeComponent;
   exportMode = null;
   savePath = null;
   tempPath = null;
   progress = {
     state: false,
+    btnTitle: null,
     msg: '导出',
     length: null,
     now: 0,
+    success: false
   };
 
   taskData = {
@@ -63,11 +66,21 @@ export class DataTreatingComponent implements OnInit {
     msg: null
   };
   indatas: Array<TensionTask>;
+  selectIndatas: Array<TensionTask>;
   upanState = {
     path: null,
     msg: null,
     state: false,
   };
+  /** 顶模式字符串 */
+  modeName = modeName;
+  inResult = {
+    add: [],
+    merge: [],
+    jump: [],
+  };
+  /** 修改梁号 */
+  nowBridgeName = null;
 
   constructor(
     private message: NzMessageService,
@@ -76,6 +89,7 @@ export class DataTreatingComponent implements OnInit {
     public apps: AppService,
     public e: ElectronService,
     private PLCS: PLCService,
+    private modalService: NzModalService
   ) { }
 
   ngOnInit() {
@@ -96,14 +110,17 @@ export class DataTreatingComponent implements OnInit {
     console.log('选择Mode', this.exportMode, this.e.isWindows);
     switch (this.exportMode) {
       case 1:
+        this.progress.btnTitle = '导出';
         this.getTemplate();
         this.getTaskProject();
         break;
       case 2:
+        this.progress.btnTitle = '导出';
         this.getUpan();
         this.getTaskProject();
         break;
       case 3:
+        this.progress.btnTitle = '导入';
         this.getDbFile();
         break;
       default:
@@ -151,12 +168,13 @@ export class DataTreatingComponent implements OnInit {
   }
   /** 选择保存路径 */
   selectSavePath() {
-    this.savePath = this.e.remote.dialog.showOpenDialog({properties: ['openDirectory']})[0];
+    this.savePath = this.e.remote.dialog.showOpenDialog({ properties: ['openDirectory'] })[0];
     console.log(this.savePath);
   }
   /** 获取模板路径 */
   selectTemp() {
-    this.tempPath = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
+    this.tempPath = this.e.remote.dialog.showOpenDialog({
+      properties: ['openFile'],
       filters: [{ name: '模板', extensions: ['kvmt'] }]
     })[0];
     this.savePath = this.createSavePath(this.tempPath);
@@ -169,7 +187,8 @@ export class DataTreatingComponent implements OnInit {
   }
   /** 获取数据文件 */
   selectDb() {
-    this.inData.selectFile = this.e.remote.dialog.showOpenDialog({properties: ['openFile'],
+    this.inData.selectFile = this.e.remote.dialog.showOpenDialog({
+      properties: ['openFile'],
       filters: [{ name: '数据文件', extensions: ['db'] }]
     })[0];
     this.inData.selsectPath = this.inData.selectFile;
@@ -226,6 +245,12 @@ export class DataTreatingComponent implements OnInit {
     console.log(this.taskData.sp, e);
     this.getTaskBridge();
   }
+  /** 选择顶 */
+  selectTaskJack(e) {
+    this.selectIndatas = this.indatas.filter(t => t.jack.name === this.taskData.sj);
+    console.log(this.taskData.sj, e, this.selectIndatas);
+    this.cdr.markForCheck();
+  }
   /** 获取任务梁数据 */
   async getTaskBridge() {
     this.taskData.bridge = await this.db.getTaskBridgeMenuData(
@@ -239,13 +264,13 @@ export class DataTreatingComponent implements OnInit {
     const index = this.taskData.sb.indexOf(id);
     console.log(id, index);
     if (index > -1) {
-        // 有则移出
-       this.taskData.sb.splice(index, 1);
-        // this.onChange(this.model); // 需更新绑定的值
+      // 有则移出
+      this.taskData.sb.splice(index, 1);
+      // this.onChange(this.model); // 需更新绑定的值
     } else {
-        // 无则添加
-       this.taskData.sb.push(id);
-        // this.onChange(this.model); // 需更新绑定的值
+      // 无则添加
+      this.taskData.sb.push(id);
+      // this.onChange(this.model); // 需更新绑定的值
     }
     console.log(this.taskData.sb);
     this.progress.length = this.taskData.sb.length;
@@ -300,7 +325,8 @@ export class DataTreatingComponent implements OnInit {
     outdata.data.bridgeOtherInfo = data.otherInfo;
     outdata.data.project = project;
     console.log(data, id);
-    const jack = await this.db.db.jack.filter(j => j.id === data.device[0]).first();
+    // const jack = await this.db.db.jack.filter(j => j.id === data.device[0]).first();
+    const jack = data.jack;
     const tensionDate = [];
     data.groups.map(g => {
       if (g.record) {
@@ -356,11 +382,13 @@ export class DataTreatingComponent implements OnInit {
         if (this.progress.now === this.taskData.sb.length) {
           // this.message.success(`导出${count}条完成`);
           this.progress.msg = '导出完成';
+          this.progress.success = true;
         } else {
           this.derivedExcel();
         }
       } else {
         this.progress.msg = '导出错误';
+        this.progress.success = true;
       }
       this.cdr.markForCheck();
       console.log('导出', data);
@@ -385,8 +413,10 @@ export class DataTreatingComponent implements OnInit {
     this.e.ipcRenderer.once(channel, (event, data) => {
       if (data.success) {
         this.progress.msg = '导出完成';
+        this.progress.success = true;
       } else {
         this.progress.msg = '导出错误';
+        this.progress.success = true;
         console.log(data);
       }
       this.cdr.markForCheck();
@@ -394,6 +424,7 @@ export class DataTreatingComponent implements OnInit {
     });
   }
   async inDb() {
+    this.inData.state = true;
     console.log(this.inData.selsectPath);
     const channel = `ecxel${this.PLCS.constareChannel()}`;
     this.e.ipcRenderer.send('indb', {
@@ -409,24 +440,25 @@ export class DataTreatingComponent implements OnInit {
           this.taskData.sp = this.taskData.project[0].key;
         }
         this.taskData.jack = [];
-        await this.db.db.jack.toArray().then(j => {
+        await this.db.db.jack.filter(j => j.state).toArray().then(j => {
           j.map(jack => {
-            this.taskData.jack.push({ title: jack.name, key: jack.id });
+            this.taskData.jack.push({ title: jack.name, key: jack.id, mode: jack.jackMode });
           });
         });
-
-
         this.indatas = JSON.parse(b64_to_utf8(data.data));
         console.log('导入的文件', data, this.indatas);
+        this.inData.state = false;
         this.cdr.markForCheck();
       } else {
         console.log(data);
         this.inData.msg = data.msg;
         this.message.error('获取数据错误');
+        this.inData.state = false;
+        this.cdr.markForCheck();
       }
     });
   }
-  inDataRun() {
+  async inDataRun() {
     if (!this.taskData.sp) {
       this.message.error('请选择项目');
       return;
@@ -435,19 +467,98 @@ export class DataTreatingComponent implements OnInit {
       this.message.error('请选择顶');
       return;
     }
-    this.taskData.sb.map(id => {
-      const task = this.indatas.filter(t => t.id === id)[0];
-      delete task.id;
-      task.project = this.taskData.sp;
-      console.log(task);
-      this.db.inAddTaskAsync(
-          task,
-          (o1: TensionTask) => o1.name === task.name && task.project === o1.project && task.component === o1.component)
-        .then(data => {
-        console.log('导入结果', data);
-        this.progress.now++;
-        this.cdr.markForCheck();
-      });
+    // tslint:disable-next-line: no-shadowed-variable
+    const task = this.indatas.filter(t => t.id === this.taskData.sb[this.progress.now])[0];
+
+    // 获取是否有数据
+    const t = await this.db.inRepetitionAsync(
+      (o1: TensionTask) => o1.name === task.name && task.project === o1.project && task.component === o1.component);
+    if (t) {
+      console.log(t, task);
+      if (t.name === task.name && t.createdDate === task.createdDate) {
+        if (t.modificationDate !== task.modificationDate) {
+          task.id = t.id;
+          await this.db.inUpdateAsync(task).then(data => {
+            this.progress.now++;
+            if (this.progress.now === this.taskData.sb.length) {
+              // this.message.success(`导出${count}条完成`);
+              this.progress.msg = '导出完成';
+              this.progress.success = true;
+            }
+            console.log('覆盖导入', task);
+            this.inResult.merge.push(task.name);
+            this.cdr.markForCheck();
+            this.inDataRun();
+          });
+        } else {
+          this.injump(task);
+        }
+      } else {
+        this.nowBridgeName = task.name;
+        const modal: NzModalRef = this.modalService.create({
+          nzTitle: '千斤顶不一致',
+          // nzContent: '千斤顶名称模式不一致不能导入',
+          nzContent: this.tplTitle,
+          nzClosable: false,
+          nzMaskClosable: false,
+          nzFooter: [
+            {
+              label: '跳过这一条',
+              shape: 'default',
+              type: 'danger',
+              onClick: () => {
+                modal.destroy();
+                this.injump(task);
+                return;
+              }
+            },
+            {
+              label: '修改添加',
+              shape: 'default',
+              type: 'primary',
+              onClick: () => {
+                // modal.destroy();
+                task.name = this.nowBridgeName;
+                console.log(task, this.selectIndatas);
+                modal.destroy();
+                this.inDataRun();
+                return;
+              }
+            },
+          ]
+        });
+      }
+    } else {
+      this.inadd(task);
+    }
+    console.log('159753122222222222222222222222222222222222');
+  }
+  async inadd(task: TensionTask) {
+    delete task.id;
+    task.project = this.taskData.sp;
+    console.log(task);
+    await this.db.inAddTaskAsync(task).then(data => {
+      this.inResult.add.push(task.name);
+      console.log('添加导入', task);
+      this.progress.now++;
+      if (this.progress.now === this.taskData.sb.length) {
+        // this.message.success(`导出${count}条完成`);
+        this.progress.msg = '导出完成';
+        this.progress.success = true;
+      }
+      this.cdr.markForCheck();
+      this.inDataRun();
     });
+  }
+  injump(task: TensionTask) {
+    this.progress.now++;
+    if (this.progress.now === this.taskData.sb.length) {
+      // this.message.success(`导出${count}条完成`);
+      this.progress.msg = '导出完成';
+      this.progress.success = true;
+    }
+    console.log('跳过导入', task);
+    this.inResult.jump.push(task.name);
+    this.cdr.markForCheck();
   }
 }

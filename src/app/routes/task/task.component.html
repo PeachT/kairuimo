@@ -33,18 +33,7 @@
                 <nz-cascader nzMenuClassName="task-cascader" nzPlaceHolder="选择顶" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
                   (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="selectJackState">
                 </nz-cascader>
-                <!-- <nz-form-explain *ngIf="formData.get('device').dirty && formData.get('device').errors">请入选择设备！
-                </nz-form-explain> -->
               </nz-form-control>
-              <!-- <nz-form-label [nzSm]="3" nzRequired>钢绞线</nz-form-label>
-              <nz-form-control [nzSm]="4">
-                <nz-cascader [nzOptions]="steelStrandOptions" formControlName="steelStrand"
-                  (ngModelChange)="steelStrandOnChanges($event)">
-                </nz-cascader>
-                <nz-form-explain
-                  *ngIf="formData.get('steelStrand').dirty && formData.get('steelStrand').errors">
-                  请入选择钢绞线！</nz-form-explain>
-              </nz-form-control> -->
             </nz-form-item>
 
             <app-add-other [validateForm]="formData" [keys]="bridgeOtherKey" [iselect]="0" #otherInfo></app-add-other>
@@ -60,13 +49,10 @@
                     class="hole"
                     >{{item.name}}</label>
                 </nz-radio-group>
-                <!-- <nz-form-explain style="color: #f5222d;"
-                  *ngIf="formData.get('groups').dirty && formData.get('groups').errors">
-                  至少需要一组张拉数据！</nz-form-explain> -->
               </nz-form-control>
             </nz-form-item>
           </form>
-          <app-task-data #taskDataDom [jackData]="jackData" (updateHole)="updateGroupItem()" ></app-task-data>
+          <app-task-data #taskDataDom [jackData]="jackData" (updateHole)="updateGroupItem()" [show]="holeMneuData.name"></app-task-data>
           <div class="edit" [ngClass]="{'edit-on': appS.edit}" *ngIf="!appS.edit"></div>
         </div>
         <app-record *ngIf="holeMneuData.data && holeMneuData.data?.record" [GroupData]="holeMneuData.data" ></app-record>
@@ -90,7 +76,7 @@
         (outDelete)="delete()">
         <!-- <button nz-button nzType="primary" nzGhost nzSearch (click)="selectTemplate()" type="button" >选择导出</button>
         <button nz-button nzType="primary" nzGhost nzSearch (click)="derivedExcel()" type="button" >导 出</button> -->
-        <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button" *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3))">张 拉</button>
+        <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button" *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3) && !appS.edit)">张 拉</button>
       </app-operat>
     </div>
   </div>
