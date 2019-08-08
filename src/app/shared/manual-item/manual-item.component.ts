@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DbService } from 'src/app/services/db.service';
@@ -14,7 +14,7 @@ import { DebugData } from 'src/app/models/debug';
   styleUrls: ['./manual-item.component.less']
 })
 export class ManualItemComponent implements OnInit {
-  [x: string]: any;
+  // [x: string]: any;
   /** 设备名称 */
   @Input() name: any;
   /** 设备设置数据 */
@@ -84,6 +84,7 @@ export class ManualItemComponent implements OnInit {
     160: null,
     200: null,
   };
+  ms = 0;
   debugItem = null;
   debugItems = ['m5', 'm10', 'm15', 'm20', 'm25', 'm30', 'm35', 'm40', 'm45', 'm50', 'm55', 'mmSpeed'];
   debugNames = ['5Mpa保压', '10Mpa保压', '15Mpa保压', '20Mpa保压', '25Mpa保压', '30Mpa保压',
@@ -97,11 +98,20 @@ export class ManualItemComponent implements OnInit {
     public appService: AppService,
     public PLCS: PLCService,
     private message: NzMessageService,
+    private cdr: ChangeDetectorRef,
   ) {
   }
 
   ngOnInit() {
     console.log(this.name);
+    // setInterval(() => {
+    //   this.ms ++;
+    //   console.log(this.ms);
+    //   if (this.ms > 10000) {
+    //     this.ms = 0;
+    //   }
+    //   this.cdr.markForCheck();
+    // }, 50);
 
     this.PLCD = this.PLCS.PD[this.name];
     console.log(this.PLCD);

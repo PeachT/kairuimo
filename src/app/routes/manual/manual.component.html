@@ -7,10 +7,12 @@
       <nz-option [nzValue]="item.id" [nzLabel]="item.name" *ngFor="let item of jacks"></nz-option>
       </nz-select>
     </div>
+    <span hidden>{{ms.i}}</span>
     <nz-radio-group [(ngModel)]="connection" nzName="radiogroup" (ngModelChange)="onConnention()">
       <label nz-radio [nzValue]="true">联机</label>
       <label nz-radio [nzValue]="false">单机</label>
     </nz-radio-group>
+
   </header>
   <main class="manual kvm-slider">
     <div class="content z scroll-y" [ngClass]="{'form-edit': !PLCS.plcState.z}">
@@ -30,7 +32,7 @@
         <div #domz>
         </div>
       </div>
-      <div class="alarm" *ngIf="zmsg || !PLCS.plcState.z">{{!PLCS.plcState.z ? '设备未连接' : cmsg}}</div>
+      <div class="alarm" *ngIf="zmsg || !PLCS.plcState.z">{{!PLCS.plcState.z ? '设备未连接' : zmsg}}</div>
     </div>
     <br><br>
     <div class="content c scroll-y" [ngClass]="{'form-edit': !PLCS.plcState.c}" [hidden]="!connection">

@@ -225,6 +225,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   autoTask: any;
   /** stateTension */
   stateTension = false;
+  ms = {
+    i: 0,
+    t: null,
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -253,6 +257,14 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
+    this.ms.t = setInterval(() => {
+      this.ms.i ++;
+      // console.log(this.ms);
+      if (this.ms.i > 10000) {
+        this.ms.i = 0;
+      }
+      this.cdr.markForCheck();
+    }, 50);
     this.plcsub = this.PLCS.plcSubject.subscribe((data) => {
       this.alarmMonitoring();
       this.cdr.markForCheck();
@@ -272,6 +284,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   ngOnDestroy() {
     console.log('退出');
+    clearInterval(this.ms.t);
     this.PLCS.ipcSend('zF05', PLC_S(10), false);
     this.PLCS.ipcSend('cF05', PLC_S(10), false);
     try {

@@ -36,7 +36,7 @@
       </nz-col>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="采集频率ms">
-          <input nz-input type="number" nzSize="large" style="width: 100%;" min="100" max="1000" [(ngModel)]="heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"/>
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="100" max="1000" [value]="PLCS.heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"/>
         </nz-input-group>
       </nz-col>
     </nz-row>

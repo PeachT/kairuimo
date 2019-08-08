@@ -92,7 +92,7 @@ app.on('activate', () => {
 ipcMain.on('runSocket', (event, data) => {
   if (!ztcp) {
     // tslint:disable-next-line:no-string-literal
-    global['heartbeatRate'] = Number(data.delay) || 1000;
+    global['heartbeatRate'] = Number(data.delay) || 10;
     event.sender.send(data.channel, global['heartbeatRate']);
     console.log('3333333333333333333333333333333', data);
     // 启动Modbus
@@ -111,7 +111,7 @@ ipcMain.on('runSocket', (event, data) => {
  */
 ipcMain.on('heartbeatRate', (event, data) => {
   // tslint:disable-next-line:no-string-literal
-  global['heartbeatRate'] = Number(data.delay) || 1000;
+  global['heartbeatRate'] = Number(data.delay) || 10;
   // tslint:disable-next-line:no-string-literal
   event.sender.send(data.channel, global['heartbeatRate']);
   console.log('global.heartbeatRate', global['heartbeatRate']);

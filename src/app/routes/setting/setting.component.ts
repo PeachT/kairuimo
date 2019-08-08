@@ -35,7 +35,6 @@ export class SettingComponent implements OnInit, OnDestroy {
   };
   // mpaRevise: MpaRevise;
   autoData: AutoDate;
-  heartbeatRateValue = null;
   keyboard = {
     text: {w: 0, h: 0},
     number: {w: 0, h: 0},
@@ -53,7 +52,6 @@ export class SettingComponent implements OnInit, OnDestroy {
     this.getData('c');
     // this.mpaRevise = this.PLCS.getMpaRevise();
     this.autoData = this.PLCS.getAutoDate();
-    this.heartbeatRateValue = this.PLCS.heartbeatRate();
     this.keyboard = JSON.parse(localStorage.getItem('keyboard'));
   }
 

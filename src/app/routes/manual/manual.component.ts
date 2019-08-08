@@ -14,7 +14,7 @@ import { deviceGroupMode } from 'src/app/models/jack';
   selector: 'app-manual',
   templateUrl: './manual.component.html',
   styleUrls: ['./manual.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('domz', { read: ViewContainerRef, static: false }) domz: ViewContainerRef;
@@ -89,7 +89,6 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     cD: true,
   };
 
-  it = null;
   zmsg = null;
   cmsg = null;
 
@@ -98,6 +97,10 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   anchor = {
     z: [],
     c: []
+  };
+  ms = {
+    i: 0,
+    t: null,
   };
 
   constructor(
@@ -113,6 +116,16 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.ms.t = setInterval(() => {
+      this.ms.i ++;
+      // console.log(this.ms);
+      if (this.ms.i > 10000) {
+        this.ms.i = 0;
+      }
+      this.cdr.markForCheck();
+    }, 50);
+
+
     this.PLCS.ipcSend('zF05', PLC_S(0), true);
     this.PLCS.ipcSend('cF05', PLC_S(0), true);
     this.PLCS.plcSubject.subscribe((data) => {
@@ -130,12 +143,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.cmsg = null;
       }
-      this.cdr.markForCheck();
     });
-    // this.it = setInterval(() => {
-    //   // this.da = this.da++;
-    //   // console.log('manual');
-    // }, 500);
     // 获取顶
     await this.db.jack.toArray().then((d) => {
       this.jacks = d.map(item => {
@@ -159,7 +167,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     console.log('退出');
-    clearInterval(this.it);
+    clearInterval(this.ms.t);
     this.selectManual('z', [false, false, false, false]);
     this.selectManual('c', [false, false, false, false]);
     this.PLCS.ipcSend('zF05', PLC_S(0), false);

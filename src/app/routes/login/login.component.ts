@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService } from 'src/app/services/db.service';
 import { NzMessageService } from 'ng-zorro-antd';
@@ -43,6 +43,7 @@ export class LoginComponent implements OnInit {
     private message: NzMessageService,
     private router: Router,
     public PLCS: PLCService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.db = this.odb.db;
   }
@@ -52,10 +53,6 @@ export class LoginComponent implements OnInit {
       userName: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
-    // setInterval(() => {
-    //   this.msg = randomWord(32);
-    // }, 5000);
-
     // tslint:disable-next-line:no-unused-expression
     return new Promise((resolve, reject) => {
       this.db.users.filter(f => f.jurisdiction < 8).toArray().then((d) => {
