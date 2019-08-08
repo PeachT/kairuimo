@@ -14,6 +14,7 @@ export class TimeSecComponent implements OnInit {
   ngOnInit() {
     setInterval(() => {
       this.time = (DateFormat(new Date(), 'MM-dd hh:mm:ss'));
+      localStorage.setItem('lastTime', `${new Date().getTime()}`);
       this.cdr.markForCheck();
     }, 1000);
   }

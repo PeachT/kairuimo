@@ -4,18 +4,18 @@
   <div class="item" [ngClass]="{'active': PLCS.plcState.c}">C:{{PLCS.plcState.cLT}}</div>
 </div>
 <router-outlet></router-outlet>
-<nz-modal [nzVisible]="appService.powerState" nzTitle="" [nzFooter]="null" [nzMaskClosable]="!appService.powerDelayT" nzClosable="false" (nzOnCancel)="appService.powerState = false">
+<nz-modal [nzVisible]="appS.powerState" nzTitle="" [nzFooter]="null" [nzMaskClosable]="!appS.powerDelayT" nzClosable="false" (nzOnCancel)="appS.powerState = false">
   <div class="power-btn">
-    <ng-container *ngIf="!appService.powerDelayT">
+    <ng-container *ngIf="!appS.powerDelayT">
       <button class="login-out" (click)="loginOut()"> <i nz-icon nzType="logout" style="color:dodgerblue"></i> 登 出 </button>
       <button class="restart" (click)="power(false)"> <i nz-icon nzType="reload" style="color:lime"></i> 重 启 </button>
       <button class="shutdown" (click)="power(true)"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button>
-      <button class="login-out" (click)="appService.usb()"> <i nz-icon nzType="usb" style="color:beige"></i> 卸载U盘 </button>
+      <button class="login-out" (click)="appS.usb()"> <i nz-icon nzType="usb" style="color:beige"></i> 卸载U盘 </button>
     </ng-container>
-    <ng-container *ngIf="appService.powerDelayT && appService.powerDelay">
-      <h1 >{{appService.powerDelay}}s后{{appService.powerText}}！</h1>
+    <ng-container *ngIf="appS.powerDelayT && appS.powerDelay">
+      <h1 >{{appS.powerDelay}}s后{{appS.powerText}}！</h1>
       <button class="shutdown" (click)="cancle()"> <i nz-icon nzType="poweroff" style="color:brown"></i> 取 消</button>
     </ng-container>
-    <h1 *ngIf="!appService.powerDelay">正在{{appService.powerText}}...</h1>
+    <h1 *ngIf="!appS.powerDelay">正在{{appS.powerText}}...</h1>
   </div>
 </nz-modal>

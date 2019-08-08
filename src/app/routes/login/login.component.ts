@@ -6,6 +6,9 @@ import { AppService } from 'src/app/services/app.service';
 import { User } from 'src/app/models/user.models';
 import { Router } from '@angular/router';
 import { randomWord } from 'src/app/Function/randomWord';
+import { PLCService } from 'src/app/services/PLC.service';
+import { PLC_D, PLC_M } from 'src/app/models/IPCChannel';
+import { decodeLock } from 'src/app/Function/lock';
 
 const menus = [
   { jurisdiction: 0, url: '/task', icon: 'form', name: '任务' },
@@ -31,6 +34,7 @@ export class LoginComponent implements OnInit {
   users = [];
   sUsers = [];
   msg = null;
+  lock = null;
 
   constructor(
     public appS: AppService,
@@ -38,6 +42,7 @@ export class LoginComponent implements OnInit {
     private odb: DbService,
     private message: NzMessageService,
     private router: Router,
+    public PLCS: PLCService,
   ) {
     this.db = this.odb.db;
   }
@@ -122,5 +127,23 @@ export class LoginComponent implements OnInit {
   // }
   touch(msg) {
     console.log(msg);
+  }
+  onLock() {
+    const j4 = decodeLock(this.lock, this.PLCS.lock.code);
+    if (j4) {
+      this.PLCS.ipcSend('zF016', PLC_D(3900), [j4.slice(0, 4), j4.slice(4, 8), j4.slice(8, 12), j4.slice(12, 16)]).then(() => {
+        this.message.success('解锁成功');
+        this.PLCS.lock.success = false;
+        const nowTime = Math.round(new Date().getTime() / 1000);
+        const lockTime = Number(j4);
+        this.lock.state = true;
+        if (nowTime < lockTime) {
+          this.lock.success = false;
+          this.PLCS.ipcSend(`cF05`, PLC_M(0), true);
+        }
+      });
+    } else {
+      this.message.warning('验证码错误');
+    }
   }
 }

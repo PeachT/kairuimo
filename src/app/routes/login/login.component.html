@@ -36,8 +36,8 @@
             <button nz-button class="login-form-button" nzType="default" nzGhost type="button"
               (click)="submitForm()"
               nzSize="large"
-              [nzLoading]="dyLogin"
-              >登 录</button>
+              [nzLoading]="dyLogin || PLCS.lock.success"
+              >{{PLCS.lock.state ? '登 录' : '正在连接设备...'}}</button>
           </nz-form-control>
         </nz-form-item>
         <nz-form-item>
@@ -53,3 +53,31 @@
   </nz-content>
   <nz-footer>©柳州凯瑞姆</nz-footer>
 </nz-layout>
+
+
+<nz-modal [(nzVisible)]="PLCS.lock.success || appS.lock" [nzTitle]="null" [nzFooter]="null" [nzClosable]="false">
+  <h1 style="text-align: center;" *ngIf="!appS.lock"><i nz-icon nzType="lock" nzTheme="outline"></i> 锁机</h1>
+  <h1 style="text-align: center; color: red;" *ngIf="appS.lock"> <i nz-icon nzType="warning" nzTheme="outline"></i> 系统内部错误锁机</h1>
+  <br>
+  <br>
+  <nz-form-item>
+    <nz-form-label [nzSm]="4" >ID</nz-form-label>
+    <nz-form-control [nzSm]="20" >
+      <h1>{{PLCS.lock.code}}</h1>
+    </nz-form-control>
+    <nz-form-label [nzSm]="4" >验证码</nz-form-label>
+    <nz-form-control [nzSm]="20" >
+      <input nz-input nzSize="large" [(ngModel)]="lock"/>
+    </nz-form-control>
+    <!-- <nz-form-label [nzSm]="4" >日期</nz-form-label>
+    <nz-form-control [nzSm]="20" >
+      <input nz-input nzSize="large" #ti/>
+    </nz-form-control> -->
+  </nz-form-item>
+
+  <button style="width: 100%;" nz-button nzSize="large" nzType="primary" (click)="onLock()">确 定</button>
+  <!-- <button style="width: 100%;" nz-button nzSize="large" nzType="primary" (click)="onJM(ti.value)">确 定</button> -->
+  <br>
+  <br>
+  <h1>联系方式：{{appS.info.unit.tel}}</h1>
+</nz-modal>

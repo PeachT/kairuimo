@@ -56,7 +56,8 @@ export class ModbusTCP {
       this.cs = false;
 
       this.client.setID(cStr.address);
-      this.IPCSend(`${this.dev}----connection`, { state: '链接成功', client: this.client });
+      this.IPCSend(`${this.dev}connection`, { state: '链接成功', client: this.client });
+      this.devicesLock();
 
       this.heartbeat();
     }).catch((err) => {
@@ -64,7 +65,7 @@ export class ModbusTCP {
 
       console.log(`${this.dev}---error`, err);
 
-      this.IPCSend(`${this.dev}---error`, { state: '链接失败', client: this.client, err });
+      this.IPCSend(`${this.dev}error`, { state: '链接失败', client: this.client, err });
 
       this.overtime();
     });
@@ -99,30 +100,26 @@ export class ModbusTCP {
         }
         console.log('open');
         this.IPCSend(`${this.dev}error`, { state: '打开链接', client: this.client._port.isOpen});
+        if (this.client._port.isOpen) {
+          this.devicesLock();
+        }
       });
     }, 10000);
   }
+  /** 锁机 */
+  public devicesLock() {
+    if (this.client._port.isOpen) {
+      this.client.readHoldingRegisters(7996, 4).then((data) => {
+        const float = bf.bufferToFloat(data.buffer);
+        const dint16 = bf.bufferTo16int(data.buffer);
+        this.IPCSend(`${this.dev}LOCK`, { uint16: data.data, int16: dint16, float });
+        // this.IPCSend(`${this.dev}LOCK`, { state: '链接成功', uint16: data.data });
+      }).catch((err) => {
+      });
+    }
+  }
   /** 心跳包 */
   private heartbeat() {
-    // if (this.heartbeatT) {
-    //   clearInterval(this.heartbeatT);
-    //   this.heartbeatT = null;
-    // }
-    // this.heartbeatT = setInterval(() => {
-    //   if (this.ifClient()) {
-    //     this.client.readHoldingRegisters(4096, 30).then((data) => {
-    //       const float = bf.bufferToFloat(data.buffer);
-    //       this.IPCSend(`${this.dev}heartbeat`, { float, int16: data.data });
-    //     }).catch((err) => {
-    //       this.IPCSend(`${this.dev}error`, err);
-    //     });
-    //   } else {
-    //     console.log('123456789');
-    //     this.IPCSend(`${this.dev}error`, {msg: '心跳链接错误'});
-    //     clearInterval(this.heartbeatT);
-    //     this.heartbeatT = null;
-    //   }
-    // }, this.heartbeatRate);
     setTimeout(() => {
       if (this.ifClient()) {
         const d = new Date().getSeconds();

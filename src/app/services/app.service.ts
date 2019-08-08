@@ -8,6 +8,8 @@ import { NzMessageService } from 'ng-zorro-antd';
 
 @Injectable({ providedIn: 'root' })
 export class AppService {
+  /** ID */
+  ID = null;
   /** 平台 */
   platform = localStorage.getItem('platform');
   /** 软件信息 */
@@ -41,6 +43,7 @@ export class AppService {
   public menus = [];
   public leftMenu = null;
   public editId = null;
+  public lock = false;
 
   constructor(
     private router: Router,
@@ -52,6 +55,11 @@ export class AppService {
       localStorage.setItem('unitInfo', JSON.stringify(this.info.unit));
     } else {
       this.info.unit = info;
+    }
+    this.ID = localStorage.getItem('ID');
+    if (!this.ID) {
+      localStorage.setItem('ID', new Date().getTime().toString());
+      this.ID = localStorage.getItem('ID');
     }
   }
   // /** 搜索事件 */

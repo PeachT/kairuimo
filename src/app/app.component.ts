@@ -26,16 +26,24 @@ export class AppComponent implements OnInit {
   constructor(
     private e: ElectronService,
     private odb: DbService,
-    public appService: AppService,
+    public appS: AppService,
     private message: NzMessageService,
     private router: Router,
     public PLCS: PLCService,
   ) {
-
-    // 采集频率
-    this.PLCS.heartbeatRate();
+    console.log('平台', this.appS.platform);
+    if (!this.appS.platform || this.appS.platform === 'devices') {
+      // this.router.navigate(['/lock']);
+      const lastTime = Number(localStorage.getItem('lastTime'));
+      const nowTime = new Date().getTime();
+      if (nowTime < lastTime) {
+        appS.lock = true;
+      } else {
+        this.PLCS.runSocket();
+      }
+    }
     // 判断运行环境适合是 Electron
-    this.appService.Environment = navigator.userAgent.indexOf('Electron') !== -1;
+    this.appS.Environment = navigator.userAgent.indexOf('Electron') !== -1;
     this.db = this.odb.db;
     /** 添加管理员 */
     this.db.users.count().then((data) => {
@@ -74,11 +82,11 @@ export class AppComponent implements OnInit {
 
     router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
-        if (!this.appService.userInfo) {
+        if (!this.appS.userInfo) {
           // this.router.navigate(['/login']);
         }
         console.log(event);
-        this.appService.nowUrl = event.url;
+        this.appS.nowUrl = event.url;
       }
     });
 
@@ -100,7 +108,7 @@ export class AppComponent implements OnInit {
       };
       localStorage.setItem('keyboard', JSON.stringify(keyboard));
     }
-    if (this.appService.Environment) {
+    if (this.appS.Environment) {
       console.log('在 Electron 中运行');
       // 监听主进程
       this.e.ipcRenderer.on('message', (event, message) => {
@@ -164,7 +172,7 @@ export class AppComponent implements OnInit {
           if (this.keyboardState) {
             this.keyboardState = false;
             console.log('隐藏键盘', event.target.localName);
-            this.appService.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
+            this.appS.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
           }
         } else {
           console.log('键盘', event, event.target.disabled, event.target.readOnly);
@@ -172,7 +180,7 @@ export class AppComponent implements OnInit {
             if (this.keyboardState) {
               this.keyboardState = false;
               console.log('隐藏键盘', event.target.localName);
-              this.appService.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
+              this.appS.onKeyboard({ type: 'text', x: -10000, y: -10000, w: 0, h: 0 });
             }
             return;
           }
@@ -214,7 +222,7 @@ export class AppComponent implements OnInit {
 
             console.log('打开键盘', keyType);
             event.target.select();
-            this.appService.onKeyboard({ type: keyType, x, y, w: kwh.w, h: kwh.h });
+            this.appS.onKeyboard({ type: keyType, x, y, w: kwh.w, h: kwh.h });
           }
         }
       }, true);
@@ -235,16 +243,16 @@ export class AppComponent implements OnInit {
   }
   power(mode) {
     // this.appService.powerState = false;
-    this.appService.power(mode);
+    this.appS.power(mode);
 
   }
   loginOut() {
-    this.appService.powerState = false;
+    this.appS.powerState = false;
     this.router.navigate(['/login']);
   }
   cancle() {
     console.log('取消');
-    clearTimeout(this.appService.powerDelayT);
-    this.appService.powerDelayT = null;
+    clearTimeout(this.appS.powerDelayT);
+    this.appS.powerDelayT = null;
   }
 }

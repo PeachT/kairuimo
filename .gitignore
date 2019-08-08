@@ -43,3 +43,4 @@ Thumbs.db
 /app/js
 /app/static/ejsexcel
 /win
+src/app/Function/lock.ts

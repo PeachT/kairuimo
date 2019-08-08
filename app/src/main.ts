@@ -57,11 +57,11 @@ function createWindow() {
   // Open the DevTools optionally:
   // win.webContents.openDevTools()
   console.log('start...');
-  // 启动Modbus
-  createModbus();
-  // IPC 监听
-  IPCOn('z', ztcp);
-  IPCOn('c', ctcp);
+  // // 启动Modbus
+  // createModbus();
+  // // IPC 监听
+  // IPCOn('z', ztcp);
+  // IPCOn('c', ctcp);
   if (dev) {
     win.webContents.openDevTools();
   }
@@ -84,6 +84,37 @@ app.on('activate', () => {
   if (win === null) {
     createWindow();
   }
+});
+
+/**
+ * *启动Socket
+ */
+ipcMain.on('runSocket', (event, data) => {
+  if (!ztcp) {
+    // tslint:disable-next-line:no-string-literal
+    global['heartbeatRate'] = Number(data.delay) || 1000;
+    event.sender.send(data.channel, global['heartbeatRate']);
+    console.log('3333333333333333333333333333333', data);
+    // 启动Modbus
+    createModbus();
+    // IPC 监听
+    IPCOn('z', ztcp);
+    IPCOn('c', ctcp);
+  } else {
+    event.sender.send(data.channel, global['heartbeatRate']);
+    ztcp.devicesLock();
+    ctcp.devicesLock();
+  }
+});
+/**
+ * *采集频率
+ */
+ipcMain.on('heartbeatRate', (event, data) => {
+  // tslint:disable-next-line:no-string-literal
+  global['heartbeatRate'] = Number(data.delay) || 1000;
+  // tslint:disable-next-line:no-string-literal
+  event.sender.send(data.channel, global['heartbeatRate']);
+  console.log('global.heartbeatRate', global['heartbeatRate']);
 });
 
 
@@ -120,15 +151,7 @@ function IPCOn(d: string = 'z', tcp: ModbusTCP) {
   });
 }
 
-/**
- * *采集频率
- */
-ipcMain.on('heartbeatRate', (e, delay) => {
-  // tslint:disable-next-line:no-string-literal
-  global['heartbeatRate'] = delay || 1000;
-  // tslint:disable-next-line:no-string-literal
-  console.log('global.heartbeatRate', global['heartbeatRate']);
-});
+
 // 主进程监听渲染进程传来的信息
 ipcMain.on('update', (e, arg) => {
   console.log('update');

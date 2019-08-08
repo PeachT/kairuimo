@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { NzMessageService } from 'ng-zorro-antd';
+import { Router, NavigationEnd } from '@angular/router';
 
 import { Subject, Observable, interval } from 'rxjs';
-import { PLC_D } from '../models/IPCChannel';
+import { PLC_D, PLC_M } from '../models/IPCChannel';
 import { PLCLiveData, GetPLCLiveData } from '../models/live';
 import { plcToMpa, plcToMm, mmToPlc } from '../Function/device.date.processing';
 import { MpaRevise, AutoDate, GetMpaRevise, IMpaRevise } from '../models/device';
@@ -139,34 +140,143 @@ export class PLCService {
     z: null,
     c: null,
   };
+  lock = {
+    state: false,
+    success: true,
+    code: null,
+  };
   constructor(
     private e: ElectronService,
     private message: NzMessageService,
     private odb: DbService,
+    private router: Router,
   ) {
     console.log(this.e.isLinux);
-
+    this.lock.code = `${localStorage.getItem('ID')}${new Date().getTime()}`;
+    const arrs = [];
+    for (let index = 0; index < 9; index++) {
+      const i = Math.floor(Math.random() * this.lock.code.length);
+      arrs.push(this.lock.code[i]);
+    }
+    this.lock.code = arrs.join('');
+    // 253 400 572 8
     // const revise = JSON.parse(localStorage.getItem('mpaRevise'));
     // if (!revise) {
     //   this.setMpaRevise(mpaRevise);
     // } else {
     //   this.mpaRevise = revise;
     // }
+    // const auto = JSON.parse(localStorage.getItem('autoDate'));
+    // if (!auto) {
+    //   this.setAutoData(autoDate);
+    // }
+    // this.ipcOn('z');
+    // this.ipcOn('c');
+    // this.selectJack(this.getJackId());
+  }
+
+
+  /** 启动Socket */
+  runSocket() {
+    console.log('1111111111111111111');
+    const channel = 'runSocket';
     const auto = JSON.parse(localStorage.getItem('autoDate'));
     if (!auto) {
       this.setAutoData(autoDate);
     }
-    this.ipcOn('z');
-    this.ipcOn('c');
-    this.selectJack(this.getJackId());
-  }
-
-
-  /** 获取实时数据 */
-  private ipcOn(dev: string = 'z') {
-    this.e.ipcRenderer.on(`${dev}connection`, (event, data) => {
-      console.log(dev, data);
+    this.e.ipcRenderer.send('runSocket', {delay: 500, channel});
+    this.e.ipcRenderer.once(channel, (event, data) => {
+      localStorage.setItem('heartbeatRate', data);
+      this.heartbeatRateValue = Number(localStorage.getItem('heartbeatRate'));
+      console.log('启动Socket完成', data);
+      this.ipcOn('z');
+      this.ipcOn('c');
+      this.selectJack(this.getJackId());
     });
+  }
+  /**
+   * *设置采集频率
+   */
+  heartbeatRate(delay: number = null) {
+    if (!delay) {
+      delay = Number(localStorage.getItem('heartbeatRate'));
+    }
+    delay = Number(delay) || 500;
+    this.e.ipcRenderer.send('heartbeatRate', {delay, channel: 'delay'});
+    this.e.ipcRenderer.once('delay', (event, data) => {
+      localStorage.setItem('heartbeatRate', data);
+      console.log('设置采集频率完成', localStorage.getItem('heartbeatRate'));
+      this.heartbeatRateValue = delay;
+    });
+  }
+  async lockPLC(dev) {
+    if (dev === 'z') {
+      console.log('获取PLC加密');
+      await this.ipcSend(`${dev}F03`, PLC_D(3900), 4).then((t: any) => {
+        console.log('PLC加密码', t);
+        const nowTime = Math.round(new Date().getTime() / 1000);
+        const lockTime = Number(`${t.uint16[0]}${t.uint16[1]}${t.uint16[2]}${t.uint16[3]}0000`);
+        this.lock.state = true;
+        if (nowTime < lockTime) {
+          this.lock.success = false;
+          this.ipcSend(`cF05`, PLC_M(0), true);
+        } else {
+          this.lock.code = `${localStorage.getItem('ID')}${new Date().getTime()}`;
+          const arrs = [];
+          for (let index = 0; index < 9; index++) {
+            const i = Math.floor(Math.random() * this.lock.code.length);
+            arrs.push(this.lock.code[i]);
+          }
+          this.lock.code = arrs.join('');
+        }
+      });
+    } else {
+      if (this.lock.state && this.lock.success) {
+        this.ipcSend(`cF05`, PLC_M(0), true);
+      }
+    }
+  }
+  /** 数据监听 */
+  private ipcOn(dev: string = 'z') {
+    /** 获取锁机数据 */
+    this.e.ipcRenderer.on(`${dev}LOCK`, async (event, data) => {
+      if (dev === 'z') {
+        console.log('获取PLC加密');
+        const nowTime = Math.round(new Date().getTime() / 1000);
+        const lockTime = Number(`${data.uint16[0]}${data.uint16[1]}${data.uint16[2]}0000`);
+        console.log('PLC加密码', data, nowTime, lockTime);
+        this.lock.state = true;
+        if (nowTime < lockTime) {
+          this.lock.success = false;
+          // this.ipcSend(`cF05`, PLC_M(0), true);
+          console.log('c锁机z');
+          this.e.ipcRenderer.send('cF05', { address: PLC_M(0), value : true});
+        } else {
+          this.lock.code = `${localStorage.getItem('ID')}${new Date().getTime()}`;
+          const arrs = [];
+          for (let index = 0; index < 9; index++) {
+            const i = Math.floor(Math.random() * this.lock.code.length);
+            arrs.push(this.lock.code[i]);
+          }
+          this.lock.code = arrs.join('');
+        }
+      } else {
+        console.log('c锁机', this.lock.state, this.lock.success);
+        if (this.lock.state && !this.lock.success) {
+          console.log('c锁机c');
+          this.e.ipcRenderer.send('cF05', { address: PLC_M(0), value : true});
+          // this.ipcSend(`cF05`, PLC_M(0), true);
+        }
+      }
+    });
+    /** 链接成功 */
+    this.e.ipcRenderer.on(`${dev}connection`, async (event, data) => {
+      console.log('链接成功', dev, data);
+      this.lockPLC(dev);
+        // 156 518 292 3
+        // 253 400 630 399
+    });
+    /** 获取实时数据 */
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
       // if (!this.revise[`${dev}GetMpaState`]) {
       //   console.log(this.revise[`${dev}MpaRevise`]);
@@ -294,18 +404,6 @@ export class PLCService {
     });
   }
 
-
-  // /** 获取压力校正系数 */
-  // getMpaRevise(): MpaRevise {
-  //   this.mpaRevise = JSON.parse(localStorage.getItem('mpaRevise'));
-  //   return this.mpaRevise;
-  // }
-
-  // /** 设置压力校正系数 */
-  // setMpaRevise(revise: MpaRevise) {
-  //   localStorage.setItem('mpaRevise', JSON.stringify(revise));
-  //   this.mpaRevise = revise;
-  // }
   /** 获取自动参数 */
   getAutoDate(): AutoDate {
     return JSON.parse(localStorage.getItem('autoDate'));
@@ -322,23 +420,6 @@ export class PLCService {
     await this.odb.db.jack.filter(f => f.id === id).first(d => {
       this.jack = d;
     });
-    // const z = [];
-    // const c = [];
-    // deviceGroupMode[4].map((key) => {
-    //   if (key.indexOf('z') > -1) {
-    //     if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
-    //       z.push(this.jack[key].upper, this.jack[key].floot);
-    //     } else {
-    //       z.push(0, 0);
-    //     }
-    //   } else {
-    //     if (deviceGroupMode[this.jack.jackMode].indexOf(key) > -1) {
-    //       c.push(this.jack[key].upper, this.jack[key].floot);
-    //     } else {
-    //       c.push(0, 0);
-    //     }
-    //   }
-    // });
     await this.ipcSend(`zF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
       console.log(data);
       deviceGroupModeDev.z[this.jack.jackMode].map((name, index) => {
@@ -367,21 +448,6 @@ export class PLCService {
     // 设置泵顶组
     this.ipcSend('zF06', PLC_D(407), this.jack.saveGroup);
     this.ipcSend('cF06', PLC_D(407), this.jack.saveGroup);
-
-    // this.ipcSend('zF016_float', PLC_D(420), z);
-    // this.ipcSend('cF016_float', PLC_D(420), c);
-    // this.ipcSend('zF016', PLC_D(420), [
-    //   mmToPlc(this.jack.zA.upper, this.jack.zA.mm), mmToPlc(this.jack.zA.floot, this.jack.zA.mm),
-    //   mmToPlc(this.jack.zB.upper, this.jack.zB.mm), mmToPlc(this.jack.zB.floot, this.jack.zB.mm),
-    //   mmToPlc(this.jack.zC.upper, this.jack.zC.mm), mmToPlc(this.jack.zC.floot, this.jack.zC.mm),
-    //   mmToPlc(this.jack.zD.upper, this.jack.zD.mm), mmToPlc(this.jack.zD.floot, this.jack.zD.mm),
-    // ]);
-    // this.ipcSend('cF016', PLC_D(420), [
-    //   mmToPlc(this.jack.cA.upper, this.jack.zA.mm), mmToPlc(this.jack.cA.floot, this.jack.zA.mm),
-    //   mmToPlc(this.jack.cB.upper, this.jack.zB.mm), mmToPlc(this.jack.cB.floot, this.jack.zB.mm),
-    //   mmToPlc(this.jack.cC.upper, this.jack.zC.mm), mmToPlc(this.jack.cC.floot, this.jack.zC.mm),
-    //   mmToPlc(this.jack.cD.upper, this.jack.zD.mm), mmToPlc(this.jack.cD.floot, this.jack.zD.mm),
-    // ]);
     console.log('切换顶', this.jack);
     return this.jack;
   }
@@ -393,22 +459,7 @@ export class PLCService {
     return JSON.parse(localStorage.getItem('jackId'));
   }
 
-  /**
-   * *设置采集频率
-   */
-  heartbeatRate(delay = null) {
-    if (!delay) {
-      delay = localStorage.getItem('heartbeatRate');
-    }
-    if (!delay) {
-      delay = 500;
-    }
 
-    localStorage.setItem('heartbeatRate', delay);
-    this.e.ipcRenderer.send('heartbeatRate', delay);
-    console.log('设置采集频率', localStorage.getItem('heartbeatRate'));
-    this.heartbeatRateValue = delay;
-  }
 
   getPLCMpa(dev) {
     // await this.ipcSend(`cF03`, PLC_D(2100), 20).then((data: any) => {
