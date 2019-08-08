@@ -28,6 +28,8 @@ export interface Project extends IBase {
   // stationRange: string;
   /** 监理 */
   supervisions: Array<Supervision>;
+  /** 项目权限 */
+  jurisdiction?: number;
   /** 其他信息 */
   otherInfo: Array<OtherInfo>;
 }

@@ -33,6 +33,8 @@ export class ProjectComponent implements OnInit {
   data: Project;
   deleteShow = false;
 
+  menuFilter = (o1: Project) => o1.jurisdiction !== 8;
+
   constructor(
     private message: NzMessageService,
     private db: DbService,

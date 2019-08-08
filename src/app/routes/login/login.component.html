@@ -43,6 +43,7 @@
         <nz-form-item>
           <div class="power-btn">
             <button class="restart" (click)="appS.powerState = true"> <i nz-icon nzType="poweroff" style="color:lime"></i>电  源 </button>
+            <button class="restart" (click)="runPLC()" *ngIf="appS.platform === 'devices'">链接设备</button>
             <!-- <button class="shutdown" (click)="appS.powerState = true"> <i nz-icon nzType="poweroff" style="color:brown"></i> 关 机</button> -->
           </div>
         </nz-form-item>
@@ -55,7 +56,7 @@
 </nz-layout>
 
 
-<nz-modal [(nzVisible)]="PLCS.lock.success || appS.lock" [nzTitle]="null" [nzFooter]="null" [nzClosable]="false">
+<nz-modal [(nzVisible)]="(PLCS.lock.success && PLCS.lock.state) || appS.lock" [nzTitle]="null" [nzFooter]="null" [nzClosable]="false">
   <h1 style="text-align: center;" *ngIf="!appS.lock"><i nz-icon nzType="lock" nzTheme="outline"></i> 锁机</h1>
   <h1 style="text-align: center; color: red;" *ngIf="appS.lock"> <i nz-icon nzType="warning" nzTheme="outline"></i> 系统内部错误锁机</h1>
   <br>

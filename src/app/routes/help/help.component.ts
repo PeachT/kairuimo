@@ -140,4 +140,14 @@ export class HelpComponent implements OnInit {
       filters: [{ name: 'KVM更新文件', extensions: ['kvm'] }]
     })[0];
   }
+  /** 设置软件端 */
+  setPlatform() {
+    const pf = localStorage.getItem('platform');
+    if (pf === 'devices') {
+      localStorage.setItem('platform', '');
+    } else {
+      localStorage.setItem('platform', 'devices');
+    }
+    this.appS.platform = localStorage.getItem('platform');
+  }
 }

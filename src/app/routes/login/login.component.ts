@@ -58,7 +58,7 @@ export class LoginComponent implements OnInit {
 
     // tslint:disable-next-line:no-unused-expression
     return new Promise((resolve, reject) => {
-      this.db.users.filter(f => f.jurisdiction < 9).toArray().then((d) => {
+      this.db.users.filter(f => f.jurisdiction < 8).toArray().then((d) => {
         console.log(d);
         this.users = d.map(item => {
           return item.name;
@@ -144,6 +144,20 @@ export class LoginComponent implements OnInit {
       });
     } else {
       this.message.warning('验证码错误');
+    }
+  }
+  runPLC() {
+    this.PLCS.lock = {
+      state: false,
+      success: true,
+      code: null,
+    };
+    const lastTime = Number(localStorage.getItem('lastTime'));
+    const nowTime = new Date().getTime();
+    if (nowTime < lastTime) {
+      this.appS.lock = true;
+    } else {
+      this.PLCS.runSocket();
     }
   }
 }

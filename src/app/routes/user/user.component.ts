@@ -31,7 +31,7 @@ export class UserComponent implements OnInit {
   formData: FormGroup;
   data: User;
   deleteShow = false;
-  menuFilter = (f) => f.jurisdiction < 9;
+  menuFilter = (f) => f.jurisdiction < 8;
 
   constructor(
     private fb: FormBuilder,

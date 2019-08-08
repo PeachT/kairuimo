@@ -9,6 +9,7 @@ import { PLCService } from './services/PLC.service';
 import { DateFormat } from './Function/DateFormat';
 import { Jack } from './models/jack';
 import { getModelBase } from './models/base';
+import { Project } from './models/project';
 
 @Component({
   selector: 'app-root',
@@ -32,14 +33,24 @@ export class AppComponent implements OnInit {
     public PLCS: PLCService,
   ) {
     console.log('平台', this.appS.platform);
-    if (!this.appS.platform || this.appS.platform === 'devices') {
-      // this.router.navigate(['/lock']);
-      const lastTime = Number(localStorage.getItem('lastTime'));
-      const nowTime = new Date().getTime();
-      if (nowTime < lastTime) {
-        appS.lock = true;
-      } else {
-        this.PLCS.runSocket();
+    if (this.e.isWindows) {
+      this.PLCS.lock = {
+        state: true,
+        success: false,
+        code: null,
+      };
+    }
+    if (this.e.isLinux) {
+      if (!this.appS.platform || this.appS.platform === 'devices') {
+        this.runPLC();
+        // this.router.navigate(['/lock']);
+        // const lastTime = Number(localStorage.getItem('lastTime'));
+        // const nowTime = new Date().getTime();
+        // if (nowTime < lastTime) {
+        //   appS.lock = true;
+        // } else {
+        //   this.PLCS.runSocket();
+        // }
       }
     }
     // 判断运行环境适合是 Electron
@@ -50,8 +61,8 @@ export class AppComponent implements OnInit {
       console.log('获取用户数量', data);
       if (data === 0) {
         const user: User = {
-          name: 'kvm',
-          password: 'kvmadmin',
+          name: 'admin',
+          password: 'adminPeach',
           jurisdiction: 9,
           operation: []
         };
@@ -60,25 +71,56 @@ export class AppComponent implements OnInit {
         }).catch(() => {
           this.message.error('添加失败😔');
         });
+        for (let index = 0; index < 10; index++) {
+          const user1: User = {
+            name: `kvmadmin${index}`,
+            password: 'kvmadmin',
+            jurisdiction: 8,
+            operation: []
+          };
+          this.db.users.add(user1).then(() => {
+            this.message.success('添加成功🙂');
+          }).catch(() => {
+            this.message.error('添加失败😔');
+          });
+        }
       }
     }).catch((error) => {
       console.log('数据库错误！！', error);
     });
-    /** 添加顶 */
-    this.db.jack.count().then((data) => {
-      console.log('获取用户数量', data);
+    /** 添加测试项目 */
+    this.db.project.count().then((data) => {
+      console.log('获取项目数量', data);
       if (data === 0) {
-        const jack: Jack = getModelBase('jack');
-        jack.name = '测试顶';
-        this.db.jack.add(jack).then(() => {
-          this.message.success('添加成功🙂');
-        }).catch(() => {
-          this.message.error('添加失败😔');
+        const project: Project = getModelBase('project');
+        project.name = '测试项目';
+        project.jurisdiction = 8;
+        delete project.id;
+        this.db.project.add(project).then(() => {
+          this.message.success('添加测试项目成功🙂');
+        }).catch((err) => {
+          console.log(err);
+          this.message.error('项目添加失败😔');
         });
       }
     }).catch((error) => {
       console.log('数据库错误！！', error);
     });
+    /** 添加顶 */
+    // this.db.jack.count().then((data) => {
+    //   console.log('获取用户数量', data);
+    //   if (data === 0) {
+    //     const jack: Jack = getModelBase('jack');
+    //     jack.name = '测试顶';
+    //     this.db.jack.add(jack).then(() => {
+    //       this.message.success('添加成功🙂');
+    //     }).catch(() => {
+    //       this.message.error('添加失败😔');
+    //     });
+    //   }
+    // }).catch((error) => {
+    //   console.log('数据库错误！！', error);
+    // });
 
     router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
@@ -91,7 +133,15 @@ export class AppComponent implements OnInit {
     });
 
   }
-
+  runPLC() {
+    const lastTime = Number(localStorage.getItem('lastTime'));
+    const nowTime = new Date().getTime();
+    if (nowTime < lastTime) {
+      this.appS.lock = true;
+    } else {
+      this.PLCS.runSocket();
+    }
+  }
   ngOnInit() {
     let keyboard = JSON.parse(localStorage.getItem('keyboard'));
     if (!keyboard) {

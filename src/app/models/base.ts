@@ -16,6 +16,7 @@ const base = {
     id: null,
     createdDate: null,
     modificationDate: null,
+    jurisdiction: 0,
     user: null,
     name: null,
     otherInfo: [],

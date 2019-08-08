@@ -152,7 +152,7 @@ export class TaskComponent implements OnInit {
   /** 获取顶数据 */
   getJacks() {
     console.log('获取jack');
-    this.db.jack.toArray().then((d: Array<Jack>) => {
+    this.db.jack.filter(j => j.state).toArray().then((d: Array<Jack>) => {
       this.jacks = d.map(item => {
         return {
           value: item.id,

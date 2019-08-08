@@ -14,6 +14,7 @@ import { debounceTime, map } from 'rxjs/operators';
 // import endOfMonth from 'date-fns/end_of_month';
 // import * as endOfMonth from 'date-fns/end_of_month';
 import { lastDayOfWeek, lastDayOfMonth, startOfWeek, startOfMonth, getTime, compareAsc, compareDesc} from 'date-fns';
+import { Project } from 'src/app/models/project';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -115,7 +116,15 @@ export class TaskMenuComponent implements OnInit {
   }
 
   async getProject() {
-    this.project.menu = await this.db.getMenuData('project');
+    const j =  this.appS.userInfo.jurisdiction;
+    this.project.menu = await this.db.getMenuData('project', (o1: Project) => {
+      if (j < 8 && o1.jurisdiction !== 8) {
+        return true;
+      }
+      if (j >= 8) {
+        return o1.jurisdiction === 8;
+      }
+    });
     this.project.names = this.project.menu.map(item => {
       return item.name;
     });

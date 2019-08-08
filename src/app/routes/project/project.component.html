@@ -1,6 +1,6 @@
 <app-left>
   <div class="sider sider-menu">
-    <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" #leftMenu></app-left-menu>
+    <app-left-menu [dbName]="dbName" (menuChange)="onMneu($event)" [menuFilter]="menuFilter" #leftMenu></app-left-menu>
   </div>
   <div class="main scroll-y">
     <app-operat [dbName]="dbName" [formData]="prjDom.validateForm" (outEdit)="edit($event)"
