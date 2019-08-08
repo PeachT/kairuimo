@@ -49,8 +49,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.validateForm = this.fb.group({
-      userName: ['kvm', [Validators.required]],
-      password: ['kvmadmin', [Validators.required]]
+      userName: ['', [Validators.required]],
+      password: ['', [Validators.required]]
     });
     setInterval(() => {
       this.msg = randomWord(32);
