@@ -30,7 +30,7 @@
         <div #domz>
         </div>
       </div>
-      <div class="alarm" *ngIf="cmsg || !PLCS.plcState.z">{{!PLCS.plcState.z ? '设备未连接' : cmsg}}</div>
+      <div class="alarm" *ngIf="zmsg || !PLCS.plcState.z">{{!PLCS.plcState.z ? '设备未连接' : cmsg}}</div>
     </div>
     <br><br>
     <div class="content c scroll-y" [ngClass]="{'form-edit': !PLCS.plcState.c}" [hidden]="!connection">

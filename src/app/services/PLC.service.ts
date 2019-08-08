@@ -282,8 +282,8 @@ export class PLCService {
       //   console.log(this.revise[`${dev}MpaRevise`]);
       //   this.getPLCMpa(dev);
       // }
-      this.manualMode[dev] = data.uint16[25].toString(2).padStart(16, '0');
-      // console.log(data, this.manualMode[dev], this.manualMode[dev][4] === '1');
+      this.manualMode[dev] = data.uint16[25].toString(2).padStart(16, '0').split('').reverse().join('');
+      console.log(data, this.manualMode[dev]);
 
       this.plcState[`${dev}LT`] = new Date().getTime() - this.plcState[`${dev}OT`];
       this.plcState[`${dev}OT`] = new Date().getTime();
@@ -337,19 +337,29 @@ export class PLCService {
       r.alarm.push('PLC停机');
       return r;
     }
-    const s = value.toString(2).padStart(16, '0');
+    const s = Array.from(value.toString(2).padStart(16, '0').split('').reverse().join(''));
     // tslint:disable-next-line:prefer-for-of
-    let i = 0;
-    for (let index = 15; index > 0; index--) {
-      if (s[index] === '1') {
+    // let i = 0;
+    // for (let index = 15; index > 0; index--) {
+    //   if (s[index] === '1') {
+    //     if (i < 3 && !auto) {
+    //       r.state.push(states[i]);
+    //     } else {
+    //       r.alarm.push(states[i]);
+    //     }
+    //   }
+    //   i = i + 1;
+    // }
+    s.map((v, i) => {
+      if (v === '1') {
         if (i < 3 && !auto) {
           r.state.push(states[i]);
         } else {
           r.alarm.push(states[i]);
         }
       }
-      i = i + 1;
-    }
+    });
+    console.log('报警', s, r);
     if (r.state.length === 0) {
       r.state.push('待机');
     }
