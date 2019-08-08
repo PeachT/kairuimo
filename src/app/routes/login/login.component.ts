@@ -52,9 +52,9 @@ export class LoginComponent implements OnInit {
       userName: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
-    setInterval(() => {
-      this.msg = randomWord(32);
-    }, 5000);
+    // setInterval(() => {
+    //   this.msg = randomWord(32);
+    // }, 5000);
 
     // tslint:disable-next-line:no-unused-expression
     return new Promise((resolve, reject) => {
