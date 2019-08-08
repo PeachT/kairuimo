@@ -22,23 +22,6 @@ const routes: Routes = [
         // loadChildren: () => import('./routes/auto/auto.module').then(m => m.AutoModule),
         data: { title: '自动' }
       },
-      {
-        path: 'lock',
-        loadChildren: './routes/lock/lock.module#LockModule',
-        // loadChildren: () => import('./routes/auto/auto.module').then(m => m.AutoModule),
-        data: { title: '锁机' }
-      },
-
-      // {
-      //   path: 'task',
-      //   loadChildren: './routes/task/task.module#TaskModule',
-      //   data: { title: '任务' }
-      // },
-      // {
-      //   path: 'manual',
-      //   loadChildren: './routes/manual/manual.module#ManualModule',
-      //   data: { title: '手动' }
-      // },
     ]
   },
   {
