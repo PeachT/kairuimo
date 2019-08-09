@@ -41,6 +41,7 @@ export class SettingComponent implements OnInit, OnDestroy {
   };
 
   constructor(
+    public appS: AppService,
     private e: ElectronService,
     private odb: DbService,
     public appService: AppService,

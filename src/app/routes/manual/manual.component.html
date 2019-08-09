@@ -32,7 +32,7 @@
         <div #domz>
         </div>
       </div>
-      <div class="alarm" *ngIf="zmsg || !PLCS.plcState.z">{{!PLCS.plcState.z ? '设备未连接' : zmsg}}</div>
+      <div class="alarm" *ngIf="!PLCS.jack || !PLCS.plcState.z">{{!PLCS.jack ? '没有选择顶' : (!PLCS.plcState.z ? '设备未连接' : zmsg)}}</div>
     </div>
     <br><br>
     <div class="content c scroll-y" [ngClass]="{'form-edit': !PLCS.plcState.c}" [hidden]="!connection">
@@ -50,7 +50,7 @@
       <div class="manual-data scroll-content" #dc>
         <div #domc hidden></div>
       </div>
-      <div class="alarm" *ngIf="cmsg || !PLCS.plcState.c">{{!PLCS.plcState.c ? '设备未连接' : cmsg}}</div>
+      <div class="alarm" *ngIf="!PLCS.jack || !PLCS.plcState.c">{{!PLCS.jack ? '没有选择顶' : (!PLCS.plcState.c ? '设备未连接' : cmsg)}}</div>
     </div>
   </main>
 </main>

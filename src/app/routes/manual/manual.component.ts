@@ -9,6 +9,8 @@ import { plcToMpa } from 'src/app/Function/device.date.processing';
 import { ManualItemComponent } from 'src/app/shared/manual-item/manual-item.component';
 import { DebugData } from 'src/app/models/debug';
 import { deviceGroupMode } from 'src/app/models/jack';
+import { Subscription } from 'rxjs';
+import { log } from 'util';
 
 @Component({
   selector: 'app-manual',
@@ -23,7 +25,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedJack: any;
   selectedI: any = null;
   jacks = [];
-  selectJackId = 1;
+  selectJackId = null;
   deviceMode = true;
   devModeStr: any = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']};
   /** 点动  强制  补压 */
@@ -98,15 +100,18 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     z: [],
     c: []
   };
+  /** 刷新率 */
   ms = {
     i: 0,
     t: null,
   };
+  /** 监听PLC */
+  plcsub: Subscription;
 
   constructor(
     private e: ElectronService,
     private odb: DbService,
-    public appService: AppService,
+    public appS: AppService,
     public PLCS: PLCService,
     private message: NzMessageService,
     private cfr: ComponentFactoryResolver,
@@ -116,6 +121,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnInit() {
+    /** 刷新率 */
     this.ms.t = setInterval(() => {
       this.ms.i ++;
       // console.log(this.ms);
@@ -123,40 +129,50 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
         this.ms.i = 0;
       }
       this.cdr.markForCheck();
-    }, 50);
-
-
-    this.PLCS.ipcSend('zF05', PLC_S(0), true);
-    this.PLCS.ipcSend('cF05', PLC_S(0), true);
-    this.PLCS.plcSubject.subscribe((data) => {
-      if (this.PLCS.PD.zA.alarm.indexOf('急停') > -1) {
-        this.zmsg = '急停！！';
-      } else if (this.PLCS.PD.zA.alarm.indexOf('相序错误') > -1) {
-        this.zmsg = '相序错误！！';
-      } else {
-        this.zmsg = null;
-      }
-      if (this.PLCS.PD.cA.alarm.indexOf('急停') > -1) {
-        this.cmsg = '急停！！';
-      } else if (this.PLCS.PD.cA.alarm.indexOf('相序错误') > -1) {
-        this.cmsg = '相序错误！！';
-      } else {
-        this.cmsg = null;
-      }
-    });
+    }, this.appS.refresh);
     // 获取顶
-    await this.db.jack.toArray().then((d) => {
+    await this.db.jack.filter(j => j.state).toArray().then((d) => {
       this.jacks = d.map(item => {
         return { name: item.name, id: item.id };
       });
     });
-    await this.onSelectedDevice(this.PLCS.getJackId());
+    /** 获取当前顶 */
+    await this.onSelectedDevice();
+
+    this.PLCS.ipcSend('zF05', PLC_S(0), true);
+    this.PLCS.ipcSend('cF05', PLC_S(0), true);
+    // this.plcsub = this.PLCS.plcSubject.subscribe((data: any) => {
+    //   const dev = data.dev;
+    //   let msg = null;
+    //   if (this.PLCS.PD[`${dev}`].alarm.indexOf('急停') > -1) {
+    //     msg = '急停！！';
+    //   } else if (this.PLCS.PD[`${dev}`].alarm.indexOf('相序错误') > -1) {
+    //     msg = '相序错误！！';
+    //   }
+    //   this[`${dev[0]}msg`] = msg;
+    //   // if (this.PLCS.PD.zA.alarm.indexOf('急停') > -1) {
+    //   //   this.zmsg = '急停！！';
+    //   // } else if (this.PLCS.PD.zA.alarm.indexOf('相序错误') > -1) {
+    //   //   this.zmsg = '相序错误！！';
+    //   // } else {
+    //   //   this.zmsg = null;
+    //   // }
+    //   // if (this.PLCS.PD.cA.alarm.indexOf('急停') > -1) {
+    //   //   this.cmsg = '急停！！';
+    //   // } else if (this.PLCS.PD.cA.alarm.indexOf('相序错误') > -1) {
+    //   //   this.cmsg = '相序错误！！';
+    //   // } else {
+    //   //   this.cmsg = null;
+    //   // }
+    // });
+
+
     /** 获取设备压力校正 */
     // await this.PLCS.getMpaRevise();
-    this.selectManual('z');
-    this.selectManual('c');
-    this.getManualData('z');
-    this.getManualData('c');
+    // this.selectManual('z');
+    // this.selectManual('c');
+    // this.getManualData('z');
+    // this.getManualData('c');
     console.log('init');
     // this.f5();
 
@@ -168,17 +184,60 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     console.log('退出');
     clearInterval(this.ms.t);
+    if (this.plcsub) {
+      this.plcsub.unsubscribe();
+    }
     this.selectManual('z', [false, false, false, false]);
     this.selectManual('c', [false, false, false, false]);
     this.PLCS.ipcSend('zF05', PLC_S(0), false);
     this.PLCS.ipcSend('cF05', PLC_S(0), false);
   }
+  /** 数据监听|处理 */
+
   /** 切换设备 */
-  async onSelectedDevice(id) {
-    console.log(id);
+  async onSelectedDevice(id: number = null) {
+    id = id ||  Number(localStorage.getItem('jackId'));
+    if (!id) {
+      this.message.warning('没有设备');
+      this.PLCS.jack = null;
+      return;
+    }
+
+    this.PLCS.ipcSend('zF05', PLC_S(0), true);
+    this.PLCS.ipcSend('cF05', PLC_S(0), true);
+    if (!this.plcsub) {
+      this.plcsub = this.PLCS.plcSubject.subscribe((data: any) => {
+        const dev = data.dev;
+        // console.log(dev);
+        let msg = null;
+        try {
+          if (!this.PLCS.jack) {
+            msg = '没有选择顶！！';
+          } else if (this.PLCS.PD[`${dev}`].alarm.indexOf('急停') > -1) {
+            msg = '急停！！';
+          } else if (this.PLCS.PD[`${dev}`].alarm.indexOf('相序错误') > -1) {
+            msg = '相序错误！！';
+          }
+          this[`${dev[0]}msg`] = msg;
+        } catch (error) {
+          console.warn(error);
+        }
+      });
+    }
+
+    /** 切换手动 */
+    // this.selectManual('z');
+    // this.selectManual('c');
+    // this.getManualData('z');
+    // this.getManualData('c');
+
     // this.PLCS.ipcSend('zF06', PLC_S(0), id);
     this.selectJackId = id;
     const jack = await this.PLCS.selectJack(id);
+    if (!jack) {
+      this.message.warning('没有选择顶！！');
+      return;
+    }
     const devModeStr = [
       {},
       { z: ['zA'], c: ['cA'] },

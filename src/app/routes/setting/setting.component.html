@@ -1,4 +1,17 @@
 <main class="setting">
+  <div>
+    <nz-divider style="min-width: auto;" nzText="系统参数" nzOrientation="left"></nz-divider>
+    <nz-col nz-col nzSpan="6">
+      <nz-input-group nzAddOnBefore="采集频率ms">
+        <input nz-input type="number" nzSize="large" style="width: 100%;" min="10" max="1000" [ngModel]="PLCS.heartbeatRateValue" (change)="PLCS.heartbeatRate($event.target.valueAsNumber)"/>
+      </nz-input-group>
+    </nz-col>
+    <nz-col nz-col nzSpan="6">
+      <nz-input-group nzAddOnBefore="刷新率">
+        <input nz-input type="number" nzSize="large" style="width: 100%;" min="10" max="1000" [ngModel]="appS.refresh" (change)="appS.setRefresh($event.target.valueAsNumber)"/>
+      </nz-input-group>
+    </nz-col>
+  </div>
   <div [ngClass]="{'form-edit': !PLCS.plcState.z}">
     <nz-divider style="min-width: auto;" nzText="主机系统参数" nzOrientation="left"></nz-divider>
     <nz-row>
@@ -34,11 +47,11 @@
           </nz-radio-group>
         </nz-input-group>
       </nz-col>
-      <nz-col nz-col nzSpan="6">
+      <!-- <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="采集频率ms">
           <input nz-input type="number" nzSize="large" style="width: 100%;" min="100" max="1000" [value]="PLCS.heartbeatRateValue" (ngModelChange)="heartbeatRate($event)"/>
         </nz-input-group>
-      </nz-col>
+      </nz-col> -->
     </nz-row>
     <div class="edit" *ngIf="!PLCS.plcState.z">设备未连接无法设置参数！！</div>
   </div>

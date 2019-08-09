@@ -137,8 +137,8 @@ export class PLCService {
   // }
   /** 手动模式 */
   public manualMode = {
-    z: null,
-    c: null,
+    z: '0',
+    c: '0',
   };
   lock = {
     state: false,
@@ -203,10 +203,12 @@ export class PLCService {
       delay = Number(localStorage.getItem('heartbeatRate'));
     }
     delay = Number(delay) || 10;
+    console.log('设置采集频率', delay);
     this.e.ipcRenderer.send('heartbeatRate', {delay, channel: 'delay'});
     this.e.ipcRenderer.once('delay', (event, data) => {
       localStorage.setItem('heartbeatRate', data);
       console.log('设置采集频率完成', localStorage.getItem('heartbeatRate'));
+      this.message.success(`设置采集频率完成: ${delay}`);
       this.heartbeatRateValue = delay;
     });
   }
@@ -252,12 +254,15 @@ export class PLCService {
           // this.ipcSend(`cF05`, PLC_M(0), true);
           console.log('c锁机z');
           this.e.ipcRenderer.send('cF05', { address: PLC_M(0), value : true});
+          if (this.jack) {
+            this.gsJack('z');
+          }
         } else {
-          this.lock.code = `${localStorage.getItem('ID')}${new Date().getTime()}`;
+          // this.lock.code = `${localStorage.getItem('ID')}${new Date().getTime()}`;
           const arrs = [];
           for (let index = 0; index < 9; index++) {
-            const i = Math.floor(Math.random() * this.lock.code.length);
-            arrs.push(this.lock.code[i]);
+            const i = Math.floor(Math.random() * 12);
+            arrs.push([0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9][i]);
           }
           this.lock.code = arrs.join('');
         }
@@ -267,6 +272,9 @@ export class PLCService {
           console.log('c锁机c');
           this.e.ipcRenderer.send('cF05', { address: PLC_M(0), value : true});
           // this.ipcSend(`cF05`, PLC_M(0), true);
+          if (this.jack && this.jack.link) {
+            this.gsJack('c');
+          }
         }
       }
     });
@@ -279,6 +287,7 @@ export class PLCService {
     });
     /** 获取实时数据 */
     this.e.ipcRenderer.on(`${dev}heartbeat`, (event, data) => {
+      // console.log(dev, data);
       // if (!this.revise[`${dev}GetMpaState`]) {
       //   console.log(this.revise[`${dev}MpaRevise`]);
       //   this.getPLCMpa(dev);
@@ -294,10 +303,12 @@ export class PLCService {
         // [[], ['A'], ['A', 'B'], [], ['A', 'B', 'C', 'D']]
         numberMode[this.jack.jackMode].forEach(k => {
           // console.log(this.jack);
-          // console.log(dev, k, data);
           const key = `${dev}${k}`;
           this.PD[key].showMpa = data.float[i].toFixed(2);
           this.PD[key].showMm = data.float[i + 1].toFixed(2);
+          this.PD[key].setMpa = data.float[i + 13].toFixed(2);
+          this.PD[key].setMm = data.float[i + 14].toFixed(2);
+          this.PD[key].upMpa = data.float[i + 15].toFixed(2);
           const state = this.getState(data.uint16[i * 2 + 4], data.uint16[24]);
           this.PD[key].state = state.state.join('·');
           this.PD[key].alarm = state.alarm;
@@ -306,7 +317,7 @@ export class PLCService {
         });
       }
       // this.onPlcSub(data);
-      this.plcSub.next(data);
+      this.plcSub.next({data, dev});
 
       this.plcState[`${dev}T`] = setTimeout(() => {
         this.plcState[dev] = false;
@@ -413,50 +424,65 @@ export class PLCService {
 
   /** 切换设备 */
   async selectJack(id: number): Promise<Jack> {
+    console.log('切换顶', id);
+    if (!id) {
+      return;
+    }
     localStorage.setItem('jackId', JSON.stringify(id));
-    await this.odb.db.jack.filter(f => f.id === id).first(d => {
+    const  j = await this.odb.db.jack.filter(f => f.id === id).first(d => {
+      console.log(d);
       this.jack = d;
     });
-    await this.ipcSend(`zF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
+    console.log(this.jack);
+    if (!this.jack) {
+      return;
+    }
+    this.gsJack('z');
+    if (this.jack.link) {
+      this.gsJack('c');
+    }
+    // if (this.jack.link) {  156 531 874 3 156 710 000
+    //   await this.ipcSend(`cF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
+    //     deviceGroupModeDev.c[this.jack.jackMode].map((name, index) => {
+    //       // console.log(name, index);
+    //       const startIndex = index * 10;
+    //       this.jack[name].mm = data.float.slice(startIndex, startIndex + 6).map(v => v.toFixed(5));
+    //       this.jack[name].upper = data.float[startIndex + 6];
+    //       this.jack[name].floot = data.float[startIndex + 7];
+    //     });
+    //   }).catch(() => {
+    //     console.error('获取PLC位移校正错误');
+    //   });
+    // }
+    // 设置泵顶组
+    // this.ipcSend('zF06', PLC_D(407), this.jack.saveGroup);
+    // this.ipcSend('cF06', PLC_D(407), this.jack.saveGroup);
+    console.log('切换顶', this.jack);
+    return this.jack;
+  }
+  /** 获取设置顶数据 */
+  async gsJack(dev: string) {
+    await this.ipcSend(`${dev}F03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
       console.log(data);
-      deviceGroupModeDev.z[this.jack.jackMode].map((name, index) => {
+      deviceGroupModeDev[dev[0]][this.jack.jackMode].map((name, index) => {
         // console.log(name, index);
         const startIndex = index * 10;
         this.jack[name].mm = data.float.slice(startIndex, startIndex + 6).map(v => v.toFixed(5));
         this.jack[name].upper = data.float[startIndex + 6];
         this.jack[name].floot = data.float[startIndex + 7];
       });
+      this.ipcSend(`${dev}F06`, PLC_D(407), this.jack.saveGroup);
     }).catch(() => {
       console.error('获取PLC位移校正错误');
     });
-    if (this.jack.link) {
-      await this.ipcSend(`cF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
-        deviceGroupModeDev.c[this.jack.jackMode].map((name, index) => {
-          // console.log(name, index);
-          const startIndex = index * 10;
-          this.jack[name].mm = data.float.slice(startIndex, startIndex + 6).map(v => v.toFixed(5));
-          this.jack[name].upper = data.float[startIndex + 6];
-          this.jack[name].floot = data.float[startIndex + 7];
-        });
-      }).catch(() => {
-        console.error('获取PLC位移校正错误');
-      });
-    }
-    // 设置泵顶组
-    this.ipcSend('zF06', PLC_D(407), this.jack.saveGroup);
-    this.ipcSend('cF06', PLC_D(407), this.jack.saveGroup);
-    console.log('切换顶', this.jack);
-    return this.jack;
   }
   getJackId() {
-    const jackId = JSON.parse(localStorage.getItem('jackId'));
-    if (!jackId) {
-      this.selectJack(1);
+    const jackId = Number(JSON.parse(localStorage.getItem('jackId')));
+    if (jackId) {
+      this.selectJack(jackId);
     }
-    return JSON.parse(localStorage.getItem('jackId'));
+    return jackId;
   }
-
-
 
   getPLCMpa(dev) {
     // await this.ipcSend(`cF03`, PLC_D(2100), 20).then((data: any) => {

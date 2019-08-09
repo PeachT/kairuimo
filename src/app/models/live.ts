@@ -12,10 +12,21 @@ export interface PLCLiveData {
 }
 
 export interface PLCItem {
+  /** 显示压力 */
   showMpa: number;
+  /** 显示位移 */
   showMm: number;
+  /** 设置压力 */
+  setMpa: number;
+  /** 设置卸荷压力 */
+  upMpa: number;
+  /** 设置位移 */
+  setMm: number;
+  /** 设备状态 */
   state: string;
+  /** 报警状态 */
   alarm: Array<string>;
+  /** 自动状态 */
   autoState: Array<string>;
 }
 export function GetPLCLiveData(): PLCLiveData {

@@ -257,6 +257,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
+    /** 刷新率 */
     this.ms.t = setInterval(() => {
       this.ms.i ++;
       // console.log(this.ms);
@@ -264,10 +265,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ms.i = 0;
       }
       this.cdr.markForCheck();
-    }, 50);
+    }, this.appS.refresh);
     this.plcsub = this.PLCS.plcSubject.subscribe((data) => {
       this.alarmMonitoring();
-      this.cdr.markForCheck();
     });
     this.stageStr = getStageString(this.task);
     this.stepStageStr = this.stageStr;

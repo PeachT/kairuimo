@@ -35,6 +35,8 @@ export class AppService {
   dataTreatingShow = false;
   /** 调试 */
   debugShow = false;
+  /** 刷新率 */
+  refresh = 50;
 
   public powerState = false;
   public powerDelay = 5;
@@ -50,6 +52,7 @@ export class AppService {
     private e: ElectronService,
     private message: NzMessageService,
   ) {
+    this.refresh = Number(localStorage.getItem('refresh')) || 50;
     const info = JSON.parse(localStorage.getItem('unitInfo'));
     if (!info) {
       localStorage.setItem('unitInfo', JSON.stringify(this.info.unit));
@@ -103,7 +106,16 @@ export class AppService {
       }
     });
   }
-
+  /**
+   * 设置刷新率
+   *
+   * @param {number} value
+   * @memberof AppService
+   */
+  setRefresh(value: number) {
+    localStorage.setItem('refresh', `${value}`);
+    this.refresh = Number(value) || 50;
+  }
   sss(v) {
     console.log(v);
   }

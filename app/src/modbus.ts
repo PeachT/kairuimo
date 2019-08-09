@@ -126,7 +126,7 @@ export class ModbusTCP {
         // this.F06(4195, d)
         this.client.writeRegister(4195, d).then((data) => {
         });
-        this.client.readHoldingRegisters(4096, 30).then((data) => {
+        this.client.readHoldingRegisters(4096, 50).then((data) => {
           const float = bf.bufferToFloat(data.buffer);
           const dint16 = bf.bufferTo16int(data.buffer);
           this.IPCSend(`${this.dev}heartbeat`, { uint16: data.data, int16: dint16, float });

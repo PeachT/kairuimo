@@ -24,14 +24,12 @@
       <nz-row style="margin-bottom: 4px;">
         <nz-col nz-col nzXl="8" nzMd="12">
           <nz-input-group nzAddOnBefore="设置压力 Mpa" nzSize="large">
-            <input nz-input type="number" min="0" max="60" [(ngModel)]="dev.setMpa"
-              (change)="set(setAeeress[0], $event, 'mpa')" />
-            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60" [(ngModel)]="dev.setMpa"
-              (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-input-number> -->
+            <input nz-input type="number" min="0" max="60" [ngModel]="PLCS.PD[name].setMpa"
+              (change)="set(setAeeress[0], $event.target.valueAsNumber, 'mpa')" />
           </nz-input-group>
         </nz-col>
         <nz-col nzXl="16" nzMd="12">
-          <nz-slider [nzMarks]="mpaMarks" [nzMin]="0" [nzMax]="60" [nzStep]="0.5" [(ngModel)]="dev.setMpa"
+          <nz-slider [nzMarks]="mpaMarks" [nzMin]="0" [nzMax]="60" [nzStep]="0.5" [ngModel]="PLCS.PD[name].setMpa"
             (ngModelChange)="set(setAeeress[0], $event, 'mpa')"></nz-slider>
         </nz-col>
       </nz-row>
@@ -39,9 +37,6 @@
         <nz-col nzXl="8" nzMd="12">
           <nz-input-group nzAddOnBefore="设备压力 Mpa" nzSize="large">
             <input nz-input type="number" readonly [value]="PLCD.showMpa" />
-            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-              [(ngModel)]="PLCD.showMpa">
-            </nz-input-number> -->
           </nz-input-group>
         </nz-col>
         <nz-col nzXl="16" nzMd="12">
@@ -54,14 +49,12 @@
       <nz-row style="margin-bottom: 4px;">
         <nz-col nz-col nzXl="8" nzMd="12">
           <nz-input-group nzAddOnBefore="设置位移 Mm" nzSize="large">
-            <input nz-input type="number" min="0" max="220" [(ngModel)]="dev.setMm"
-              (change)="set(setAeeress[1], $event, 'mm')" />
-            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="220" [(ngModel)]="dev.setMm"
-              (ngModelChange)="set(setAeeress[1], $event)"></nz-input-number> -->
+            <input nz-input type="number" min="0" [max]="220" [ngModel]="PLCS.PD[name].setMm"
+              (change)="set(setAeeress[1], $event.target.valueAsNumber, 'mm')" />
           </nz-input-group>
         </nz-col>
         <nz-col nzXl="16" nzMd="12">
-          <nz-slider [nzMarks]="mmMarks" [nzMin]="0" [nzMax]="220" [nzStep]="1" [(ngModel)]="dev.setMm"
+          <nz-slider [nzMarks]="mmMarks" [nzMin]="0" [nzMax]="220" [nzStep]="1" [ngModel]="PLCS.PD[name].setMm"
             (ngModelChange)="set(setAeeress[1], $event, 'mm')"></nz-slider>
         </nz-col>
       </nz-row>
@@ -69,9 +62,6 @@
         <nz-col nzXl="8" nzMd="12">
           <nz-input-group nzAddOnBefore="设备位移 Mm" nzSize="large">
             <input nz-input type="number" readonly [value]="PLCD.showMm" />
-            <!-- <nz-input-number nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="220"
-              [(ngModel)]="PLCD.showMm">
-            </nz-input-number> -->
           </nz-input-group>
         </nz-col>
         <nz-col nzXl="16" nzMd="12">

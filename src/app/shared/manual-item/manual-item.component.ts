@@ -116,22 +116,23 @@ export class ManualItemComponent implements OnInit {
     this.PLCD = this.PLCS.PD[this.name];
     console.log(this.PLCD);
     this.devName = this.name[0];
+    const key = this.name[1];
     // this.setAeeress = this.name.indexOf('A') > -1 ? [100, 102] : [106, 108];
     switch (true) {
-      case this.name.indexOf('A') > -1:
-        this.setAeeress = [100, 102];
+      case key === 'A':
+        this.setAeeress = [26, 28, 30];
         this.setM = [20, 21, 22, 23];
         break;
-        case this.name.indexOf('B') > -1:
-        this.setAeeress = [106, 108];
+        case key === 'B':
+        this.setAeeress = [32, 34, 36];
         this.setM = [24, 25, 26, 27];
         break;
-        case this.name.indexOf('C') > -1:
-        this.setAeeress = [112, 114];
+        case key === 'C':
+        this.setAeeress = [38, 40, 42];
         this.setM = [30, 31, 32, 33];
         break;
-        case this.name.indexOf('D') > -1:
-        this.setAeeress = [118, 120];
+        case key === 'D':
+        this.setAeeress = [44, 46, 48];
         this.setM = [34, 35, 36, 37];
         break;
       default:
@@ -164,23 +165,15 @@ export class ManualItemComponent implements OnInit {
   /** 设置数据 */
   async set(address: number, value: number, cla: string = 'mm'): Promise<boolean> {
     console.log(value);
-    let state = true;
+    let state = false;
     // this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]);
     if (cla === 'mpa') {
       await this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]).then((d: any) => {
-        console.log(d);
-        if (d.success) {
-          this.dev.setMpa = value;
-        }
-      }).catch(() => {
-        state = false;
+        state = true;
       });
     } else {
       await this.PLCS.ipcSend(`${this.devName}F016_float`, PLC_D(address), [value]).then((d) => {
-        console.log(d);
-        this.dev.setMm = value;
-      }).catch(() => {
-        state = false;
+        state = true;
       });
     }
     return state;
@@ -200,12 +193,15 @@ export class ManualItemComponent implements OnInit {
   /** 按下 */
   onDown(i: number) {
     console.log('按下');
-    if (this.dev.setMpa > 0 || i > 0) {
+    if (this.PLCS.PD[this.name].setMpa > 0 || i > 0) {
       console.log(this.setM[i]);
       this.PLCS.ipcSend(`${this.devName}F05`, PLC_M(this.setM[i]), true);
       this.setMState[i] = true;
     } else {
       this.message.warning('设置压力不能等于0MPa');
+    }
+    if (this.PLCS.PD[this.name].setMm < this.PLCS.PD[this.name].showMm) {
+      this.message.warning('位移超出设置值');
     }
   }
   /** 松开 */
