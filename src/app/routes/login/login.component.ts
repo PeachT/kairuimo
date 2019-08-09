@@ -125,6 +125,7 @@ export class LoginComponent implements OnInit {
   touch(msg) {
     console.log(msg);
   }
+  /** 解锁 */
   onLock() {
     const j4 = decodeLock(this.lock, this.PLCS.lock.code);
     if (j4) {
@@ -141,6 +142,7 @@ export class LoginComponent implements OnInit {
       });
     } else {
       this.message.warning('验证码错误');
+      this.PLCS.getLockID();
     }
   }
   runPLC() {

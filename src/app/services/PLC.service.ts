@@ -259,12 +259,13 @@ export class PLCService {
           }
         } else {
           // this.lock.code = `${localStorage.getItem('ID')}${new Date().getTime()}`;
-          const arrs = [];
-          for (let index = 0; index < 9; index++) {
-            const i = Math.floor(Math.random() * 12);
-            arrs.push([0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9][i]);
-          }
-          this.lock.code = arrs.join('');
+          // const arrs = [];
+          // for (let index = 0; index < 9; index++) {
+          //   const i = Math.floor(Math.random() * 12);
+          //   arrs.push([0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9][i]);
+          // }
+          // this.lock.code = arrs.join('');
+          this.getLockID();
         }
       } else {
         console.log('c锁机', this.lock.state, this.lock.success);
@@ -278,6 +279,7 @@ export class PLCService {
         }
       }
     });
+
     /** 链接成功 */
     this.e.ipcRenderer.on(`${dev}connection`, async (event, data) => {
       console.log('链接成功', dev, data);
@@ -337,6 +339,15 @@ export class PLCService {
       this.PD[`${dev}C`].state = '重新链接中...';
       this.PD[`${dev}D`].state = '重新链接中...';
     });
+  }
+  /** 生成锁机ID */
+  getLockID() {
+    const arrs = [];
+    for (let index = 0; index < 9; index++) {
+      const i = Math.floor(Math.random() * 12);
+      arrs.push([0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9][i]);
+    }
+    this.lock.code = arrs.join('');
   }
   /** 设备状态处理 */
   getState(value: number, PLCstate: number, auto = false, states = this.stateStr): { state: Array<string>, alarm: Array<string> } {

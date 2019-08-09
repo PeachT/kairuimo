@@ -19,7 +19,7 @@ export class DbService {
   public db: DB;
   constructor(
     private message: NzMessageService,
-    private apps: AppService,
+    private appS: AppService,
   ) {
     // tslint:disable-next-line: no-use-before-declare
     this.db = new DB();
@@ -42,7 +42,7 @@ export class DbService {
     try {
       data.createdDate = new Date().getTime();
       data.modificationDate = new Date().getTime();
-      data.user = this.apps.userInfo.name || 'sys';
+      data.user = this.appS.userInfo.name || 'sys';
       const r = await this.db[tName].add(data);
       console.log('保存结果', r);
       return { success: true, id: r };
@@ -265,7 +265,12 @@ export class DbService {
   /** 任务数据导出菜单 */
   public async getTaskDataTreatingProject() {
     const r = [];
-    await this.db.project.each(v => {
+    const j =  this.appS.userInfo.jurisdiction;
+    await this.db.project.filter((o1: Project) => {
+      if ((j < 8 && o1.jurisdiction !== 8) || j >= 8) {
+        return true;
+      }
+    }).each(v => {
       r.push({ title: v.name, key: v.id, expanded: false });
     });
     return r;
