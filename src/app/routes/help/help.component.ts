@@ -141,13 +141,9 @@ export class HelpComponent implements OnInit {
     })[0];
   }
   /** 设置软件端 */
-  setPlatform() {
+  setPlatform(value: string) {
     const pf = localStorage.getItem('platform');
-    if (pf === 'devices') {
-      localStorage.setItem('platform', '');
-    } else {
-      localStorage.setItem('platform', 'devices');
-    }
+    localStorage.setItem('platform', value);
     this.appS.platform = localStorage.getItem('platform');
   }
 }

@@ -200,8 +200,11 @@ export class ManualItemComponent implements OnInit {
     } else {
       this.message.warning('设置压力不能等于0MPa');
     }
-    if (this.PLCS.PD[this.name].setMm < this.PLCS.PD[this.name].showMm) {
+    if (this.PLCS.PD[this.name].setMm > 0 && this.PLCS.PD[this.name].setMm < this.PLCS.PD[this.name].showMm) {
       this.message.warning('位移超出设置值');
+    }
+    if (this.PLCS.PD[this.name].setMpa < this.PLCS.PD[this.name].showMpa) {
+      this.message.warning('压力超出设置值');
     }
   }
   /** 松开 */

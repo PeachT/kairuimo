@@ -25,7 +25,7 @@ export class AppComponent implements OnInit {
   keyboardState = true;
 
   constructor(
-    private e: ElectronService,
+    public e: ElectronService,
     private odb: DbService,
     public appS: AppService,
     private message: NzMessageService,
@@ -41,6 +41,9 @@ export class AppComponent implements OnInit {
       };
     }
     if (this.e.isLinux) {
+      if (this.appS.platform === '') {
+        localStorage.setItem('platform', 'devices');
+      }
       if (!this.appS.platform || this.appS.platform === 'devices') {
         this.runPLC();
         // this.router.navigate(['/lock']);

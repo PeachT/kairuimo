@@ -1,7 +1,7 @@
 <div class="plc-state">
-  <app-time-sec class="item"></app-time-sec>
-  <div class="item" [ngClass]="{'active': PLCS.plcState.z}">Z:{{PLCS.plcState.zLT}}</div>
-  <div class="item" [ngClass]="{'active': PLCS.plcState.c}">C:{{PLCS.plcState.cLT}}</div>
+  <app-time-sec class="item" *ngIf="appS.platform === 'devices'"></app-time-sec>
+  <div class="item" *ngIf="appS.platform === 'devices'" [ngClass]="{'active': PLCS.plcState.z}">Z:{{PLCS.plcState.zLT}}</div>
+  <div class="item" *ngIf="appS.platform === 'devices'" [ngClass]="{'active': PLCS.plcState.c}">C:{{PLCS.plcState.cLT}}</div>
 </div>
 <router-outlet></router-outlet>
 <nz-modal [nzVisible]="appS.powerState" nzTitle="" [nzFooter]="null" [nzMaskClosable]="!appS.powerDelayT" nzClosable="false" (nzOnCancel)="appS.powerState = false">

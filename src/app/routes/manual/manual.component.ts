@@ -94,7 +94,7 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   zmsg = null;
   cmsg = null;
 
-  connection = true;
+  connection = false;
 
   anchor = {
     z: [],
