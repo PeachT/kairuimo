@@ -82,8 +82,8 @@ export class SettingComponent implements OnInit, OnDestroy {
         this.systenDate[`${dev}`][3] = data.float[4];
         this.systenDate[`${dev}`][4] = data.uint16[10] / 10;
         this.systenDate[`${dev}`][5] = data.uint16[11] / 10;
-        this.systenDate[`${dev}`][5] = data.uint16[12];
-        this.systenDate[`${dev}`][6] = data.uint16[13];
+        this.systenDate[`${dev}`][6] = data.uint16[12];
+        this.systenDate[`${dev}`][7] = data.uint16[13];
         this.revise[`${dev}Mode`] = numberMode[data.uint16[0]];
         console.log(this.revise[`${dev}Mode`]);
         this.cdr.markForCheck();

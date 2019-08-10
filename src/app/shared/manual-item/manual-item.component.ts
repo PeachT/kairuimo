@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { NzMessageService } from 'ng-zorro-antd';
 import { DbService } from 'src/app/services/db.service';
@@ -13,7 +13,7 @@ import { DebugData } from 'src/app/models/debug';
   templateUrl: './manual-item.component.html',
   styleUrls: ['./manual-item.component.less']
 })
-export class ManualItemComponent implements OnInit {
+export class ManualItemComponent implements OnInit, OnDestroy {
   // [x: string]: any;
   /** 设备名称 */
   @Input() name: any;
@@ -24,6 +24,7 @@ export class ManualItemComponent implements OnInit {
       setMm: 0,
       setUn: 0
     };
+  @Input() refreshState = false;
 
   devName = 'z';
 
@@ -84,12 +85,16 @@ export class ManualItemComponent implements OnInit {
     160: null,
     200: null,
   };
-  ms = 0;
   debugItem = null;
   debugItems = ['m5', 'm10', 'm15', 'm20', 'm25', 'm30', 'm35', 'm40', 'm45', 'm50', 'm55', 'mmSpeed'];
   debugNames = ['5Mpa保压', '10Mpa保压', '15Mpa保压', '20Mpa保压', '25Mpa保压', '30Mpa保压',
                 '35Mpa保压', '40Mpa保压', '45Mpa保压', '50Mpa保压', '54.5 ~ 55Mpa安全阀测试', '顶速度'];
   debugData: DebugData;
+  /** 刷新率 */
+  ms = {
+    i: 0,
+    t: null,
+  };
 
   constructor(
     public appS: AppService,
@@ -104,14 +109,16 @@ export class ManualItemComponent implements OnInit {
 
   ngOnInit() {
     console.log(this.name);
-    // setInterval(() => {
-    //   this.ms ++;
-    //   console.log(this.ms);
-    //   if (this.ms > 10000) {
-    //     this.ms = 0;
-    //   }
-    //   this.cdr.markForCheck();
-    // }, 50);
+    if (this.refreshState) {
+      this.ms.t = setInterval(() => {
+        this.ms.i ++;
+        // console.log(this.ms);
+        if (this.ms.i > 10000) {
+          this.ms.i = 0;
+        }
+        this.cdr.markForCheck();
+      }, this.appS.refresh);
+    }
 
     this.PLCD = this.PLCS.PD[this.name];
     console.log(this.PLCD);
@@ -160,6 +167,11 @@ export class ManualItemComponent implements OnInit {
       this.debugData =  debugData;
     }
     console.log(this.debugData, localStorageName);
+  }
+
+  ngOnDestroy() {
+    console.log('退出');
+    clearInterval(this.ms.t);
   }
 
   /** 设置数据 */
