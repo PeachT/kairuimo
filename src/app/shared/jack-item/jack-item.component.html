@@ -56,6 +56,6 @@
 </div>
 
 <nz-modal nzWidth="96%" *ngIf="revise.state" [(nzVisible)]="revise.state" nzMaskClosable="false" [nzStyle]="{ top: '20px' }"
-  nzClosable="false" [nzTitle]="name + '·位移校正'" (nzOnCancel)="cancel()" (nzOnOk)="handleOk()" nzOkText="保 存">
+  nzClosable="false" [nzTitle]="(name | nameConvert) + '·位移校正'" (nzOnCancel)="cancel()" (nzOnOk)="handleOk()" nzOkText="保 存">
   <app-revise-item [name]="name" reviseName="mm" [reviseData]="formGroup.value[name].mm" [upper]="formGroup.value[name].upper" [floot]="formGroup.value[name].floot" #reviseDom></app-revise-item>
 </nz-modal>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { taskModeStr } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { Router } from '@angular/router';
@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
   // tslint:disable-next-line:component-selector
   selector: 'task-tension',
   templateUrl: './tension.component.html',
-  styleUrls: ['./tension.component.less']
+  styleUrls: ['./tension.component.less'],
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class TensionComponent implements OnInit {
   @Input() show: boolean;
@@ -31,9 +32,13 @@ export class TensionComponent implements OnInit {
   constructor(
     public PLCS: PLCService,
     private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
+    this.PLCS.plcSubject.subscribe(() => {
+      this.cdr.markForCheck();
+    });
   }
   /**
    * *张拉

@@ -71,16 +71,19 @@ export class SettingComponent implements OnInit, OnDestroy {
     this.PLCS.getPLCMpa(dev);
     console.log('123123123123123123132132');
     // this.PLCS.ipcSend(`zF03`, PLC_D(410), 6);
-    this.PLCS.ipcSend(`${dev}F03`, PLC_D(408), 12).then((data: any) => {
+    this.PLCS.ipcSend(`${dev}F03`, PLC_D(408), 20).then((data: any) => {
       if (data) {
         console.log(data);
         /** 设备模式 */
-        this.systenDate[`${dev}`][4] = data.uint16[0];
 
-        this.systenDate[`${dev}`][0] = data.float[2];
-        this.systenDate[`${dev}`][1] = data.float[3];
-        this.systenDate[`${dev}`][2] = data.float[4];
-        this.systenDate[`${dev}`][3] = data.uint16[10] / 10;
+        this.systenDate[`${dev}`][0] = data.uint16[0];
+        this.systenDate[`${dev}`][1] = data.float[2];
+        this.systenDate[`${dev}`][2] = data.float[3];
+        this.systenDate[`${dev}`][3] = data.float[4];
+        this.systenDate[`${dev}`][4] = data.uint16[10] / 10;
+        this.systenDate[`${dev}`][5] = data.uint16[11] / 10;
+        this.systenDate[`${dev}`][5] = data.uint16[12];
+        this.systenDate[`${dev}`][6] = data.uint16[13];
         this.revise[`${dev}Mode`] = numberMode[data.uint16[0]];
         console.log(this.revise[`${dev}Mode`]);
         this.cdr.markForCheck();

@@ -107,6 +107,9 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
   };
   /** 监听PLC */
   plcsub: Subscription;
+  /** 显示 */
+  zShow = true;
+  cShow = false;
 
   constructor(
     private e: ElectronService,
@@ -192,7 +195,12 @@ export class ManualComponent implements OnInit, AfterViewInit, OnDestroy {
     this.PLCS.ipcSend('zF05', PLC_S(0), false);
     this.PLCS.ipcSend('cF05', PLC_S(0), false);
   }
-  /** 数据监听|处理 */
+  showDevices() {
+    console.log(this.zShow, this.cShow);
+    if (!this.zShow && !this.cShow) {
+      this.zShow = true;
+    }
+  }
 
   /** 切换设备 */
   async onSelectedDevice(id: number = null) {

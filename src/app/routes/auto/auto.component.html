@@ -61,17 +61,22 @@
   [nzFooter]="null" (nzOnCancel)="handleCancel(handle=false)">
   <div nz-row nzGutter="25">
     <nz-divider style="min-width: auto;" nzText="设备状态" nzOrientation="left"></nz-divider>
-    <h2 style="color: red;">{{auto.pauseMsg}}{{auto.msg | json}}</h2>
-    <div nz-col nzSm="24" nzLg="12" class="title" *ngFor="let name of devNames; index as i">
-      <h1>{{name}}·{{PLCS.PD[name].state}}-{{PLCS.PD[name].alarm | json}}</h1>
-      <h1 style="color: red;" *ngIf="task.record && task.record[name].make.length > 0">
-        {{task.record[name].make[task.record[name].make.length - 1].msg}}</h1>
-      <div *ngIf="PLCS.PD[name].alarm.length > 0" class="alarm">
+    <!-- <h2 style="color: red;">{{auto.pauseMsg}}{{auto.msg | json}}</h2> -->
+    <div class="main-alert">
+      <ng-container  *ngFor="let name of devNames; index as i">
+        <div class="item" *ngIf="PLCS.PD[name].alarm.lenth > 0">
+          <nz-divider style="min-width: auto;" [nzText]="(name | nameConvert) + '：设备状态'" nzOrientation="left"></nz-divider>
+          <nz-alert nzType="error" [nzMessage]="item" nzDescription="还没有说明" nzShowIcon *ngFor="let item of PLCS.PD[name].alarm"></nz-alert>
+        </div>
+      </ng-container>
+      <!-- <h1 style="color: red;" *ngIf="task.record && task.record[name].make.length > 0">
+        {{task.record[name].make[task.record[name].make.length - 1].msg}}</h1> -->
+      <!-- <div *ngIf="PLCS.PD[name].alarm.length > 0" class="alarm">
         <nz-alert nzType="error" [nzMessage]="PLCS.PD[name].alarm[0]" nzShowIcon>
         </nz-alert>
         <button nzSize="large" nz-button nzType="default" *ngIf="PLCS.PD[name].alarm.length > 1"
           (click)="showAlarm(name)">查 看</button>
-      </div>
+      </div> -->
     </div>
   </div>
   <div>
