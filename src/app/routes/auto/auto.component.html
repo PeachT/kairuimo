@@ -61,28 +61,23 @@
   [nzFooter]="null" (nzOnCancel)="handleCancel(handle=false)">
   <div nz-row nzGutter="25">
     <nz-divider style="min-width: auto;" nzText="设备状态" nzOrientation="left"></nz-divider>
-    <!-- <h2 style="color: red;">{{auto.pauseMsg}}{{auto.msg | json}}</h2> -->
+    <h1 style="color:coral;" *ngIf="auto.fastMsg">最后异常记录：{{auto.fastMsg}}</h1>
     <h1 style="color: red">{{auto.pauseMsg}}</h1>
+    <h1 style="color: red">{{auto.mgsElongation}}</h1>
+    <h1 style="color: red">{{auto.mgsUpmm}}</h1>
+    <h1 style="color: red">{{auto.mgsMpaCmp}}</h1>
     <div class="main-alert">
       <ng-container  *ngFor="let name of devNames; index as i">
-        <div class="item" *ngIf="PLCS.PD[name].alarm.length > 0">
+        <div class="item" *ngIf="PLCS.PD[name].alarm.length > 0 || auto.pauseMsg">
           <nz-divider style="min-width: auto;" [nzText]="(name | nameConvert) + '：设备状态'" nzOrientation="left"></nz-divider>
           <nz-alert nzType="error" [nzMessage]="item" nzDescription="还没有说明" nzShowIcon *ngFor="let item of PLCS.PD[name].alarm"></nz-alert>
         </div>
 
-        <div class="item" *ngIf="auto.msg[name]">
+        <div class="item" *ngIf="auto.msg[name] && !selfInspectData.success">
           <nz-divider style="min-width: auto;" [nzText]="(name | nameConvert) + '：自检错误'" nzOrientation="left"></nz-divider>
           <nz-alert nzType="error" [nzMessage]="auto.msg[name]" nzDescription="切换到手动模式测试设备是否正常！" nzShowIcon ></nz-alert>
         </div>
       </ng-container>
-      <!-- <h1 style="color: red;" *ngIf="task.record && task.record[name].make.length > 0">
-        {{task.record[name].make[task.record[name].make.length - 1].msg}}</h1> -->
-      <!-- <div *ngIf="PLCS.PD[name].alarm.length > 0" class="alarm">
-        <nz-alert nzType="error" [nzMessage]="PLCS.PD[name].alarm[0]" nzShowIcon>
-        </nz-alert>
-        <button nzSize="large" nz-button nzType="default" *ngIf="PLCS.PD[name].alarm.length > 1"
-          (click)="showAlarm(name)">查 看</button>
-      </div> -->
     </div>
   </div>
   <div>
@@ -155,23 +150,11 @@
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="张拉平衡mm">
           <input nz-input type="number" nzSize="large" style="width: 100%;" min="1" [(ngModel)]="autoData.tensionBalance"/>
-          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="1" [(ngModel)]="autoData.tensionBalance">
-          </nz-input-number> -->
         </nz-input-group>
       </nz-col>
-      <!-- <nz-col nz-col nzSpan="6">
-        <nz-input-group nzAddOnBefore="回顶位移mm">
-          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" [(ngModel)]="autoData.backMm"/>
-        </nz-input-group>
-      </nz-col> -->
-    </nz-row>
-    <br>
-    <nz-row>
       <nz-col nz-col nzSpan="6">
         <nz-input-group nzAddOnBefore="卸荷延时s">
           <input nz-input type="number" nzSize="large" style="width: 100%;" min="5" max="999" [(ngModel)]="autoData.unloadingDelay"/>
-          <!-- <nz-input-number type="number" nzSize="large" style="width: 100%;" [nzMin]="0" [nzMax]="60"
-            [(ngModel)]="autoData.unloadingDelay"></nz-input-number> -->
         </nz-input-group>
       </nz-col>
     </nz-row>
@@ -190,7 +173,7 @@
     [disabled]="auto.nowPause || auto.pauseMsg">继续张拉</button>
   <button nz-button nzType="primary" class="r" nzShape="round" (click)="goBackMm()">回 顶</button>
   <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancel()"
-    *ngIf="((!auto.runState || selfInspectData.success) && (!task.record || task.record?.tensionStage === 0)) || saveState">取消张拉</button>
+    *ngIf="(((!task.record || task.record?.tensionStage === 0) || !auto.runState) || saveState) && !stateTension">取消张拉</button>
   <button nz-button nzType="primary" class="z" nzShape="round" (click)="saveOut()" *ngIf="(auto.runState && !saveState) || stateTension">保存退出</button>
   <!-- <button nz-button nzType="danger" class="s" nzShape="round" (click)="cancelOut()" *ngIf="auto.runState">不保存退出</button> -->
   <button nz-button nzType="primary" nzShape="round" (click)="handle=!handle">显示切换</button>
@@ -199,11 +182,13 @@
 <ng-template #tplTitle>
   <div>
     <h2 style="color:coral;">位移超过了顶工作位移，需要回顶才能继续张拉</h2>
-    <h3 style="color: pink;">根据剩余位移量，调整回顶位移长度，避免顶申长量太小，无法卸下工具锚具。</h3>
-    <nz-col nz-col nzSpan="6">
-      <nz-input-group nzAddOnBefore="回顶位移mm">
-        <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" [(ngModel)]="autoData.backMm"/>
-      </nz-input-group>
-    </nz-col>
+    <h3 style="color: red;">根据剩余位移量，调整回顶位移长度，避免顶申长量太小，无法卸下工具锚具。</h3>
+    <nz-row>
+      <nz-col nz-col nzSpan="12">
+        <nz-input-group nzAddOnBefore="回顶位移mm">
+          <input nz-input type="number" nzSize="large" style="width: 100%;" min="30" [(ngModel)]="autoData.backMm"/>
+        </nz-input-group>
+      </nz-col>
+    </nz-row>
   </div>
 </ng-template>

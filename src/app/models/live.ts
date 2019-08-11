@@ -28,6 +28,7 @@ export interface PLCItem {
   alarm: Array<string>;
   /** 自动状态 */
   autoState: Array<string>;
+  autoAlarm: boolean;
 }
 export function GetPLCLiveData(): PLCLiveData {
   const r: any = {};
@@ -38,6 +39,7 @@ export function GetPLCLiveData(): PLCLiveData {
       state: '设备未连接',
       alarm: [],
       autoState: [],
+      autoAlarm: false,
     };
   });
   return r as PLCLiveData;

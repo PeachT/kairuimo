@@ -215,7 +215,7 @@ export class ManualItemComponent implements OnInit, OnDestroy {
     if (this.PLCS.PD[this.name].setMm > 0 && this.PLCS.PD[this.name].setMm < this.PLCS.PD[this.name].showMm) {
       this.message.warning('位移超出设置值');
     }
-    if (this.PLCS.PD[this.name].setMpa < this.PLCS.PD[this.name].showMpa) {
+    if (this.PLCS.PD[this.name].setMpa < this.PLCS.PD[this.name].showMpa && i === 0) {
       this.message.warning('压力超出设置值');
     }
   }

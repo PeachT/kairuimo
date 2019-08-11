@@ -315,6 +315,7 @@ export class PLCService {
           this.PD[key].state = state.state.join('·');
           this.PD[key].alarm = state.alarm;
           this.PD[key].autoState = this.getState(data.uint16[i * 2 + 5], data.uint16[24], true, this.stateAutoStr).alarm;
+          this.PD[key].autoAlarm = this.carterAutoState(data.uint16[i * 2 + 5], data.uint16[24], true, this.stateAutoStr);
           i += 3;
         });
       }
@@ -373,6 +374,12 @@ export class PLCService {
       r.state.push('待机');
     }
     return r;
+  }
+  carterAutoState(value: number, PLCstate: number, auto = false, states = this.stateStr) {
+    const s = Array.from(value.toString(2).padStart(16, '0').split('').reverse().join(''));
+    if (s[3] === '1' || s[5] === '1' || s[6] === '1') {
+      return true;
+    }
   }
   /**
    * 拼接一个时间戳字符串

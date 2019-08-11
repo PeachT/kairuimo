@@ -213,6 +213,7 @@ export function myToFixed(data): number {
   return Number(data.toFixed(length));
 }
 
+/** 转换设备名称 */
 export function nameConvert(name: string): string {
   if (name.indexOf('z') > -1) {
     return name.replace('z', '主');

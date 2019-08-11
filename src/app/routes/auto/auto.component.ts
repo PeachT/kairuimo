@@ -9,7 +9,7 @@ import { PLCService } from 'src/app/services/PLC.service';
 import { AutoService } from 'src/app/services/auto.service';
 import { PLC_D, PLC_S, PLC_M, PLC_Y } from 'src/app/models/IPCChannel';
 import { GroupItem, TensionTask, TaskJack } from 'src/app/models/task.models';
-import { mpaToPlc, TensionMm, myToFixed, mmToPlc } from 'src/app/Function/device.date.processing';
+import { mpaToPlc, TensionMm, myToFixed, mmToPlc, nameConvert } from 'src/app/Function/device.date.processing';
 import { AutoDate } from 'src/app/models/device';
 import { Elongation } from 'src/app/models/live';
 import { getStageString } from 'src/app/Function/stageString';
@@ -65,8 +65,12 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     twoTension: false,
     goBack: false,
     nowBack: false,
+    backState: false,
     nowDelay: false,
     nowTwice: false,
+    mgsElongation: null,
+    mgsUpmm: null,
+    mgsMpaCmp: null,
     msg: {
       zA: null,
       zB: null,
@@ -79,6 +83,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     },
     zModes: [],
     cModes: [],
+    fastMsg: null,
   };
   autoData: AutoDate;
   // 张拉完成
@@ -230,6 +235,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     i: 0,
     t: null,
   };
+  outstate = false;
 
   constructor(
     private fb: FormBuilder,
@@ -260,6 +266,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   async ngOnInit() {
     /** 刷新率 */
     this.ms.t = setInterval(() => {
+      if (this.outstate) {
+        return;
+      }
       this.ms.i ++;
       // console.log(this.ms);
       if (this.ms.i > 10000) {
@@ -285,11 +294,18 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.inAuto(false);
   }
   ngOnDestroy() {
+    this.outTension();
+  }
+  outTension() {
+    this.outstate = true;
     console.log('退出');
-    clearInterval(this.ms.t);
-    this.PLCS.ipcSend('zF05', PLC_S(10), false);
-    this.PLCS.ipcSend('cF05', PLC_S(10), false);
+    if (this.plcsub) {
+      this.plcsub.unsubscribe();
+    }
     try {
+      clearInterval(this.ms.t);
+      this.PLCS.ipcSend('zF05', PLC_S(10), false);
+      this.PLCS.ipcSend('cF05', PLC_S(10), false);
       clearInterval(this.svgt);
       clearInterval(this.selfInspectData.zt);
       clearInterval(this.selfInspectData.ct);
@@ -298,8 +314,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     localStorage.setItem('autoTask', null);
     localStorage.setItem('stateTension', '');
-    if (this.plcsub) {
-      this.plcsub.unsubscribe();
+    const stateTension = localStorage.getItem('stateTension');
+    if (!stateTension) {
+      this.go();
+    } else {
+      this.outTension();
     }
   }
   // tslint:disable-next-line:use-life-cycle-interface
@@ -310,8 +329,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initSvg();
     console.log('二次张拉', this.task.record);
   }
-  inAuto(self) {
-    this.setPLCM(520, false);
+  inAuto(self = false) {
+    // this.setPLCM(520, false);
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
       this.PLCS.ipcSend('zF05', PLC_S(10), true);
       this.PLCS.ipcSend('cF05', PLC_S(10), true);
@@ -385,20 +404,6 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   startAuto(self = false) {
-    // this.setPLCM(520, false);
-    // if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
-    //   this.PLCS.ipcSend('cF05', PLC_S(10), true);
-    //   if (self) {
-    //     this.selfInspectStart('z');
-    //     this.selfInspectStart('c');
-    //   }
-    // } else {
-    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
-    //   if (self) {
-    //     this.selfInspectStart('z');
-    //   }
-    // }
     this.inAuto(true);
     this.modal.state = false;
   }
@@ -408,16 +413,6 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   selfRead() {
     this.continue();
     this.startAuto(true);
-    // if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
-    //   this.PLCS.ipcSend('cF05', PLC_S(10), true);
-    //   this.selfInspectStart('z');
-    //   this.selfInspectStart('c');
-    // } else {
-    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
-    //   this.selfInspectStart('z');
-    // }
-    // this.modal.state = false;
   }
   /**
    * *自检运行设备
@@ -425,7 +420,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
     let is = 0;
     this.selfInspectData[`${device}t`] = setInterval(() => {
-      if (this.auto.pause) {
+      if (this.auto.pause || this.outstate) {
         return;
       }
       console.log(device, '运行中', address, name, is);
@@ -626,7 +621,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *二次任务下载到PLC
    */
   twoDownPLCdata() {
-    this.auto.runState = false;
+    this.auto.runState = true;
     this.delay = 15; // 保压时间
     this.nowDelay = 0;
     const pMpa = {
@@ -643,7 +638,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     /** 数据转换 */
     taskModeStr[this.task.mode].map(name => {
       pMpa[name] = this.task.record[name].mpa[stage];
-      this.target[name] = this.task.record[name].mpa[stage]
+      this.target[name] = this.task.record[name].mpa[stage];
       this.twoMm.record[name] = this.task.record[name].mm[stage];
     });
     this.setPLCMpa(pMpa);
@@ -694,7 +689,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.setPLCM(524, true);
       }
       if (tensionOk) {
-        this.go();
+        this.outTension();
       }
     } else {
       let ten = true;
@@ -710,7 +705,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   /**
-   * *保压延时
+   * * 保压延时
    */
   delayF() {
     let ten = true;
@@ -735,7 +730,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.nowDelay = 0;
           this.stepNum ++;
         } else {
-          this.task.record.tensionStage += 1;
+          if (this.auto.nowBack) {
+            this.auto.nowBack = false;
+          } else {
+            this.task.record.tensionStage += 1;
+          }
           this.auto.nowDelay = false;
           this.downPLCData();
         }
@@ -743,7 +742,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   /**
-   * *卸荷/回程
+   * * 卸荷/回程
    */
   unre() {
     this.tensionOk = true;
@@ -803,7 +802,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
     if (tensionOk) {
-      this.go();
+      this.outTension();
     }
   }
   setPLCM(address: number, state = false) {
@@ -829,7 +828,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   /**
-   * *张拉平衡
+   * * 张拉平衡
    */
   balance() {
     const names = taskModeStr[this.task.mode];
@@ -838,15 +837,16 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     for (const key of names) {
       /** 超伸长量 */
       if (this.elongation[key].percent > this.autoData.superElongation) {
-        this.auto.pauseMsg = `${key[1]}·超伸长量${this.elongation[key].percent }`;
+        this.auto.mgsElongation = `${key[1]}组·超伸长量${this.elongation[key].percent }%`;
+        console.log(this.auto.pauseMsg);
         if (!this.auto.pause) {
           const msg = `超伸长量${this.elongation[key].percent }`;
           this.pushMake(msg, key);
           this.pause();
-          return;
         }
+        return;
       } else {
-        this.auto.pauseMsg = null;
+        this.auto.mgsElongation = null;
       }
       arrMm.push(this.elongation[key].mm);
     }
@@ -884,7 +884,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   /**
-   * *压力差
+   * * 压力差
    */
   cmpMpa() {
     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
@@ -893,32 +893,39 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         const cmpMpa = myToFixed(Math.abs(this.PLCS.PD[`z${key[1]}`].showMpa - this.PLCS.PD[`c${key[1]}`].showMpa));
         console.log('压力差', cmpMpa);
         if (key[0] === 'z' && cmpMpa > this.autoData.pressureDifference) {
+          this.auto.mgsMpaCmp = `${key[1]}组·压力差${cmpMpa}`;
           if (!this.auto.pause) {
             const msg = `压力差${cmpMpa}`;
             this.pushMake(msg, key);
             this.pause();
-            return;
           }
+          return;
+        } else {
+          this.auto.mgsMpaCmp = null;
         }
       }
     }
   }
   /**
-   * *报警监控
+   * * 报警监控
    */
   alarmMonitoring() {
-    console.log('报警监控');
+    // console.log('报警监控', this.auto);
     this.auto.nowPause = false;
     const names = taskModeStr[this.task.mode];
     let backOk = true;
     for (const key of names) {
       /** 极限报警 || 超伸长量 */
-
       if (this.PLCS.PD[key].alarm.length > 0 || this.comm()) {
-        console.log(key, this.PLCS.PD[key].alarm.length);
+        this.modal.state = true;
         this.auto.nowPause = true;
+        let msg = null;
+        if (this.PLCS.plcState[key[0]]) {
+          msg = `${this.PLCS.PD[key].alarm.join('|')}|${this.PLCS.PD[key].state}`;
+        } else {
+          msg = '设备未连接';
+        }
         if (!this.auto.pause) {
-          const msg = this.PLCS.PD[key].alarm.join('|');
           this.pushMake(msg, key);
           this.pause();
           return;
@@ -926,13 +933,16 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       if (this.PLCS.PD[key].autoState.indexOf('超工作位移上限') > -1) {
+        this.auto.mgsUpmm = `${nameConvert(key)}超工作位移上限${this.PLCS.PD[key].showMm}`;
         this.auto.nowPause = true;
         if (!this.auto.pause && !this.auto.nowBack) {
           console.log(key, '超工作位移上限');
           this.pushMake('超工作位移上限', key);
           this.pause();
-          return;
         }
+        return;
+      } else {
+        this.auto.mgsUpmm = null;
       }
       if (this.PLCS.PD[key].autoState.indexOf('回顶完成') === -1) {
         backOk = false;
@@ -961,7 +971,16 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *曲线采集与监控
    */
   ec() {
+    if (this.svgt) {
+      return;
+    }
     this.svgt = setInterval(() => {
+      if (this.outstate) {
+        return;
+      } else {
+        console.log('11111111111111111111111111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+        localStorage.setItem('stateTension', 'true');
+      }
       // this.alarmMonitoring();
       if (this.tensionOk) {
         this.unre();
@@ -999,9 +1018,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             // item.push(value - Math.random() * 10);
             // this.svgData.mm[i].push(value - Math.random() * 10);
             // 实时保存张拉记录
-            localStorage.setItem('autoTask', JSON.stringify(this.autoTask));
 
-            localStorage.setItem('stateTension', 'true');
+            localStorage.setItem('autoTask', JSON.stringify(this.autoTask));
           }
         });
       }
@@ -1030,12 +1048,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           msg,
           index: this.task.record.time.length
         });
-        msg = `${name}-${msg}`;
+        msg = `${nameConvert(name)}-${msg}`;
       }
       this.task.record.make.push({
         msg,
         index: this.task.record.time.length
       });
+      this.auto.fastMsg = msg;
     }
   }
   /**
@@ -1048,6 +1067,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       nzContent: this.tplTitle,
       nzClosable: false,
       nzMaskClosable: false,
+      nzWidth: '85%',
       nzFooter: [
         {
           label: '取消',
@@ -1067,6 +1087,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.setF06(466, this.autoData.backMm);
             this.setPLCM(522, true);
             this.auto.nowBack = true;
+            this.auto.backState = true;
             this.continue();
             return;
           }
@@ -1079,7 +1100,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   pause() {
     this.auto.pause = true;
     this.modal.state = true;
-    this.auto.nowBack = false;
+    // this.auto.nowBack = false;
     clearInterval(this.selfInspectData.zt);
     clearInterval(this.selfInspectData.ct);
     this.setPLCM(520, true);
@@ -1091,6 +1112,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.auto.goBack) {
       this.twoDownPLCdata();
     }
+    if (this.stateTension) {
+      this.ec();
+    }
     this.auto.pause = false;
     this.modal.state = false;
     this.auto.goBack = false;
@@ -1098,12 +1122,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   /** 取消张拉 */
   cancel() {
-    this.go();
+    console.log('取消张拉');
     localStorage.setItem('autoTask', null);
     localStorage.setItem('stateTension', '');
-    this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
-      console.log('查询结果', this.autoS.task.id, d);
-    });
+    // this.odb.db.task.filter(f => f.id === this.autoS.task.id).first((d) => {
+    //   console.log('查询结果', this.autoS.task.id, d);
+    // });
+    this.outTension();
   }
   /** 保存数据退出 */
   saveOut() {
@@ -1115,9 +1140,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   /** 张拉完成 */
   outOk() {
-    this.go();
     localStorage.setItem('autoTask', null);
     localStorage.setItem('stateTension', '');
+    this.outTension();
   }
   /** 暂定 */
   sotp() {
@@ -1182,7 +1207,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         if (out) {
           localStorage.setItem('autoTask', null);
           localStorage.setItem('stateTension', '');
-          this.go();
+          this.outTension();
         }
       }).catch((err) => {
         console.log(`保存失败😔`, err);
