@@ -46,7 +46,6 @@
                     <nz-form-label [nzSm]="6" nzRequired>梁名称</nz-form-label>
                     <nz-form-control [nzSm]="18" [ngClass]="{'in-error': item.get('name').errors}" [nzErrorTip]="item.get('name').errors | ValidatorError">
                       <input type="text" nz-input placeholder="梁名称" formControlName="name">
-                      <!-- <nz-form-explain *ngIf="appS.edit">{{item.get('name').errors | ValidatorError}}</nz-form-explain> -->
                     </nz-form-control>
                   </nz-form-item>
 
@@ -59,10 +58,6 @@
                           (keydown.enter)="handleInputConfirm($event, item.get('holes'))" />
                       </nz-form-control>
                     </nz-form-item>
-                    <!-- <span>孔号：</span>
-                    <input nz-input nzSize="large" *ngIf="appS.edit" placeholder="添加孔" type="text"
-                    (blur)="handleInputConfirm($event, item.get('holes'))"
-                    (keydown.enter)="handleInputConfirm($event, item.get('holes'))" /> -->
                     <div class="hole-tag">
                       <span *ngFor="let tag of item.get('holes').value; index as hi">
                         {{tag}}

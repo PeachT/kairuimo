@@ -452,22 +452,6 @@ export class PLCService {
     if (this.jack.link) {
       this.gsJack('c');
     }
-    // if (this.jack.link) {  156 531 874 3 156 710 000
-    //   await this.ipcSend(`cF03_float`, PLC_D(2100 + this.jack.saveGroup * 100), 100).then((data: any) => {
-    //     deviceGroupModeDev.c[this.jack.jackMode].map((name, index) => {
-    //       // console.log(name, index);
-    //       const startIndex = index * 10;
-    //       this.jack[name].mm = data.float.slice(startIndex, startIndex + 6).map(v => v.toFixed(5));
-    //       this.jack[name].upper = data.float[startIndex + 6];
-    //       this.jack[name].floot = data.float[startIndex + 7];
-    //     });
-    //   }).catch(() => {
-    //     console.error('获取PLC位移校正错误');
-    //   });
-    // }
-    // 设置泵顶组
-    // this.ipcSend('zF06', PLC_D(407), this.jack.saveGroup);
-    // this.ipcSend('cF06', PLC_D(407), this.jack.saveGroup);
     console.log('切换顶', this.jack);
     return this.jack;
   }

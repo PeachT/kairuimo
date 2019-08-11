@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn,
-         AbstractControl, ValidationErrors, FormArray } from '@angular/forms';
+         AbstractControl, ValidationErrors, FormArray, ValidatorFn } from '@angular/forms';
 import { DB, DbService, tableName } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
@@ -13,6 +13,8 @@ import { Comp } from 'src/app/models/component';
 import { copyAny } from 'src/app/models/base';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { nameRepetition } from 'src/app/Validator/async.validator';
+import { PLC_D } from 'src/app/models/IPCChannel';
+import { deviceGroupModeDev } from 'src/app/models/jack';
 
 @Component({
   selector: 'app-component',
@@ -43,6 +45,7 @@ export class ComponentComponent implements OnInit {
     private message: NzMessageService,
     public appS: AppService,
     private cdr: ChangeDetectorRef,
+    private PLCS: PLCService
   ) {
   }
 
@@ -92,7 +95,6 @@ export class ComponentComponent implements OnInit {
       ImgBase64: [],
     });
   }
-
   onMneu(data: Comp) {
     console.log('一条数据', data);
     this.data = data;

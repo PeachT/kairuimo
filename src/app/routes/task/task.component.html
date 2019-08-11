@@ -17,19 +17,20 @@
             <nz-form-item>
               <nz-form-label [nzSm]="3" nzRequired>构建</nz-form-label>
               <nz-form-control [nzSm]="6" nzErrorTip="请入选择构建！">
-                <div style="display: flex;">
-                  <nz-select style="width: 100%;" formControlName="component" nzPlaceHolder="选择构建" (ngModelChange)="componentChange($event)" [nzDisabled]="selectJackState">
+                <input type="text" nz-input formControlName="component" *ngIf="data?.createdDate" disabled>
+                <div style="display: flex;" *ngIf="!data?.createdDate">
+                  <nz-select style="width: 100%;" formControlName="component" nzPlaceHolder="选择构建" (ngModelChange)="componentChange($event)" [nzDisabled]="data?.createdDate">
                     <nz-option [nzValue]="item.name" [nzLabel]="item.name" *ngFor="let item of componentOptions.menu"></nz-option>
                   </nz-select>
                   <button nz-button nzType="primary" nzSearch (click)="groupDom.onShow()"
-                    type="button" *ngIf="!data?.id" style="z-index: 1">分组</button>
+                    type="button" *ngIf="!data?.createdDate" style="z-index: 1">分组</button>
                 </div>
               </nz-form-control>
 
               <nz-form-label [nzSm]="3" nzRequired>顶</nz-form-label>
               <nz-form-control [nzSm]="5" nzErrorTip="请入选择顶！">
                 <nz-cascader nzMenuClassName="task-cascader" nzPlaceHolder="选择顶" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
-                  (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="selectJackState">
+                  (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="data?.createdDate">
                 </nz-cascader>
               </nz-form-control>
             </nz-form-item>
