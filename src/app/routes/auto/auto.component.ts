@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, ChangeDetectionStrategy, TemplateRef } from '@angular/core';
 import { taskModeStr, tableDev, groupModeStr, JackItem } from 'src/app/models/jack';
 import { DB, DbService } from 'src/app/services/db.service';
 import { FormBuilder } from '@angular/forms';
-import { NzMessageService, NzModalService } from 'ng-zorro-antd';
+import { NzMessageService, NzModalService, NzModalRef } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
 import { Router } from '@angular/router';
 import { PLCService } from 'src/app/services/PLC.service';
@@ -23,6 +23,7 @@ import { SelfInspect } from './class/selfInspect';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('tplTitle', null) tplTitle: TemplateRef<{}>;
   @ViewChild('mainContent', null) mainDom: ElementRef;
   @ViewChild('table', null) tableDom: ElementRef;
 
@@ -281,6 +282,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
     await this.PLCS.selectJack(this.autoS.task.jackId);
+    this.inAuto(false);
   }
   ngOnDestroy() {
     console.log('退出');
@@ -307,6 +309,22 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.svgHeight = (this.mainDom.nativeElement.offsetHeight - this.tableDom.nativeElement.offsetHeight) / 2;
     this.initSvg();
     console.log('二次张拉', this.task.record);
+  }
+  inAuto(self) {
+    this.setPLCM(520, false);
+    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      this.PLCS.ipcSend('cF05', PLC_S(10), true);
+      if (self) {
+        this.selfInspectStart('z');
+        this.selfInspectStart('c');
+      }
+    } else {
+      this.PLCS.ipcSend('zF05', PLC_S(10), true);
+      if (self) {
+        this.selfInspectStart('z');
+      }
+    }
   }
   /** 初始化曲线 */
   initSvg() {
@@ -367,26 +385,28 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   startAuto(self = false) {
-    this.setPLCM(520, false);
-    if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      this.PLCS.ipcSend('cF05', PLC_S(10), true);
-      if (self) {
-        this.selfInspectStart('z');
-        this.selfInspectStart('c');
-      }
-    } else {
-      this.PLCS.ipcSend('zF05', PLC_S(10), true);
-      if (self) {
-        this.selfInspectStart('z');
-      }
-    }
+    // this.setPLCM(520, false);
+    // if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
+    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
+    //   this.PLCS.ipcSend('cF05', PLC_S(10), true);
+    //   if (self) {
+    //     this.selfInspectStart('z');
+    //     this.selfInspectStart('c');
+    //   }
+    // } else {
+    //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
+    //   if (self) {
+    //     this.selfInspectStart('z');
+    //   }
+    // }
+    this.inAuto(true);
     this.modal.state = false;
   }
   /**
    * *自检
    */
   selfRead() {
+    this.continue();
     this.startAuto(true);
     // if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
     //   this.PLCS.ipcSend('zF05', PLC_S(10), true);
@@ -400,7 +420,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     // this.modal.state = false;
   }
   /**
-   * *自检
+   * *自检运行设备
    */
   selfInspectRun(device: string, name: string, names: Array<string>, address: number) {
     let is = 0;
@@ -441,14 +461,15 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
 
       });
       const nameSatate = this.selfInspectData.state[name];
-      if (nameSatate > 2 || is > 15) {
+      if (nameSatate > 2 || is >= 5) {
+        this.auto.msg[name] = `自检超时`;
         console.log(name, device, '失败');
         clearInterval(this.selfInspectData[`${device}t`]);
         console.log(this.selfInspectData.state);
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
         this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
-        this.auto.pauseMsg = `${name}自检错误！切换到手动模式测试设备是否正常！`;
+        this.auto.pauseMsg = `${name}自检错误！`;
         this.pause();
         this.selfInspectData.error = true;
       } else if (nameSatate === 2) {
@@ -464,8 +485,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
         });
         if (state) {
           console.log(device, '全部测试通过', this.selfInspectData.state);
-          this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
-          this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
+          // this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
+          // this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);  #1d8fff
           let allState = true;
           taskModeStr[this.task.mode].map(key => {
             if (this.selfInspectData.state[key] !== 2) {
@@ -481,38 +502,6 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.selfInspectStart(device);
         }
       }
-      // const state = this.selfInspectData.state[name];
-      // if (state > 2 || is > 15) {
-      //   console.log(name, device, '失败');
-      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
-      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
-      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
-      //   this.auto.pauseMsg = `${name}自检错误！切换到手动模式测试设备是否正常！`;
-      //   this.pause();
-      // } else if (state === 2) {
-      //   this.index ++;
-      //   this.PLCS.ipcSend(`${device}F05`, PLC_Y(address), false);
-      //   console.log(name, device, '成功');
-      //   if (this.index === this.auto[`${device}Modes`].length) {
-      //     this.PLCS.ipcSend(`${device}F05`, PLC_Y(0), false);
-      //     this.PLCS.ipcSend(`${device}F05`, PLC_Y(1), false);
-      //     this.selfInspectData[`${device}Success`] = true;
-      //     if (this.task.mode !== 'A1' && this.task.mode !== 'B1') {
-      //       if (this.selfInspectData.zSuccess && this.selfInspectData.cSuccess) {
-      //         // this.run();
-      //         console.log(device, '测试通过', this.selfInspectData);
-      //         this.pause();
-      //       }
-      //     } else {
-      //         if (this.selfInspectData.zSuccess) {
-      //           // this.run();
-      //           this.pause();
-      //         }
-      //     }
-      //   } else {
-      //     this.selfInspectStart(device);
-      //   }
-      // }
       is ++;
     }, 1000);
   }
@@ -520,6 +509,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.selfInspectData.state[name] = state;
     this.auto.msg[name] = msg;
   }
+  // 自检前数据处理
   selfInspectStart(device: string) {
     this.selfInspectData.run = true;
     const names = {z: ['zA', 'zB', 'zC', 'zD'], c: ['cA', 'cB', 'cC', 'cD']}[device];
@@ -581,6 +571,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.downPLCData();
     }
     this.ec();
+    this.continue();
   }
   /**
    * *任务下载到PLC
@@ -922,7 +913,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     let backOk = true;
     for (const key of names) {
       /** 极限报警 || 超伸长量 */
+
       if (this.PLCS.PD[key].alarm.length > 0 || this.comm()) {
+        console.log(key, this.PLCS.PD[key].alarm.length);
         this.auto.nowPause = true;
         if (!this.auto.pause) {
           const msg = this.PLCS.PD[key].alarm.join('|');
@@ -1049,10 +1042,37 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    * *手动回顶
    */
   goBackMm() {
-    this.setF06(466, this.autoData.backMm);
-    this.setPLCM(522, true);
-    this.auto.nowBack = true;
-    this.continue();
+    const modal: NzModalRef = this.modalService.create({
+      nzTitle: '回顶数据调整',
+      // nzContent: '千斤顶名称模式不一致不能导入',
+      nzContent: this.tplTitle,
+      nzClosable: false,
+      nzMaskClosable: false,
+      nzFooter: [
+        {
+          label: '取消',
+          shape: 'default',
+          type: 'danger',
+          onClick: () => {
+            modal.destroy();
+            return;
+          }
+        },
+        {
+          label: '确定回顶',
+          shape: 'default',
+          type: 'primary',
+          onClick: () => {
+            modal.destroy();
+            this.setF06(466, this.autoData.backMm);
+            this.setPLCM(522, true);
+            this.auto.nowBack = true;
+            this.continue();
+            return;
+          }
+        },
+      ]
+    });
     // this.setPLCM(520, false);
   }
   /** 张拉暂停 */

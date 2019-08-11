@@ -1,4 +1,4 @@
-{{appS.sss('记录数据改变')}}
+<!-- {{appS.sss('记录数据改变')}} -->
 <div >
     <nz-divider style="min-width: auto;" nzText="记 录" nzOrientation="left"></nz-divider>
   <table class="gridtable">
@@ -12,7 +12,7 @@
         <th *ngIf="GroupData.tensionStage > 3">阶段二</th>
         <th *ngIf="GroupData.tensionStage > 4">阶段三</th>
         <th>终张拉</th> -->
-        <th width="160" colspan="2">回油至初应力</th>
+        <th width="180" colspan="2">回油至初应力</th>
 
         <th width="90">伸长量mm</th>
         <th width="90">偏差率</th>
@@ -27,7 +27,7 @@
           {{GroupData.stage[i]}}
         </td>
         <td style="font-size: 13px;">压力/位移</td>
-        <td style="font-size: 13px;">回缩量</td>
+        <td style="font-size: 13px;">力筋回缩量</td>
       </tr>
       <ng-container  *ngFor="let item of devModeStr; index as i">
         <tr [class]="item">

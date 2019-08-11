@@ -2,7 +2,8 @@
   (nzOnCancel)="tensionDevice.state = false" (nzOnOk)="tension()">
   <div class="main-alert">
     <ng-container class="item" *ngFor="let name of tensionDevice.names; index as i">
-      <div class="item" *ngIf="PLCS.PD[name].alarm.lenth > 0">
+      <h1 style="flex: 100%; color: red;">{{name | nameConvert}} : {{PLCS.PD[name].state}}</h1>
+      <div class="item" *ngIf="PLCS.PD[name].alarm.length > 0">
         <nz-divider style="min-width: auto;" [nzText]="(name | nameConvert) + '：设备状态'" nzOrientation="left">
         </nz-divider>
         <nz-alert nzType="error" [nzMessage]="item" nzDescription="还没有说明" nzShowIcon

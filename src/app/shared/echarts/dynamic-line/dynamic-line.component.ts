@@ -28,7 +28,7 @@ export class DynamicLineComponent implements OnInit, OnChanges {
   @Input()
     show: boolean;
 
-  color = {
+  color2 = {
     zA: '#ff4081',
     cA: '#ff5722',
 
@@ -40,6 +40,19 @@ export class DynamicLineComponent implements OnInit, OnChanges {
 
     zD: '#388e3c',
     cD: '#00c853',
+  };
+  color = {
+    zA: '#ff4088',
+    cA: '#ff4000',
+
+    zB: '#208fff',
+    cB: '#202fff',
+
+    zC: '#ff00ea',
+    cC: '#af00ea',
+
+    zD: '#00c813',
+    cD: '#008813',
   };
   series = [];
   myChart: ECharts;

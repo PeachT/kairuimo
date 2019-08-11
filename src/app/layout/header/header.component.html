@@ -22,7 +22,7 @@
         <i nz-icon type="file-sync" theme="outline"></i>
         <div class="text">数据</div>
       </div>
-      <div class="icon" (click)="appS.debugShow = true" >
+      <div class="icon" (click)="appS.debugShow = true" *ngIf="appS.userInfo.jurisdiction >= 8" >
         <i nz-icon type="bug" theme="outline"></i>
         <div class="text">调试</div>
       </div>

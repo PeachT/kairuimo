@@ -74,6 +74,17 @@ export class AppComponent implements OnInit {
         }).catch(() => {
           this.message.error('添加失败😔');
         });
+        const user2: User = {
+          name: '技术员',
+          password: '123465',
+          jurisdiction: 1,
+          operation: []
+        };
+        this.db.users.add(user2).then(() => {
+          this.message.success('添加成功🙂');
+        }).catch(() => {
+          this.message.error('添加失败😔');
+        });
         for (let index = 0; index < 10; index++) {
           const user1: User = {
             name: `kvmadmin${index}`,
