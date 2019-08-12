@@ -237,11 +237,12 @@ export class TaskComponent implements OnInit {
     this.holeMneuData.index = null,
     this.holeMneuData.data = null,
     this.taskDataDom.show = null;
+    this.showRecord = false;
     console.log('编辑', this.data);
     this.reset();
     console.log('编辑', this.data, this.appS.editId, this.appS.edit);
     this.taskMneu.markForCheck();
-    this.taskDataDom.markForCheck();
+    // this.taskDataDom.markForCheck();
   }
   /**
    * *编辑完成
