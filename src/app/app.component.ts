@@ -39,21 +39,12 @@ export class AppComponent implements OnInit {
         success: false,
         code: null,
       };
-    }
-    if (this.e.isLinux) {
+    } else if (this.e.isLinux) {
       if (this.appS.platform === '') {
         localStorage.setItem('platform', 'devices');
       }
       if (!this.appS.platform || this.appS.platform === 'devices') {
         this.runPLC();
-        // this.router.navigate(['/lock']);
-        // const lastTime = Number(localStorage.getItem('lastTime'));
-        // const nowTime = new Date().getTime();
-        // if (nowTime < lastTime) {
-        //   appS.lock = true;
-        // } else {
-        //   this.PLCS.runSocket();
-        // }
       }
     }
     // 判断运行环境适合是 Electron
@@ -290,6 +281,12 @@ export class AppComponent implements OnInit {
           }
         }
       }, true);
+    } else {
+      this.PLCS.lock = {
+        state: true,
+        success: false,
+        code: null,
+      };
     }
 
   }

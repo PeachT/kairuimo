@@ -9,8 +9,7 @@ import { getStageString } from 'src/app/Function/stageString';
 @Component({
   selector: 'app-task-data',
   templateUrl: './task-data.component.html',
-  styleUrls: ['./task-data.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./task-data.component.less']
 })
 export class TaskDataComponent implements OnInit {
   @Input() jackData: Jack;
@@ -52,6 +51,11 @@ export class TaskDataComponent implements OnInit {
   ngOnInit() {
     this.createHoleform();
   }
+  /** 手动更新 */
+  markForCheck() {
+    this.cdr.markForCheck();
+  }
+
   /** 创建form */
   createHoleform(data: GroupItem = null, jack: Jack = null) {
     if (!data) {

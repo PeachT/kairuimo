@@ -70,7 +70,8 @@
             <td *ngFor="let item of tensionStageArr; index as i;">
               <nz-form-item>
                 <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)">
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" *ngIf="i !== 1">
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" *ngIf="i === 1" disabled>
                 </nz-form-control>
               </nz-form-item>
             </td>

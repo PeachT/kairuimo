@@ -13,8 +13,7 @@ import { AppService } from 'src/app/services/app.service';
   styleUrls: ['./record.component.less']
 })
 export class RecordComponent implements OnInit, OnChanges {
-  @Input()
-    GroupData: GroupItem;
+  @Input() GroupData: GroupItem;
 
   /** 曲线数据 */
   svgData = {
@@ -36,6 +35,24 @@ export class RecordComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
+    // const data = this.GroupData;
+    // this.svgData = {
+    //   names: taskModeStr[data.mode],
+    //   mpa: [],
+    //   mm: []
+    // };
+    // this.svgData.mpa.push(data.record.time);
+    // this.svgData.mm.push(data.record.time);
+    // const ten = null;
+    // this.svgData.names.map(key => {
+    //   this.svgData.mpa.push(data.record[key].mapData);
+    //   this.svgData.mm.push(data.record[key].mmData);
+    // });
+    // this.tensionStageArrF();
+    // console.log('记录数据处理', this.svgData, this.elongation);
+    this.init();
+  }
+  init() {
     const data = this.GroupData;
     this.svgData = {
       names: taskModeStr[data.mode],

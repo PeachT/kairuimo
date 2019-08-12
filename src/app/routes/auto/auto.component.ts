@@ -405,13 +405,13 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   startAuto(self = false) {
     this.inAuto(true);
+    this.continue();
     this.modal.state = false;
   }
   /**
    * *自检
    */
   selfRead() {
-    this.continue();
     this.startAuto(true);
   }
   /**
@@ -550,9 +550,9 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   run() {
     if (!this.selfInspectData.success) {
-      this.startAuto();
       this.selfInspectData.success = true;
       this.selfInspectData.run = true;
+      this.startAuto();
     }
     console.log('开始', this.task.record);
     if (this.task.record && this.task.record.tensionStage > 0 && this.task.record.state !== 4) {
@@ -561,12 +561,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       if (this.task.record && this.task.record.state === 4) {
         console.log('二次张拉22222222');
-        this.task.record.tensionStage++;
+        this.task.record.tensionStage = 3;
       }
       this.downPLCData();
     }
     this.ec();
-    this.continue();
   }
   /**
    * *任务下载到PLC
@@ -730,7 +729,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.nowDelay = 0;
           this.stepNum ++;
         } else {
-          if (this.auto.nowBack) {
+          if (this.auto.twoTension) {
+            this.auto.twoTension = false;
             this.auto.nowBack = false;
           } else {
             this.task.record.tensionStage += 1;
@@ -935,7 +935,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.PLCS.PD[key].autoState.indexOf('超工作位移上限') > -1) {
         this.auto.mgsUpmm = `${nameConvert(key)}超工作位移上限${this.PLCS.PD[key].showMm}`;
         this.auto.nowPause = true;
-        if (!this.auto.pause && !this.auto.nowBack) {
+        if (!this.auto.pause && !this.auto.twoTension) {
           console.log(key, '超工作位移上限');
           this.pushMake('超工作位移上限', key);
           this.pause();
@@ -978,7 +978,6 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.outstate) {
         return;
       } else {
-        console.log('11111111111111111111111111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
         localStorage.setItem('stateTension', 'true');
       }
       // this.alarmMonitoring();
@@ -1004,7 +1003,14 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.task.record[item[0]].mapData = item;
             this.task.record[item[0]].mmData = this.svgData.mm[i];
             /** 压力位移记录保存 */
-            if (this.auto.runState && !this.tensionOk && !this.auto.pause && !this.auto.nowBack) {
+            if (
+              this.auto.runState
+              && !this.tensionOk
+              && !this.auto.pause
+              && !this.auto.twoTension
+              && this.PLCS.PD[item[0]].alarm.length === 0
+              && this.PLCS.plcState[item[0][0]]
+              ) {
               this.task.record[item[0]].mpa[this.task.record.tensionStage] = this.PLCS.PD[item[0]].showMpa;
               const livemm = (this.PLCS.PD[item[0]].showMm - this.twoMm.live[item[0]]);
               this.task.record[item[0]].mm[this.task.record.tensionStage] = myToFixed(this.twoMm.record[item[0]] + livemm);
@@ -1025,7 +1031,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       /** 压力差与张拉平衡 */
       if (
-        this.auto.runState && !this.tensionOk  && !this.auto.nowBack
+        this.auto.runState && !this.tensionOk  && !this.auto.twoTension
         && ( !this.task.record.twice || this.task.record.tensionStage > 3)
       ) {
         this.cmpMpa();
@@ -1217,14 +1223,17 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   /** 跳转到任务 */
   go() {
-    this.router.navigate(['/task'], {
-      queryParams: {
-        project: this.autoS.task.project,
-        component: this.autoS.task.component,
-        selectBridge: this.autoS.task.id,
-        editGroupName: this.task.name,
-      }
-    });
+    console.log(this.autoS.task);
+    if (this.autoS.task) {
+      this.router.navigate(['/task'], {
+        queryParams: {
+          project: this.autoS.task.project,
+          component: this.autoS.task.component,
+          selectBridge: this.autoS.task.id,
+          editGroupName: this.task.name,
+        }
+      });
+    }
   }
 
   handleCancel() {

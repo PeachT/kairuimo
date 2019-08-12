@@ -19,6 +19,7 @@ import { TaskMenuComponent } from './components/task-menu/task-menu.component';
 import { copyAny } from 'src/app/models/base';
 import { AddOtherComponent } from 'src/app/shared/add-other/add-other.component';
 import { TensionComponent } from './components/tension/tension.component';
+import { RecordComponent } from './components/record/record.component';
 
 @Component({
   selector: 'app-task',
@@ -92,7 +93,7 @@ export class TaskComponent implements OnInit {
   /** 选择顶状态 */
   selectJackState = false;
   save100Count = 0;
-
+  showRecord = false;
   addFilterFun = (o1: any, o2: any) => o1.name === o2.name
     && o1.component === o2.component && o1.project === o2.project
   updateFilterFun = (o1: TensionTask, o2: TensionTask) => o1.name === o2.name
@@ -240,6 +241,7 @@ export class TaskComponent implements OnInit {
     this.reset();
     console.log('编辑', this.data, this.appS.editId, this.appS.edit);
     this.taskMneu.markForCheck();
+    this.taskDataDom.markForCheck();
   }
   /**
    * *编辑完成
@@ -313,10 +315,10 @@ export class TaskComponent implements OnInit {
       //   this.holeSub$ = null;
       // }
       /** 获取编辑数据 */
+      this.showRecord = false;
       this.holeMneuData.index = i;
       this.holeMneuData.name = name;
       this.holeMneuData.data = this.data.groups[i];
-      console.log('切换张拉组', this.data, name, i);
       if (this.data && this.data.jack) {
         this.jackData = this.data.jack;
       } else {
@@ -325,6 +327,14 @@ export class TaskComponent implements OnInit {
         }
       }
       this.taskDataDom.createHoleform(this.holeMneuData.data, this.jackData);
+      console.log('切换张拉组', this.data, name, i);
+      console.log(this.holeMneuData.data);
+      if (this.holeMneuData.data.record) {
+        setTimeout(() => {
+          this.showRecord = true;
+          this.cdr.markForCheck();
+        });
+      }
     }
     console.log(this.holeMneuData.index, this.holeMneuData.data,  this.holeMneuData.data.record);
   }
