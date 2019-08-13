@@ -73,11 +73,21 @@
   </div>
   <br>
   <br>
-  <div>
-    <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="onTaskFliter($event)">
-      <label nz-checkbox nzValue="0">已导出</label>
-      <label nz-checkbox nzValue="1">未导出</label>
+  <div style="display: flex; flex-direction: column;">
+
+    <nz-checkbox-wrapper (nzOnChange)="onTaskFliter($event)" style="margin-bottom: 5px;">
+      张拉状态：
+      <label nz-checkbox [(ngModel)]="filter.ok" (click)="onFilter()">已</label>
+      <label nz-checkbox [(ngModel)]="filter.no" (click)="onFilter()">未</label>
     </nz-checkbox-wrapper>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        已张拉日期: <nz-range-picker readonly [nzDisabled]="!filter.ok" [nzRanges]="rangesDate" [ngModel]="filter.tension.date" (ngModelChange)="onFilterDate($event, 'tension')"></nz-range-picker>
+      </div>
+      <div>
+        浇筑日期: <nz-range-picker readonly [nzRanges]="rangesDate" [ngModel]="filter.pouring.date" (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
+      </div>
+    </div>
   </div>
   <hr>
   <div>
@@ -103,6 +113,15 @@
       </div>
     </div>
   </div>
+
+  <nz-pagination
+    [(nzPageIndex)]="filter.pageIndex"
+    [(nzPageSize)]="filter.pageSize"
+    [nzTotal]="filter.count"
+    (nzPageIndexChange)="paginationChange()"
+    (nzPageSizeChange)="paginationChange()"
+    nzShowSizeChanger
+  ></nz-pagination>
 
   <nz-spin nzTip="正在处理数据..." *ngIf="inData.state">
     <nz-alert

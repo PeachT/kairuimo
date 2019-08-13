@@ -153,15 +153,7 @@ export class TaskMenuComponent implements OnInit {
     this.scrollTop = 0;
     this.setScrollTop = 0;
     this.bridgeScrollDom.nativeElement.scrollTop = 0;
-    // this.resetScrollTop();
     this.getBridgedb(id, 0, 45);
-    // tslint:disable-next-line:max-line-length
-    // this.bridge.menu = await this.db.getTaskBridgeMenuData((o1) => o1.project === this.project.select.id && o1.component === this.component.select, false, 0, 50);
-    // if (id) {
-    //   this.onBridge(id);
-    // }
-    // this.cdr.markForCheck();
-    // console.log(this.bridge, id);
   }
 
   onProject() {
@@ -280,9 +272,7 @@ export class TaskMenuComponent implements OnInit {
     console.log(this.pt20);
   }
   async getBridgedb(id = null, p, y) {
-    // tslint:disable-next-line:max-line-length
-    // this.bridge.menu = await this.db.getTaskBridgeMenuData((o1) => o1.project === this.project.select.id && o1.component === this.component.select, false, p, y);
-    this.bridge.menu = await this.db.getTaskBridgeMenuData(
+    const menu = await this.db.getTaskBridgeMenuData(
       (o1) => {
         if (o1.project !== this.project.select.id || o1.component !== this.component.select) {
           return false;
@@ -312,6 +302,7 @@ export class TaskMenuComponent implements OnInit {
         return false;
       },
       false, p, y);
+    this.bridge.menu = menu.menus;
     if (id) {
       this.onBridge(id);
     }

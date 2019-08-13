@@ -13,6 +13,7 @@ import { NzMessageService, NzModalRef, NzModalService } from 'ng-zorro-antd';
 import { DateFormat } from 'src/app/Function/DateFormat';
 import { utf8_to_b64, b64_to_utf8 } from 'src/app/Function/stringToBase64';
 import { TensionTask } from 'src/app/models/task.models';
+import { lastDayOfWeek, lastDayOfMonth, startOfWeek, startOfMonth, getTime, compareAsc, compareDesc} from 'date-fns';
 
 @Component({
   selector: 'app-data-treating',
@@ -81,6 +82,24 @@ export class DataTreatingComponent implements OnInit {
   };
   /** 修改梁号 */
   nowBridgeName = null;
+  filter = {
+    pageIndex: 1,
+    pageSize: 5,
+    ok: false,
+    no: false,
+    tension: {
+      startDate: null,
+      entDate: null,
+      date: [],
+    },
+    pouring: {
+      startDate: null,
+      entDate: null,
+      date: [],
+    },
+    count: 0
+  };
+  rangesDate = {本周: [startOfWeek(new Date()), lastDayOfWeek(new Date())], 本月: [startOfMonth(new Date()), lastDayOfMonth(new Date())] };
 
   constructor(
     private message: NzMessageService,
@@ -253,9 +272,44 @@ export class DataTreatingComponent implements OnInit {
   }
   /** 获取任务梁数据 */
   async getTaskBridge() {
-    this.taskData.bridge = await this.db.getTaskBridgeMenuData(
-      (o1) => o1.project === this.taskData.sp && o1.component === this.taskData.sc);
-    console.log(this.taskData.bridge);
+    // this.taskData.bridge = await this.db.getTaskBridgeMenuData(
+    //   (o1) => o1.project === this.taskData.sp && o1.component === this.taskData.sc);
+    // console.log(this.taskData.bridge);
+    // this.cdr.markForCheck();
+
+    const bridge = await this.db.getTaskBridgeMenuData(
+      (o1) => {
+        if (o1.project !== this.taskData.sp || o1.component !== this.taskData.sc) {
+          return false;
+        }
+        if (this.filter.ok) {
+          if (!this.filter.tension.startDate) {
+            return true;
+          } else if ( o1.startDate >= this.filter.tension.startDate && o1.startDate <= this.filter.tension.entDate) {
+            return true;
+          }
+        }
+        // 86400000 时间戳24小时 ms
+        if (this.filter.pouring.startDate
+          && (
+            (getTime(o1.otherInfo[0].value) < this.filter.pouring.startDate + 86400000
+            || getTime(o1.otherInfo[0].value) > this.filter.pouring.entDate + 86400000)
+            )) {
+          return false;
+        }
+        if (!this.filter.no && !this.filter.ok) {
+          return true;
+        }
+        if (this.filter.no && !o1.startDate) {
+          return true;
+        }
+
+        return false;
+      },
+      false, (this.filter.pageIndex - 1) * this.filter.pageSize, this.filter.pageSize);
+    this.taskData.bridge = bridge.menus;
+    this.filter.count = bridge.count;
+    console.log(this.filter);
     this.cdr.markForCheck();
   }
   /** 选择梁 */
@@ -560,5 +614,21 @@ export class DataTreatingComponent implements OnInit {
     console.log('跳过导入', task);
     this.inResult.jump.push(task.name);
     this.cdr.markForCheck();
+  }
+
+  onFilter() {
+    console.log(this.filter);
+    this.getTaskBridge();
+  }
+  onFilterDate(e, key) {
+    this.filter[key].startDate = getTime(e[0]);
+    this.filter[key].entDate = getTime(e[1]);
+    this.filter[key].date = e;
+    this.getTaskBridge();
+    console.log(e, this.filter);
+  }
+  paginationChange() {
+    console.log(this.filter);
+    this.getTaskBridge();
   }
 }

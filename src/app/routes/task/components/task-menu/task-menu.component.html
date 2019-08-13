@@ -12,7 +12,7 @@
           </div>
           <br>
           <div>
-            &nbsp;&nbsp;&nbsp;&nbsp;浇筑日期: <nz-range-picker readonly [nzRanges]="rangesDate" [ngModel]="filter.pouring.date" (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
+            浇筑日期: <nz-range-picker readonly [nzRanges]="rangesDate" [ngModel]="filter.pouring.date" (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
           </div>
         </ng-template>
       </div>
@@ -44,7 +44,7 @@
       </li>
     </ng-container>
   </ul>
-  <ul class="menu-2" [hidden]="component.select === null" #bridgeScroll  (scroll)="bScroll($event)"  >
+  <ul class="menu-2" [hidden]="component.select === null" #bridgeScroll  (scroll)="bScroll($event)">
     <li [style.height]="paddingTop + 'px'"></li>
     <li *ngFor="let item of bridge.menu; index as i"
       [ngClass]="{'active': bridge.select === item.id && (!appS.edit || appS.editId === item.id)}"

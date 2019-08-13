@@ -193,7 +193,7 @@ export class DbService {
   }
   /** 获取梁菜单 */
   public async getTaskBridgeMenuData(f: (o1: TensionTask) => boolean, state: boolean = false, p: number = 0, y: number = 0)
-    : Promise<Array<Menu>> {
+    : Promise<{menus: Array<Menu>, count: number}> {
     const r = [];
     const count = await this.db.task.filter(o1 => f(o1)).count();
     console.log(count);
@@ -260,7 +260,7 @@ export class DbService {
     //     r.push({ name: v.name, id: v.id, cls });
     //   }
     // });
-    return r;
+    return {menus: r, count};
   }
   /** 任务数据导出菜单 */
   public async getTaskDataTreatingProject() {
