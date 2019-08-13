@@ -453,7 +453,8 @@ export class TaskComponent implements OnInit {
       component: this.taskMneu.component.select,
       id: this.data.id,
       jackId: this.jackData.id,
-      groupData: this.holeMneuData.data
+      groupData: this.holeMneuData.data,
+      bridgeName: this.data.name
     };
     this.tensionDom.tension(this.holeMneuData, localData);
   }

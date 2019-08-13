@@ -32,6 +32,8 @@ export class AppComponent implements OnInit {
     private router: Router,
     public PLCS: PLCService,
   ) {
+    const args = process;
+    console.log(args);
     console.log('平台', this.appS.platform);
     if (this.e.isWindows) {
       this.PLCS.lock = {

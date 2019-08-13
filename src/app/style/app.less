@@ -51,13 +51,15 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: white;
+  // background-color: white;
+  background: linear-gradient(to top, #ece9e6, #ffffff);
   .project {
     // height: 68px;
     // display: flex;
     // align-items: center;
     // position: relative;
-    background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
+    // background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
+    // background: linear-gradient(to top, #232526, #414345);
     nz-select {
       // height: 100%;
       // width: 100%;
@@ -88,7 +90,8 @@ body {
         border: 0;
         border-radius: 0;
         height: 49px;
-        background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
+        background: linear-gradient(to top, #232526, #414345);
+        // background-image: linear-gradient(180deg, #35C2FF 0%, #CC088B 100%);
       }
     }
     .text {
@@ -467,13 +470,16 @@ width: 10px;
 .step {
   nz-steps {
     .ant-steps-item-process > .ant-steps-item-content > .ant-steps-item-title {
-      color: white;
+      font-weight: bold;
+      color: #207f4c;
     }
     .ant-steps-item-finish > .ant-steps-item-content > .ant-steps-item-title {
-      color: #1890ff;
+      font-weight: bold;
+      color: #0284fd;
     }
     .ant-steps-item-wait > .ant-steps-item-content > .ant-steps-item-title {
-      color: #aaa;
+      font-weight: bold;
+      color: #e2e1e4;
     }
   }
 }

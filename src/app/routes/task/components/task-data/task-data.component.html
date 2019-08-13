@@ -1,6 +1,7 @@
 <form nz-form [ngClass]="{'form-edit': !appS.edit}" [formGroup]="holeForm" *ngIf="show">
   {{updateHole.emit(holeForm.value)}}
   <nz-form-item>
+      <!-- <h1>{{tensionState | json}}</h1> -->
     <nz-form-label [nzSm]="3" nzRequired>孔名称</nz-form-label>
     <nz-form-control [nzSm]="5">
       <input type="text" readonly disabled nz-input formControlName="name">
@@ -17,7 +18,7 @@
     <!--  -->
     <nz-form-label [nzSm]="3" nzRequired>张拉应力</nz-form-label>
     <nz-form-control [nzSm]="5" [ngClass]="{'in-error': holeForm.get('tensionKn').errors}">
-      <input type="number" nz-input formControlName="tensionKn" (input)="inputKn()">
+      <input type="number" nz-input formControlName="tensionKn" (input)="inputKn()" [attr.disabled]="tensionState?.cls !== 0">
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>钢绞线数量</nz-form-label>
     <nz-form-control [nzSm]="5">
@@ -25,7 +26,7 @@
     </nz-form-control>
     <nz-form-label [nzSm]="3" nzRequired>张拉段数</nz-form-label>
     <nz-form-control [nzSm]="5">
-      <nz-select formControlName="tensionStage" #tensionStage (ngModelChange)="onStage()">
+      <nz-select formControlName="tensionStage" #tensionStage (ngModelChange)="onStage()" [nzDisabled]="tensionState?.cls !== 0">
         <nz-option [nzValue]="2" nzLabel="三段"></nz-option>
         <nz-option [nzValue]="3" nzLabel="四段"></nz-option>
         <nz-option [nzValue]="4" nzLabel="五段"></nz-option>
@@ -70,8 +71,8 @@
             <td *ngFor="let item of tensionStageArr; index as i;">
               <nz-form-item>
                 <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" *ngIf="i !== 1">
-                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" *ngIf="i === 1" disabled>
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" *ngIf="i !== 1" [attr.disabled]="tensionState?.cls !== 0">
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" *ngIf="i === 1" disabled >
                 </nz-form-control>
               </nz-form-item>
             </td>
@@ -124,7 +125,7 @@
             <td *ngFor="let item of tensionStageArr; index as i;">
               <nz-form-item>
                 <nz-form-control>
-                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)">
+                  <input type="number" nz-input [formControlName]="i" (input)="inputStage(i)" [attr.disabled]="tensionState?.cls !== 0">
                 </nz-form-control>
               </nz-form-item>
             </td>

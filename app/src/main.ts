@@ -20,6 +20,8 @@ import { autoUpdater } from 'electron-updater';
 
 // 运行环境判断
 const args = process.argv.slice(1);
+console.log(args);
+
 const dev = args.some((val) => val === '--dev');
 
 /** 启动Modbus */

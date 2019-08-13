@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ChangeDetectionStrategy, Input, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectionStrategy, Input, ChangeDetectorRef, ViewChild, OnChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormArray, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Project } from 'src/app/models/project';
 import { NzMessageService } from 'ng-zorro-antd';
@@ -16,7 +16,7 @@ import { AddOtherComponent } from '../add-other/add-other.component';
   styleUrls: ['./project.component.less'],
   // changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectComponent implements OnInit {
+export class ProjectComponent implements OnInit, OnChanges {
   @Input() data: Project = null;
   @ViewChild('otherInfo', null) otherIngoDom: AddOtherComponent;
   validateForm: FormGroup = this.fb.group({});
@@ -49,6 +49,10 @@ export class ProjectComponent implements OnInit {
     this.createForm();
     console.log(this.formArr.controls);
   }
+  ngOnChanges() {
+    console.log('123132123123123123123123');
+  }
+
   /** 手动更新 */
   markForCheck() {
     this.changeDetectorRef.markForCheck();

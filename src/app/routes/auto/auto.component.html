@@ -2,7 +2,8 @@
   <span hidden>{{ms.i}}</span>
   <div #table>
     <div class="step">
-      <nz-steps [nzCurrent]="stepNum">
+      <h3>构建：{{autoTask.component}}|梁：{{autoTask.bridgeName}}|孔号：{{autoTask.groupData.name}}|设备：{{modeName[autoTask.groupData.mode]}}</h3>
+      <nz-steps style="display: flex; flex-wrap: nowrap; width: 100%;" [nzCurrent]="stepNum">
         <nz-step *ngFor="let item of stepStageStr; index as i" [nzTitle]="item + '|' + task.time[i]"></nz-step>
         <nz-step [nzTitle]="'卸荷' + '|' + this.autoData.unloadingDelay"></nz-step>
         <nz-step nzTitle="回程"></nz-step>
@@ -14,11 +15,11 @@
           <th width="50" (click)="sotp()">顶</th>
           <th width="75" (click)="namualNext()">张拉孔道</th>
           <th width="210">设备状态({{delay}}/{{nowDelay}})</th>
-          <th>设备压力·Mpa</th>
-          <th>目标压力·Mpa</th>
-          <th>设备位移·mm</th>
-          <th>单顶伸长量·mm</th>
-          <th>总伸长量/理论伸长量·mm</th>
+          <th>设备压力</th>
+          <th>目标压力</th>
+          <th>设备位移</th>
+          <th>单顶伸长量</th>
+          <th>总伸长量/理论伸长量</th>
           <th>实时偏差率·%</th>
         </tr>
       </thead>

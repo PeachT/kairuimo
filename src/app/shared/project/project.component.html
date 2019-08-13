@@ -45,7 +45,7 @@
   <div class="supervisions">
     <nz-form-item class="revise-btn">
       <nz-divider style="min-width: auto;" nzText="监理" nzOrientation="left"></nz-divider>
-      <button nz-button nzType="primary" nzSearch (click)="add()" type="button" *ngIf="appS.edit">添 加</button>
+      <!-- <button nz-button nzType="primary" nzSearch (click)="add()" type="button" *ngIf="appS.edit">添 加</button> -->
     </nz-form-item>
     <div nz-row nzGutter="25" formArrayName="supervisions">
       <div nz-col nzSm="24" nzLg="12" *ngFor="let item of formArr.controls; index as i"
@@ -80,12 +80,12 @@
               </nz-form-control>
             </nz-form-item>
 
-            <nz-form-item>
+            <!-- <nz-form-item>
               <nz-form-label [nzSm]="6">图片</nz-form-label>
               <nz-form-control [nzSm]="18">
                   <input type="text" nz-input placeholder="图片" formControlName="ImgBase64">
               </nz-form-control>
-            </nz-form-item>
+            </nz-form-item> -->
           </div>
         </div>
       </div>

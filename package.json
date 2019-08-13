@@ -18,6 +18,7 @@
     "hmr": "ng serve --hmr",
     "dev": "concurrently \"ng serve\" \"electron . --dev\"",
     "edev": "electron . --dev",
+    "edev-9222": "electron . --remote-debugging-port=9222",
     "win-ng-pack": "ng build --prod --build-optimizer && electron-builder -w",
     "win-pack": "electron-builder -w",
     "linux-ng-pack": "ng build --prod --build-optimizer && electron-builder --linux",

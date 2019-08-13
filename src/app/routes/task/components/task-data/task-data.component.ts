@@ -14,6 +14,9 @@ import { getStageString } from 'src/app/Function/stageString';
 export class TaskDataComponent implements OnInit {
   @Input() jackData: Jack;
   @Input() show = null;
+  @Input() tensionState =  {
+    cls: 0
+  };
 
   tensionStageArr = [];
   devModeStr = [];

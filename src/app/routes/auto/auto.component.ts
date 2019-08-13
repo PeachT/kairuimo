@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef, ChangeDetectionStrategy, TemplateRef } from '@angular/core';
-import { taskModeStr, tableDev, groupModeStr, JackItem } from 'src/app/models/jack';
+import { taskModeStr, tableDev, groupModeStr, JackItem, carterJaskMenu, modeName } from 'src/app/models/jack';
 import { DB, DbService } from 'src/app/services/db.service';
 import { FormBuilder } from '@angular/forms';
 import { NzMessageService, NzModalService, NzModalRef } from 'ng-zorro-antd';
@@ -26,7 +26,7 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('tplTitle', null) tplTitle: TemplateRef<{}>;
   @ViewChild('mainContent', null) mainDom: ElementRef;
   @ViewChild('table', null) tableDom: ElementRef;
-
+  modeName = modeName;
   svgHeight = 0;
   tableHeight = 0;
   db: DB;

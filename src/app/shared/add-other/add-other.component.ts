@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormArray, Validators, FormBuilder } from '@angular/forms';
 import { AppService } from 'src/app/services/app.service';
 import { OtherInfo } from 'src/app/models/common';
+import { arrayValidator } from 'src/app/Validator/repetition.validator';
 
 @Component({
   selector: 'app-add-other',
@@ -27,16 +28,16 @@ export class AddOtherComponent implements OnInit {
 
   /** 其他信息 */
   createForm(data: Array<OtherInfo> = []) {
-    const rarr = data.map(item => {
-      return this.otherInfoVisionsForm(item);
+    const rarr = data.map((item, i) => {
+      return this.otherInfoVisionsForm(i, item);
     });
     return rarr;
   }
   /** 其他form */
-  otherInfoVisionsForm(item = {key: null, value: null}) {
+  otherInfoVisionsForm(index: number, item = {key: null, value: null}) {
     return this.fb.group({
       /** 名字 */
-      key: [item.key, [Validators.required]],
+      key: [item.key, [Validators.required, arrayValidator(index, 'otherInfo', 'key')]],
       /** 内容 */
       value: [item.value, [Validators.required]],
     });
@@ -45,7 +46,8 @@ export class AddOtherComponent implements OnInit {
   otherInfoAdd() {
     // tslint:disable-next-line:no-angle-bracket-type-assertion
     const control = <FormArray> this.validateForm.controls.otherInfo;
-    control.push(this.otherInfoVisionsForm());
+    const length = this.validateForm.value.otherInfo.length;
+    control.push(this.otherInfoVisionsForm(length));
   }
   /** 删除其他数据 */
   otherInfoSub(index) {

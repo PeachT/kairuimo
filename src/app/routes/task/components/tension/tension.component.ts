@@ -53,14 +53,6 @@ export class TensionComponent implements OnInit {
       this.tensionDevice.names = taskModeStr[this.holeMneuData.data.mode];
       console.log('记录', 'record' in this.holeMneuData.data);
     } else {
-    // await this.PLCS.selectJack(this.jackData.id);
-    //   localStorage.setItem('autoTask', JSON.stringify({
-    //     project: this.project.id,
-    //     component: this.menu.selectComponent,
-    //     id: this.data.id,
-    //     jackId: this.jackData.id,
-    //     groupData: this.holeMneuData.data
-    //   }));
       localStorage.setItem('autoTask', JSON.stringify(localStorageData));
       this.tensionDevice.state = false;
       this.router.navigate(['/auto']);

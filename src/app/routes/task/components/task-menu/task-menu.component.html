@@ -16,21 +16,14 @@
           </div>
         </ng-template>
       </div>
-      <p style="margin: 0; background-color: #51c4d3; color: white;"
-        [ngStyle]="{'textDecoration': filter.ok ? '' :'line-through'}"
-      >&nbsp;已张: {{filter.tension.date[0] | date: 'yyyy-MM-dd'}}~{{filter.tension.date[1] | date: 'yyyy-MM-dd'}}</p>
-      <p style="margin: 0; background-color: #45b787; color: white;">&nbsp;浇筑: {{filter.pouring.date[0] | date: 'yyyy-MM-dd'}}~{{filter.pouring.date[1] | date: 'yyyy-MM-dd'}}</p>
-      <!-- {{filter.date | json}} -->
-      <!-- <nz-range-picker [nzRanges]="rangesDate" [ngModel]="filter.date" (ngModelChange)="onFilterDate($event)"></nz-range-picker> -->
+      <span style="margin: 0;" [ngStyle]="{'textDecoration': filter.ok ? '' :'line-through'}"
+      >&nbsp;已张: {{filter.tension.date[0] | date: 'yyyy-MM-dd'}}~{{filter.tension.date[1] | date: 'yyyy-MM-dd'}}</span>
+      <span style="margin: 0;">&nbsp;浇筑: {{filter.pouring.date[0] | date: 'yyyy-MM-dd'}}~{{filter.pouring.date[1] | date: 'yyyy-MM-dd'}}</span>
   </div>
   <div class="project">
     <nz-select nzSize="large" nzPlaceHolder="请选择项目" [(ngModel)]="project.sName" (ngModelChange)="onProject()" [nzDisabled]="appS.edit">
       <nz-option [nzValue]="item" [nzLabel]="item" *ngFor="let item of project.names"></nz-option>
     </nz-select>
-    <!-- <h2 class="text">{{project.select?.name || '请选择项目'}}</h2>
-    <div style="display: flex; flex-direction: column;">
-      <i nz-icon nzType="up" nzTheme="outline"></i>
-    </div> -->
   </div>
   <ul>
     <ng-container *ngFor="let item of component.menu; index as i">

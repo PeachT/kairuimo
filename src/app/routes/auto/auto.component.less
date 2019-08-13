@@ -1,10 +1,17 @@
 .step {
   height: 64px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding-right: 136px;
   padding-left: 10px;
-  background-color: rgba(0, 0,0, .9);
+  // background-color: rgba(0, 0,0, .9);
+  // background: linear-gradient(to top, #000000, #434343);
+  background: rgba(0, 0, 0, .73);
+  h3 {
+    margin: 0;
+    color: white;
+  }
   nz-steps {
     flex: 1;
     .ant-steps-item-process > .ant-steps-item-content > .ant-steps-item-title {

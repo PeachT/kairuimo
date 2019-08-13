@@ -140,11 +140,15 @@ export class PLCService {
     z: '0',
     c: '0',
   };
+  /** 锁机数据 */
   lock = {
     state: false,
     success: true,
     code: null,
   };
+  /** socket是否打开 */
+  socketState = false;
+
   constructor(
     private e: ElectronService,
     private message: NzMessageService,
@@ -159,20 +163,6 @@ export class PLCService {
       arrs.push(this.lock.code[i]);
     }
     this.lock.code = arrs.join('');
-    // 253 400 572 8
-    // const revise = JSON.parse(localStorage.getItem('mpaRevise'));
-    // if (!revise) {
-    //   this.setMpaRevise(mpaRevise);
-    // } else {
-    //   this.mpaRevise = revise;
-    // }
-    // const auto = JSON.parse(localStorage.getItem('autoDate'));
-    // if (!auto) {
-    //   this.setAutoData(autoDate);
-    // }
-    // this.ipcOn('z');
-    // this.ipcOn('c');
-    // this.selectJack(this.getJackId());
   }
 
 
@@ -187,6 +177,7 @@ export class PLCService {
     this.heartbeatRateValue = Number(localStorage.getItem('heartbeatRate')) || 10;
     this.e.ipcRenderer.send('runSocket', {delay: this.heartbeatRateValue, channel});
     this.e.ipcRenderer.once(channel, (event, data) => {
+      this.socketState = true;
       localStorage.setItem('heartbeatRate', data);
       this.heartbeatRateValue = Number(localStorage.getItem('heartbeatRate'));
       console.log('启动Socket完成', data);

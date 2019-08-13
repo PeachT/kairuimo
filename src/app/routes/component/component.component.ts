@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn,
-         AbstractControl, ValidationErrors, FormArray, ValidatorFn } from '@angular/forms';
+import {
+  FormGroup, FormControl, FormBuilder, Validators, AsyncValidatorFn,
+  AbstractControl, ValidationErrors, FormArray, ValidatorFn
+} from '@angular/forms';
 import { DB, DbService, tableName } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
 import { AppService } from 'src/app/services/app.service';
@@ -8,13 +10,13 @@ import { Router } from '@angular/router';
 import { Observable, from } from 'rxjs';
 import { PLCService } from 'src/app/services/PLC.service';
 import { map } from 'rxjs/operators';
-import { reperitionValidator } from 'src/app/Validator/repetition.validator';
 import { Comp } from 'src/app/models/component';
 import { copyAny } from 'src/app/models/base';
 import { LeftMenuComponent } from 'src/app/shared/left-menu/left-menu.component';
 import { nameRepetition } from 'src/app/Validator/async.validator';
 import { PLC_D } from 'src/app/models/IPCChannel';
 import { deviceGroupModeDev } from 'src/app/models/jack';
+import { arrayValidator } from 'src/app/Validator/repetition.validator';
 
 @Component({
   selector: 'app-component',
@@ -79,22 +81,39 @@ export class ComponentComponent implements OnInit {
   holeForm() {
     console.log(!this.data);
     if (this.data) {
-      return this.data.hole.map(() => {
-        return this.createHoleForm();
+      return this.data.hole.map((v, i) => {
+        return this.createHoleForm(i);
       });
     }
-    return [this.createHoleForm()];
+    return [this.createHoleForm(0)];
   }
-  createHoleForm() {
+  createHoleForm(index: number) {
     return this.fb.group({
       /** 名字 */
-      name: [null, [Validators.required, reperitionValidator('hole')]],
+      name: [null, [Validators.required, arrayValidator(index, 'hole', 'name')]],
       /** 孔明细 */
       holes: [null, [Validators.required]],
       /** 图片 */
       ImgBase64: [],
     });
   }
+
+  // arrayValidator(index: number, value: string = 'hole', key: string = 'name'): ValidatorFn {
+  //   return (control: AbstractControl): { [key: string]: any } | null => {
+  //     const rootvalue = control.root.value;
+  //     if (control.dirty && rootvalue) {
+  //       const values = rootvalue[value];
+  //       values.splice(index, 1);
+  //       for (const item of values) {
+  //         if (!control.value || item[key] === control.value) {
+  //           return { reperition: `${control.value} 已存在!!` };
+  //         }
+  //       }
+  //     }
+  //     return null;
+  //   };
+  // }
+
   onMneu(data: Comp) {
     console.log('一条数据', data);
     this.data = data;
@@ -150,8 +169,9 @@ export class ComponentComponent implements OnInit {
 
   addHole() {
     // tslint:disable-next-line:no-angle-bracket-type-assertion
-    const control = <FormArray> this.formData.controls.hole;
-    control.push(this.createHoleForm());
+    const control = <FormArray>this.formData.controls.hole;
+    const length = this.formData.value.hole.length;
+    control.push(this.createHoleForm(length));
     this.data = this.formData.value;
   }
   /**
@@ -164,7 +184,7 @@ export class ComponentComponent implements OnInit {
       return;
     }
     // tslint:disable-next-line:no-angle-bracket-type-assertion
-    const control = <FormArray> this.formData.controls.hole;
+    const control = <FormArray>this.formData.controls.hole;
     control.removeAt(index);
     this.data = this.formData.value;
   }
@@ -193,7 +213,7 @@ export class ComponentComponent implements OnInit {
     console.log(iv, iv.length, this.formData.valid);
     // tslint:disable-next-line:forin
     for (const i in this.formData.controls) {
-    //   this.formData.controls[i].markAsDirty();
+      //   this.formData.controls[i].markAsDirty();
       this.formData.controls[i].updateValueAndValidity();
       console.log('表单校验', i, this.formData.controls[i].valid);
     }

@@ -15,7 +15,7 @@
         </ng-container>
         <div class="other-edit" *ngIf="appS.edit && i !== iselect">
           <div style="flex: 1;">
-            <nz-form-control [ngClass]="{'in-error': item.get('key').errors}" [nzErrorTip]="item.get('value').errors | ValidatorError">
+            <nz-form-control [ngClass]="{'in-error': item.get('key').errors}" [nzErrorTip]="item.get('key').errors | ValidatorError">
               <input placeholder="显示名称" nz-input formControlName="key" [nzAutocomplete]="auto" />
               <nz-autocomplete [nzDataSource]="bridgeOtherKeySelect()" #auto> </nz-autocomplete>
               <!-- <nz-form-explain *ngIf="appS.edit">{{item.get('key').errors | ValidatorError}}</nz-form-explain> -->

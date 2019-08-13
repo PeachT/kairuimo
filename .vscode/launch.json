@@ -18,13 +18,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:9222",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome",
       "url": "http://localhost:4200",
       "webRoot": "${workspaceFolder}"
     },
-
     {
       "name": "ng hmr",
       "type": "chrome",

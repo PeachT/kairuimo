@@ -50,8 +50,6 @@
       </div>
     </div>
   </div>
-
-
   <div *ngIf="exportMode === 3">
     <nz-divider nzText="导出位置"></nz-divider>
     <div>
@@ -71,75 +69,64 @@
       </div>
     </div>
   </div>
-  <br>
-  <br>
-  <div style="display: flex; flex-direction: column;">
 
+
+  <div style="display: flex; flex-direction: column;" class="border-top"
+    *ngIf="exportMode === 1 || exportMode === 2">
     <nz-checkbox-wrapper (nzOnChange)="onTaskFliter($event)" style="margin-bottom: 5px;">
       张拉状态：
-      <label nz-checkbox [(ngModel)]="filter.ok" (click)="onFilter()">已</label>
-      <label nz-checkbox [(ngModel)]="filter.no" (click)="onFilter()">未</label>
+      <label nz-checkbox [(ngModel)]="filter.ok" (click)="onFilter()">已张拉</label>
+      <label nz-checkbox [(ngModel)]="filter.no" (click)="onFilter()">未张拉</label>
     </nz-checkbox-wrapper>
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <div>
-        已张拉日期: <nz-range-picker readonly [nzDisabled]="!filter.ok" [nzRanges]="rangesDate" [ngModel]="filter.tension.date" (ngModelChange)="onFilterDate($event, 'tension')"></nz-range-picker>
+        已张拉日期: <nz-range-picker readonly [nzDisabled]="!filter.ok" [nzRanges]="rangesDate"
+          [ngModel]="filter.tension.date" (ngModelChange)="onFilterDate($event, 'tension')"></nz-range-picker>
       </div>
       <div>
-        浇筑日期: <nz-range-picker readonly [nzRanges]="rangesDate" [ngModel]="filter.pouring.date" (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
+        浇筑日期: <nz-range-picker readonly [nzRanges]="rangesDate" [ngModel]="filter.pouring.date"
+          (ngModelChange)="onFilterDate($event,'pouring')"></nz-range-picker>
       </div>
     </div>
   </div>
-  <hr>
-  <div>
-    <div *ngIf="savePath && ((tempPath && exportMode === 1) || exportMode === 2)">
+  <div *ngIf="savePath && ((tempPath && exportMode === 1) || exportMode === 2)">
+    <div style="display: flex; flex-direction: column;" class="border-top">
       <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
         <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
       </nz-radio-group>
-      <hr>
+    </div>
+    <div style="display: flex; flex-direction: column;" class="border-top">
       <nz-radio-group [(ngModel)]="taskData.sc" (ngModelChange)="selectTaskComponent($event)">
         <label nz-radio [nzValue]="c" *ngFor="let c of taskData.component">{{c}}</label>
       </nz-radio-group>
-      <hr>
-      <div style="display: flex;flex-wrap: wrap;">
-        <div *ngFor="let b of taskData.bridge; index as i" class="bridge-item">
-          <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(b.id) > -1}">
-            <input type="checkbox" name="brigeBox" [checked]="taskData.sb.indexOf(b.id) > -1" (click)="setBridge(b.id)"
-              [value]="b.id" />
-            <p>
-              {{b.name}}
-            </p>
-          </label>
-        </div>
+    </div>
+    <div style="display: flex;flex-wrap: wrap;" class="border-top">
+      <div *ngFor="let b of taskData.bridge; index as i" class="bridge-item">
+        <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(b.id) > -1}">
+          <input type="checkbox" name="brigeBox" [checked]="taskData.sb.indexOf(b.id) > -1" (click)="setBridge(b.id)"
+            [value]="b.id" />
+          <p>
+            {{b.name}}
+          </p>
+        </label>
       </div>
     </div>
   </div>
 
-  <nz-pagination
-    [(nzPageIndex)]="filter.pageIndex"
-    [(nzPageSize)]="filter.pageSize"
-    [nzTotal]="filter.count"
-    (nzPageIndexChange)="paginationChange()"
-    (nzPageSizeChange)="paginationChange()"
-    nzShowSizeChanger
-  ></nz-pagination>
+  <nz-pagination [(nzPageIndex)]="filter.pageIndex" [(nzPageSize)]="filter.pageSize" [nzTotal]="filter.count"
+    (nzPageIndexChange)="paginationChange()" (nzPageSizeChange)="paginationChange()" nzShowSizeChanger></nz-pagination>
 
   <nz-spin nzTip="正在处理数据..." *ngIf="inData.state">
-    <nz-alert
-      nzType="info"
-    >
+    <nz-alert nzType="info">
     </nz-alert>
   </nz-spin>
   <div *ngIf="indatas">
-    项目选择：
     <nz-radio-group [(ngModel)]="taskData.sp" (ngModelChange)="selectTaskProject($event)">
       <label nz-radio [nzValue]="p.key" *ngFor="let p of taskData.project">{{p.title}}</label>
     </nz-radio-group>
-    <hr>
-    顶选择：
     <nz-radio-group [(ngModel)]="taskData.sj" (ngModelChange)="selectTaskJack($event)">
       <label nz-radio [nzValue]="j.title" *ngFor="let j of taskData.jack">{{j.title}}</label>
     </nz-radio-group>
-    <hr>
     <table class="gridtable">
       <thead>
         <tr>
@@ -161,7 +148,8 @@
           <tr>
             <td>
               <label class="checkbox" [ngClass]="{'check': taskData.sb.indexOf(task.id) > -1}">
-                <input type="checkbox" [checked]="taskData.sb.indexOf(task.id) > -1" (click)="setBridge(task.id)" [value]="task.id" />
+                <input type="checkbox" [checked]="taskData.sb.indexOf(task.id) > -1" (click)="setBridge(task.id)"
+                  [value]="task.id" />
               </label>
             </td>
             <td>{{task.name}}</td>
@@ -177,15 +165,15 @@
   </div>
 
 
-  <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;">
+  <div *ngIf="taskData.sb.length > 0" style="display: flex; align-items: center;" class="border-top" >
     <button nz-button nzType="primary" (click)="exportOk()" *ngIf="progress.btnTitle && !progress.success"
       [disabled]="!(taskData.sb.length > 0)" [nzLoading]="progress.state">{{progress.btnTitle}}</button>
-      <div *ngIf="exportMode !== 2" style="flex: 1; display: flex;">
-        <h2 *ngIf="progress.success">{{progress.msg}}{{progress.now}}条</h2>
-        <nz-progress [nzPercent]="progress.now / progress.length * 100" style="flex: 1; margin-left: 15px;"></nz-progress>
-        <span>{{progress.length}} / {{progress.now}}</span>
-      </div>
-      <h2 *ngIf="exportMode === 2 && progress.success">{{progress.msg}}</h2>
+    <div *ngIf="exportMode !== 2" style="flex: 1; display: flex;">
+      <h2 *ngIf="progress.success">{{progress.msg}}{{progress.now}}条</h2>
+      <nz-progress [nzPercent]="progress.now / progress.length * 100" style="flex: 1; margin-left: 15px;"></nz-progress>
+      <span>{{progress.length}} / {{progress.now}}</span>
+    </div>
+    <h2 *ngIf="exportMode === 2 && progress.success">{{progress.msg}}</h2>
   </div>
   <div *ngIf="exportMode === 3">
     <div>
@@ -205,7 +193,7 @@
 
 <ng-template #tplTitle>
   <div>
-    <input nz-input [(ngModel)]="nowBridgeName"/>
+    <input nz-input [(ngModel)]="nowBridgeName" />
     <h1>梁号重复，请修改梁号</h1>
   </div>
 </ng-template>

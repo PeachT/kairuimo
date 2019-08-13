@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, OnChanges } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { DB, DbService, tableName } from 'src/app/services/db.service';
 import { NzMessageService, NzModalService } from 'ng-zorro-antd';
@@ -24,7 +24,7 @@ import { DeleteModalComponent } from 'src/app/shared/delete-modal/delete-modal.c
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.less']
 })
-export class ProjectComponent implements OnInit {
+export class ProjectComponent implements OnInit, OnChanges {
   dbName = 'project';
   @ViewChild('prjDom', null) prjDom: appProjectComponent;
   @ViewChild('leftMenu', null) leftMenu: LeftMenuComponent;
@@ -44,6 +44,10 @@ export class ProjectComponent implements OnInit {
   ) {}
 
   ngOnInit() {}
+
+  ngOnChanges() {
+    console.log('78999999999999999999999999999999999999999999978978');
+  }
 
   onMneu(data: Project) {
     console.log('一条数据', data);

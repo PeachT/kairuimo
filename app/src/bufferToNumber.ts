@@ -27,7 +27,7 @@ function floatToBuffer(floats) {
  * @export
  * @param {Buffer} buffers buffer数据
  */
-function bufferToFloat(buffers) {
+function bufferToFloat(buffers: Buffer) {
   const fs = [];
   for (let index = 0; index < buffers.length; index += 4) {
     const b4 = buffers.slice(index, index + 4);
@@ -42,7 +42,7 @@ function bufferToFloat(buffers) {
  * @export
  * @param {Buffer} buffers buffer数据
  */
-function bufferTo16int(buffers) {
+function bufferTo16int(buffers: Buffer) {
   const ints = [];
   for (let index = 0; index < buffers.length; index += 2) {
     const b2 = buffers.slice(index, index + 2);
