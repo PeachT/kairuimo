@@ -2,7 +2,7 @@
   <div [formGroupName]="name" [class]="name">
     <nz-form-item class="revise-btn">
       <nz-divider style="min-width: auto;" [nzText]="name  | nameConvert" nzOrientation="left"></nz-divider>
-      <button nzSize="large" nz-button nzType="default" (click)="onRevise()" *ngIf="reviseBtnShow">校 正</button>
+      <button nzSize="large" nz-button nzType="default" (click)="onRevise()" *ngIf="appS.platform === 'devices' && PLCS.plcState[name[0]]">校 正</button>
     </nz-form-item>
     <nz-form-item>
       <nz-form-label [nzSm]="3" nzRequired>千斤顶编号</nz-form-label>
@@ -29,20 +29,21 @@
       <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('date').errors}">
         <nz-date-picker readonly [nzAllowClear]="false" class="revise-date" nzFormat="yyyy-MM-dd" formControlName="date"></nz-date-picker>
       </nz-form-control>
-
-      <nz-form-label [nzSm]="3" nzRequired>位移上限</nz-form-label>
-      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('upper').errors}">
-        <input type="number" readonly noinput min="2" max="220" nz-input formControlName="upper">
-      </nz-form-control>
-      <nz-form-label [nzSm]="3" nzRequired>位移下限</nz-form-label>
-      <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('floot').errors}">
-        <input type="number" readonly noinput min="2" max="220" nz-input formControlName="floot">
-      </nz-form-control>
-      <nz-form-control [nzSm]="8">
-        &nbsp;
-      </nz-form-control>
+      <div *ngIf="appS.platform === 'devices'">
+        <nz-form-label [nzSm]="3" >位移上限</nz-form-label>
+        <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('upper').errors}">
+          <input type="number" readonly noinput min="2" max="220" nz-input formControlName="upper">
+        </nz-form-control>
+        <nz-form-label [nzSm]="3">位移下限</nz-form-label>
+        <nz-form-control [nzSm]="5" [ngClass]="{'in-error': formItem.get('floot').errors}">
+          <input type="number" readonly noinput min="2" max="220" nz-input formControlName="floot">
+        </nz-form-control>
+        <nz-form-control [nzSm]="8">
+          &nbsp;
+        </nz-form-control>
+      </div>
     </nz-form-item>
-    <nz-form-item>
+    <nz-form-item *ngIf="appS.platform === 'devices'">
       <div formArrayName="mm">
         <div *ngFor="let item of mmStage; index as i">
           <nz-form-label [nzSm]="3">{{item}}</nz-form-label>

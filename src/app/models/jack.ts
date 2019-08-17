@@ -1,3 +1,5 @@
+import { IBase } from './base';
+
 export interface DeviceValue {
   zA?: any;
   zB?: any;
@@ -8,9 +10,7 @@ export interface DeviceValue {
   cC?: any;
   cD?: any;
 }
-export interface Jack {
-  id?: any;
-  name: string;
+export interface Jack extends IBase {
   /** 设备模式
    * 4一泵四顶
    * 2一泵两顶

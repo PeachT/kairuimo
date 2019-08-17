@@ -53,14 +53,17 @@ export class AppComponent implements OnInit {
     this.appS.Environment = navigator.userAgent.indexOf('Electron') !== -1;
     this.db = this.odb.db;
     /** 添加管理员 */
-    this.db.users.count().then((data) => {
+    this.db.users.count().then(async (data) => {
       console.log('获取用户数量', data);
       if (data === 0) {
         const user: User = {
           name: 'admin',
           password: 'adminPeach',
           jurisdiction: 9,
-          operation: []
+          operation: [],
+          createdDate: new Date().getTime(),
+          modificationDate: new Date().getTime(),
+          user: 'sys'
         };
         this.db.users.add(user).then(() => {
           this.message.success('添加成功🙂');
@@ -71,7 +74,10 @@ export class AppComponent implements OnInit {
           name: '技术员',
           password: '123465',
           jurisdiction: 1,
-          operation: []
+          operation: [],
+          createdDate: new Date().getTime(),
+          modificationDate: new Date().getTime(),
+          user: 'sys'
         };
         this.db.users.add(user2).then(() => {
           this.message.success('添加成功🙂');
@@ -83,7 +89,10 @@ export class AppComponent implements OnInit {
             name: `kvmadmin${index}`,
             password: 'kvmadmin',
             jurisdiction: 8,
-            operation: []
+            operation: [],
+            createdDate: new Date().getTime(),
+            modificationDate: new Date().getTime(),
+            user: 'sys'
           };
           this.db.users.add(user1).then(() => {
             this.message.success('添加成功🙂');

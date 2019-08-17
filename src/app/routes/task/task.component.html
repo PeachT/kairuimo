@@ -3,6 +3,10 @@
     <task-menu style="overflow: hidden;" (menuChange)="onBridge($event)" #taskMneu></task-menu>
   </div>
   <div class="main">
+    <div class="upjack-alert">
+      <nz-alert nzType="error" style="height: 45px" *ngIf="tensionMsg.bridgeState === 3 && tensionMsg.jaskState >= 2" nzMessage="顶数据已更改，该梁已经不能张拉。"></nz-alert>
+      <nz-alert nzType="warning" style="height: 45px" *ngIf="tensionMsg.bridgeState === 1 && tensionMsg.jaskState >= 1" nzMessage="顶数据已更改，需要更新顶才能张拉。"></nz-alert>
+    </div>
     <!-- <button (click)="save100()">添加100</button> -->
     <nz-tabset class="task-tabset" (nzSelectChange)="changeTabst($event)">
       <nz-tab nzTitle="基础信息">
@@ -29,7 +33,8 @@
 
               <nz-form-label [nzSm]="3" nzRequired>顶</nz-form-label>
               <nz-form-control [nzSm]="5" nzErrorTip="请入选择顶！">
-                <nz-cascader nzMenuClassName="task-cascader" nzPlaceHolder="选择顶" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
+                <input type="text" nz-input [value]="data.jack.name + '/' + data.device[1]" *ngIf="data?.createdDate" disabled>
+                <nz-cascader *ngIf="!data?.createdDate" nzMenuClassName="task-cascader" nzPlaceHolder="选择顶" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
                   (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="data?.createdDate">
                 </nz-cascader>
               </nz-form-control>
@@ -75,8 +80,18 @@
         [coprState]="true"
         (outDelete)="delete()">
         <button nz-button nzType="primary" nzGhost nzSearch (click)="onTension()" type="button"
-          *ngIf="holeMneuData.index !== null && (!holeMneuData.data?.record || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3) && !appS.edit)">
+          *ngIf="holeMneuData.index !== null
+            && (!holeMneuData.data?.record
+            || (holeMneuData.data?.record && holeMneuData.data?.record.state !== 2 && holeMneuData.data?.record.state !== 3)
+            && !appS.edit)
+            && !(tensionMsg.bridgeState === 3 && tensionMsg.jaskState >= 2)
+            && !(tensionMsg.bridgeState === 1 && tensionMsg.jaskState > 1)
+            && appS.platform === 'devices'">
           张 拉
+        </button>
+        <button nz-button nzType="primary" nzGhost nzSearch (click)="gxJack()" type="button"
+          *ngIf="tensionMsg.bridgeState">
+          更新顶
         </button>
       </app-operat>
     </div>
@@ -86,3 +101,10 @@
 <task-group (outGroup)="okGroup($event)" #groupDom></task-group>
 <task-tension #tension></task-tension>
 <app-delete-modal *ngIf="deleteShow" (outDelete)="deleteOk($event)"></app-delete-modal>
+
+<nz-modal [(nzVisible)]="tensionMsg.selectJackModal" nzTitle="选择更新顶" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()" nzClosable="false" nzMaskClosable="false">
+  <span>选择更新顶：</span>
+  <nz-select style="width: 100%;" nzPlaceHolder="选择更新顶" [(ngModel)]="tensionMsg.selectJack">
+    <nz-option [nzValue]="item.id" [nzLabel]="item.name" *ngFor="let item of tensionMsg.jackMenus"></nz-option>
+  </nz-select>
+</nz-modal>

@@ -1,17 +1,18 @@
-import { Component, OnInit, OnChanges, Input, ChangeDetectionStrategy, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, ChangeDetectionStrategy, EventEmitter, Output, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { taskModeStr, Jack, tableDev, modeName } from 'src/app/models/jack';
 import { PLCService } from 'src/app/services/PLC.service';
 import { AppService } from 'src/app/services/app.service';
 import { GroupItem } from 'src/app/models/task.models';
 import { getStageString } from 'src/app/Function/stageString';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-task-data',
   templateUrl: './task-data.component.html',
   styleUrls: ['./task-data.component.less']
 })
-export class TaskDataComponent implements OnInit {
+export class TaskDataComponent implements OnInit, OnDestroy {
   @Input() jackData: Jack;
   @Input() show = null;
   @Input() tensionState =  {
@@ -42,6 +43,7 @@ export class TaskDataComponent implements OnInit {
     ['初张拉', '阶段一', '阶段二', '阶段三', '终张拉']
   ];
   revamp = false;
+  chsub: Subscription = null;
 
   @Output() updateHole = new EventEmitter();
 
@@ -53,6 +55,11 @@ export class TaskDataComponent implements OnInit {
 
   ngOnInit() {
     this.createHoleform();
+  }
+  ngOnDestroy() {
+    if (this.chsub) {
+      this.chsub.unsubscribe();
+    }
   }
   /** 手动更新 */
   markForCheck() {
@@ -97,7 +104,15 @@ export class TaskDataComponent implements OnInit {
       this.holeForm.reset(data);
     }
     this.tensionStageArrF(true);
+    // if (this.tensionState.cls !== 0) {
+    //   console.log('jksljfklsd');
+    //   this.holeForm.controls.tensionKn.disable();
+    // }
     this.cdr.markForCheck();
+    this.chsub = this.holeForm.valueChanges.subscribe((e) => {
+      // console.log(e, this.holeForm.value);
+      this.updateHole.emit(this.holeForm.value);
+    });
   }
   /** 创建设备from */
   createDevFrom() {

@@ -107,7 +107,13 @@ export class LoginComponent implements OnInit {
           const stateTension = localStorage.getItem('stateTension');
           console.log('stateTension', stateTension, localStorage.getItem('stateTension'));
           this.message.success('登录成功🙂');
-          this.appS.menus = menus.filter(menu => menu.jurisdiction <= user.jurisdiction);
+          this.appS.menus = menus.filter(menu => {
+            if (this.appS.platform === 'devices') {
+              return menu.jurisdiction <= user.jurisdiction;
+            } else if (menu.url !== '/setting') {
+              return menu.jurisdiction <= user.jurisdiction;
+            }
+          });
           if (stateTension) {
             this.router.navigate(['/auto']);
           } else {

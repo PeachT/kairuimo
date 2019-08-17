@@ -6,7 +6,7 @@ import { AppService } from 'src/app/services/app.service';
 import { Router } from '@angular/router';
 import { TensionTask } from 'src/app/models/task.models';
 import { GroupComponent } from './components/group/group.component';
-import { taskModeStr, carterJaskMenu } from 'src/app/models/jack';
+import { taskModeStr, carterJaskMenu, deviceGroupMode } from 'src/app/models/jack';
 import { TaskDataComponent } from './components/task-data/task-data.component';
 import { Jack } from 'src/app/models/jack';
 import { Comp } from 'src/app/models/component';
@@ -94,6 +94,14 @@ export class TaskComponent implements OnInit {
   selectJackState = false;
   save100Count = 0;
   showRecord = false;
+  tensionMsg = {
+    msg: null,
+    jaskState: 0,
+    bridgeState: 0,
+    selectJackModal: false,
+    selectJack: null,
+    jackMenus: []
+  };
   addFilterFun = (o1: any, o2: any) => o1.name === o2.name
     && o1.component === o2.component && o1.project === o2.project
   updateFilterFun = (o1: TensionTask, o2: TensionTask) => o1.name === o2.name
@@ -181,11 +189,12 @@ export class TaskComponent implements OnInit {
 
   /** 选择梁 */
   async onBridge(data: TensionTask) {
+    console.log('选择梁', data);
     if (!data) {
       return;
     }
     this.data = data;
-    console.log('梁梁梁梁', this.data);
+    const jack = await this.db.jack.filter(j => j.id === this.data.jack.id).first();
     this.jackData = data.jack;
     this.holeMneuData = {
       name: null,
@@ -194,17 +203,52 @@ export class TaskComponent implements OnInit {
       data: null,
     };
     this.holeMneu();
+    console.log('梁梁梁梁', this.data, this.jackData, jack, this.selectJackState);
+    let s1 = false;
+    let s2 = false;
+    this.tensionMsg.bridgeState = 0;
+    this.tensionMsg.jaskState = 0;
+    this.holeMneuData.names.map(item => {
+      if (item.cls === 0) {
+        s1 = true;
+      } else {
+        s2 = true;
+      }
+    });
+    if (s1 && !s2) {
+      this.tensionMsg.bridgeState = 1;
+    } else if (!s1 && s2) {
+      this.tensionMsg.bridgeState = 2;
+    } else if (s1 && s2) {
+      this.tensionMsg.bridgeState = 3;
+    }
+    if (jack.state) {
+      if (this.jackData.modificationDate  !== jack.modificationDate) {
+        this.tensionMsg.jaskState = 1;
+        for (const key of deviceGroupMode[jack.jackMode]) {
+          if (!(jack[key].a === this.jackData[key].a && jack[key].b === this.jackData[key].b)) {
+            this.tensionMsg.jaskState = 2;
+            break;
+          }
+        }
+      }
+    } else {
+      this.tensionMsg.jaskState = 4;
+    }
+    console.log(this.tensionMsg);
     this.reset();
     this.onHoleRadio(this.data.groups[0].name, 0);
   }
   /** 构造孔菜单 */
-  holeMneu() {
+  holeMneu(state = true) {
     this.holeMneuData.names = [];
     this.selectJackState = false;
     this.data.groups.map(g => {
       let cls = 0;
       if (g.record) {
-        cls = g.record.state;
+        if (state) {
+          cls = g.record.state;
+        }
         this.selectJackState = true;
       }
       // this.holeMneuData.names.push({ name: g.name, cls });
@@ -225,7 +269,7 @@ export class TaskComponent implements OnInit {
         delete c.record;
       }
       this.jackData = data.jack;
-      this.holeMneu();
+      this.holeMneu(false);
     /** 添加 */
     } else {
       this.selectJackState = false;
@@ -468,5 +512,40 @@ export class TaskComponent implements OnInit {
     });
     // const data = Object.assign(d, this.formData.value);
     console.log(t);
+  }
+  async gxJack() {
+    console.log('更新顶', this.data);
+    this.tensionMsg.selectJack = null;
+    if (this.tensionMsg.jaskState === 4 || this.tensionMsg.jaskState === 0) {
+      this.tensionMsg.jackMenus = [];
+      await this.db.jack.filter(j => j.state && j.jackMode >= this.data.jack.jackMode).each(j => {
+        this.tensionMsg.jackMenus.push({id: j.id, name: j.name});
+      });
+      this.tensionMsg.selectJackModal = true;
+      this.cdr.markForCheck();
+    } else {
+      this.upJack(this.data.jack.id);
+    }
+  }
+  handleOk(): void {
+    console.log(this.tensionMsg.selectJack);
+    if (this.tensionMsg.selectJack) {
+      this.upJack(this.tensionMsg.selectJack);
+      this.tensionMsg.selectJackModal = false;
+    } else {
+      this.message.warning('请选择顶');
+    }
+  }
+
+  handleCancel(): void {
+    console.log('Button cancel clicked!');
+    this.tensionMsg.selectJackModal = false;
+  }
+  async upJack(id: number) {
+    const jack = await this.db.jack.filter(j => j.id === id).first();
+    this.data.jack = jack;
+    const up =  await this.db.task.update(this.data.id, this.data);
+    console.log(up);
+    this.taskMneu.res({component: this.data.component, selectBridge: this.data.id});
   }
 }
