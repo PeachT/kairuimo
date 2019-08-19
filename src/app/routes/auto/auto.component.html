@@ -2,7 +2,7 @@
   <span hidden>{{ms.i}}</span>
   <div #table>
     <div class="step">
-      <h3>构建：{{autoTask.component}}|梁：{{autoTask.bridgeName}}|孔号：{{autoTask.groupData.name}}|设备：{{modeName[autoTask.groupData.mode]}}</h3>
+      <h3>构建：{{autoTask.component}}&nbsp; &nbsp; || &nbsp; &nbsp;梁：{{autoTask.bridgeName}}&nbsp; &nbsp; || &nbsp; &nbsp;孔号：{{autoTask.groupData.name}}&nbsp; &nbsp; || &nbsp; &nbsp;设备：{{modeName[autoTask.groupData.mode]}}</h3>
       <nz-steps style="display: flex; flex-wrap: nowrap; width: 100%;" [nzCurrent]="stepNum">
         <nz-step *ngFor="let item of stepStageStr; index as i" [nzTitle]="item + '|' + task.time[i]"></nz-step>
         <nz-step [nzTitle]="'卸荷' + '|' + this.autoData.unloadingDelay"></nz-step>

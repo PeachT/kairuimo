@@ -991,6 +991,10 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
       // const value = Math.random() * 10 + 10 + this.index % 100;
       if (!this.auto.goBack) {
         this.svgData.mpa.map((item, i) => {
+          const stage = this.task.record.tensionStage;
+          const showMm = this.PLCS.PD[item[0]].showMm;
+          const showMpa = this.PLCS.PD[item[0]].showMpa;
+          const linkState = this.PLCS.plcState[item[0][0]] && showMm > -1 && showMpa > -1;
           if (i === 0) {
             /** 添加时间轴 */
             item.push(new Date().getTime());
@@ -998,8 +1002,8 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.task.record.time = item;
           } else {
             /** 添加曲线数据 */
-            item.push(this.PLCS.PD[item[0]].showMpa);
-            this.svgData.mm[i].push(this.PLCS.PD[item[0]].showMm);
+            item.push(showMpa < -1 ? 0 : showMpa);
+            this.svgData.mm[i].push(showMm < -1 ? 0 : showMm);
             this.task.record[item[0]].mapData = item;
             this.task.record[item[0]].mmData = this.svgData.mm[i];
             /** 压力位移记录保存 */
@@ -1009,11 +1013,11 @@ export class AutoComponent implements OnInit, OnDestroy, AfterViewInit {
               && !this.auto.pause
               && !this.auto.twoTension
               && this.PLCS.PD[item[0]].alarm.length === 0
-              && this.PLCS.plcState[item[0][0]]
+              && linkState
               ) {
-              this.task.record[item[0]].mpa[this.task.record.tensionStage] = this.PLCS.PD[item[0]].showMpa;
-              const livemm = (this.PLCS.PD[item[0]].showMm - this.twoMm.live[item[0]]);
-              this.task.record[item[0]].mm[this.task.record.tensionStage] = myToFixed(this.twoMm.record[item[0]] + livemm);
+              this.task.record[item[0]].mpa[stage] = showMpa;
+              const livemm = (showMm - this.twoMm.live[item[0]]);
+              this.task.record[item[0]].mm[stage] = myToFixed(this.twoMm.record[item[0]] + livemm);
               // console.log('位移', this.PLCS.PD[item[0]].showMm, this.twoMm.live[item[0]], livemm);
             }
             /** 二次张拉位移记录 */

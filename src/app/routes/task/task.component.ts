@@ -6,7 +6,7 @@ import { AppService } from 'src/app/services/app.service';
 import { Router } from '@angular/router';
 import { TensionTask } from 'src/app/models/task.models';
 import { GroupComponent } from './components/group/group.component';
-import { taskModeStr, carterJaskMenu, deviceGroupMode } from 'src/app/models/jack';
+import { taskModeStr, carterJaskMenu, deviceGroupMode, modeName } from 'src/app/models/jack';
 import { TaskDataComponent } from './components/task-data/task-data.component';
 import { Jack } from 'src/app/models/jack';
 import { Comp } from 'src/app/models/component';
@@ -94,6 +94,7 @@ export class TaskComponent implements OnInit {
   selectJackState = false;
   save100Count = 0;
   showRecord = false;
+  /** 顶修改处理 */
   tensionMsg = {
     msg: null,
     jaskState: 0,
@@ -102,6 +103,7 @@ export class TaskComponent implements OnInit {
     selectJack: null,
     jackMenus: []
   };
+  modeName = modeName;
   addFilterFun = (o1: any, o2: any) => o1.name === o2.name
     && o1.component === o2.component && o1.project === o2.project
   updateFilterFun = (o1: TensionTask, o2: TensionTask) => o1.name === o2.name

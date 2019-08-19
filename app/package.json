@@ -1,6 +1,6 @@
 {
   "name": "kvm-device",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "main": "./js/main.js",
   "author": {
     "name": "Peach",

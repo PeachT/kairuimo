@@ -14,7 +14,7 @@ export class AppService {
   platform = localStorage.getItem('platform');
   /** 软件信息 */
   public info = {
-    version: '0.0.53',
+    version: '0.0.54',
     unit: {
       name: '柳州市凯瑞姆',
       tel: '888-8888888',

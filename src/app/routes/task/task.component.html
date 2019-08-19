@@ -33,7 +33,7 @@
 
               <nz-form-label [nzSm]="3" nzRequired>顶</nz-form-label>
               <nz-form-control [nzSm]="5" nzErrorTip="请入选择顶！">
-                <input type="text" nz-input [value]="data.jack.name + '/' + data.device[1]" *ngIf="data?.createdDate" disabled>
+                <input type="text" nz-input [value]="data.jack.name + '/' + modeName[data.device[1]]" *ngIf="data?.createdDate" disabled>
                 <nz-cascader *ngIf="!data?.createdDate" nzMenuClassName="task-cascader" nzPlaceHolder="选择顶" [nzOptions]="jacks" formControlName="device" [nzAllowClear]="false"
                   (ngModelChange)="deviceOnChanges($event)" [nzDisabled]="data?.createdDate">
                 </nz-cascader>
